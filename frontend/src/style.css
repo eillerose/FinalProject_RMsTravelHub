@@ -1,0 +1,475 @@
+.landing-page {
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 50px;
+  background-color: rgba(255, 255, 255, 0.9); /* Slightly increased opacity for better visibility */
+  position: fixed; /* Changed to fixed so it stays at the top */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* Increased z-index to ensure it's always on top */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for better distinction */
+}
+
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #3498db;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+}
+
+nav ul {
+  display: flex;
+  justify-content: center;
+  list-style-type: none;
+  padding: 0;
+}
+
+nav ul li {
+  position: relative;
+  margin: 0 20px;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  color: #3498db;
+  transition: color 0.3s ease;
+}
+
+nav ul li a {
+  color: #3498db;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+nav ul li:hover a {
+  color: #2c3e50; /* Change to a different color on hover, for example #1abc9c */
+}
+
+nav ul li::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #cfcfcf; /* Hover underline color */
+  transition: width 0.3s ease;
+}
+
+nav ul li:hover::after {
+  width: 100%; /* Expand the underline on hover */
+}
+
+
+
+/* Auth Buttons */
+.auth-buttons {
+  margin-left: auto;
+}
+
+.sign-in, .sign-up {
+  padding: 25px 45px;
+  margin-left: 10px;
+  font-size: 25px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.sign-in {
+  background-color: transparent;
+  border: 2px solid #3498db;
+  color: #3498db;
+}
+
+.sign-in:hover {
+  background-color: #3498db;
+  color: white;
+}
+
+.sign-up {
+  background-color: #3498db;
+  border: none;
+  color: white;
+}
+
+.sign-up:hover {
+  background-color: #2c3e50;
+}
+
+/* Hero Section */
+.hero {
+  background-image: url('/src/img/white-beach-puerto-galera.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  padding: 0 20px;
+}
+
+.hero h1 {
+  font-size: 64px; /* Increase size of the main heading */
+  margin-bottom: 20px;
+}
+
+.hero p {
+  font-size: 24px; /* Increase size of the subheading */
+  margin-bottom: 40px;
+}
+
+.search-bar {
+  display: flex;
+  width: 100%;
+  max-width: 700px; /* Increase width to make it bigger */
+}
+
+.search-bar input {
+  flex-grow: 1;
+  padding: 20px; /* Increase padding for larger input */
+  font-size: 18px; /* Increase font size for input text */
+  border: none;
+  border-radius: 5px 0 0 5px;
+}
+
+.search-bar button {
+  padding: 20px 40px; /* Increase button size */
+  font-size: 18px; /* Increase font size */
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+}
+
+.search-bar button:hover {
+  background-color: #2c3e50;
+}
+
+.about-us {
+  text-align: center;
+  padding: 80px 20px;
+  background-color: #f9f9f9;
+  /* margin-bottom: 80px; */
+}
+
+.about-us h2 {
+  font-size: 65px;
+  margin-bottom: 30px;
+  color: #3498db;
+}
+
+.about-description {
+  font-size: 35px;
+  color: #666;
+  max-width: 1500px;
+  margin: 40px auto 85px;
+  line-height: 1.6;
+}
+
+/* About Wrapper with Image and Text */
+.about-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 1750px;
+  margin: 40px auto;
+  gap: 40px;
+}
+
+/* Image Section Styling */
+.about-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Mission and Vision Styling */
+.mission-vision-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mission-section, .vision-section {
+  margin-bottom: 35px;
+  padding: 30px 40px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+}
+
+.mission-section h3, .vision-section h3 {
+  font-size: 36px;
+  color: #3498db;
+  margin-bottom: 20px;
+}
+
+.mission-text, .vision-text {
+  font-size: 30px;
+  color: #333;
+  line-height: 1.7;
+  text-align: justify;
+}
+
+.mission-section {
+  background: linear-gradient(135deg, #f0f9ff, #cbebff); /* Subtle blue gradient */
+}
+
+.vision-section {
+  background: linear-gradient(135deg, #fff4e6, #ffe3b3); /* Subtle orange gradient */
+}
+
+.gallery {
+  text-align: center;
+  padding: 50px 20px;
+  background-color: #f9f9f9;
+}
+
+.gallery h2 {
+  font-size: 48px; /* Title size for gallery */
+  margin-bottom: 30px;
+  color: #3498db;
+}
+
+.gallery-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 2050px;
+  margin: 0 auto;
+}
+
+.gallery-item {
+  margin: 10px; /* Add more space between items */
+  text-align: center;
+  flex: 0 0 calc(33.3333% - 40px); /* 3 items per row */
+  box-sizing: border-box; /* Ensure padding/margin are included in width */
+}
+
+.gallery-item img {
+  width: 100%; /* Responsive images */
+  height: auto;
+  border-radius: 10px;
+  max-height: 450px; /* Increased maximum image height */
+}
+
+.gallery-item p {
+  margin-top: 15px;
+  font-size: 24px; /* Larger font size for package titles */
+  color: #333;
+  font-weight: bold; /* Make the text bold for better readability */
+  padding-bottom: 10px; /* Add space below the text */
+}
+
+
+/* Media Queries for responsiveness */
+@media (max-width: 768px) {
+  .gallery-item {
+    flex: 0 0 calc(50% - 20px); /* 2 images per row on smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery-item {
+    flex: 0 0 100%; /* 1 image per row on extra small screens */
+  }
+}
+
+
+/* Trusted Section */
+.trusted-section {
+  display: flex;
+  padding: 50px;
+  background-color: white;
+}
+
+.image-container {
+  flex: 1;
+  margin-right: 50px;
+}
+
+.image-container img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.text-content {
+  flex: 1;
+}
+
+.text-content h2 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.text-content p {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Footer Styles */
+.footer {
+  background-color: #3498db;
+  color: white;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1350px;
+  margin: 0 auto;
+  padding-bottom: 20px;
+}
+
+/* Logo and Description */
+.footer-logo-desc {
+  flex: 0 0 30%;
+  text-align: left;
+}
+
+.footer-logo {
+  width: 200px; /* Increased logo size */
+  height: auto;
+  margin-bottom: 5px;
+}
+
+.footer-logo-desc p {
+  font-size: 24px;
+}
+
+/* Contact Information */
+.footer-contact {
+  flex: 0 0 30%;
+  text-align: left;
+}
+
+.footer-contact h3 {
+  font-size: 35px; /* Larger text for heading */
+  margin-bottom: 25px;
+}
+
+.footer-contact p {
+  font-size: 28px; /* Larger text for contact details */
+  margin: 5px 0;
+}
+
+/* Social Media Section */
+.footer-social {
+  flex: 0 0 30%;
+  text-align: left;
+}
+
+.footer-social h3 {
+  font-size: 35px; /* Larger text for heading */
+  margin-bottom: 15px;
+}
+
+.footer-social a {
+  font-size: 22px; /* Larger text for links */
+  margin-bottom: 5px;
+  display: block;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.footer-social a:hover {
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer-bottom p {
+  font-size: 25px;
+  color: #e1e1e1;
+}
+
+
+/* Media Queries */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  nav ul {
+    margin-top: 20px;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+  }
+
+  .trusted-section {
+    flex-direction: column;
+  }
+
+  .image-container {
+    margin-right: 0;
+    margin-bottom: 30px;
+  }
+
+  .about-wrapper {
+    flex-direction: column;
+  }
+
+  .about-image {
+    margin-bottom: 30px; /* Add margin for smaller screens */
+  }
+
+  .about-image img {
+    border-radius: 15px 15px 0 0;
+  }
+
+  .about-text-wrapper {
+    border-radius: 0 0 15px 15px;
+  }
+
+  .about-us h2 {
+    font-size: 36px; /* Adjust title size on small screens */
+  }
+
+  .about-description {
+    font-size: 18px; /* Adjust description text size */
+  }
+
+  .about-text p {
+    font-size: 18px; /* Adjust paragraph text size */
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+
