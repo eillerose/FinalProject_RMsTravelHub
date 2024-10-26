@@ -9,7 +9,7 @@
           <ul>
                 <li><a href="#hero">Home</a></li>
                 <li><a href="#about-us">About</a></li>
-                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#explore">Explore</a></li>
           </ul>
 
           <div class="auth-buttons">
@@ -17,16 +17,32 @@
                 <router-link to="/signup"><button class="sign-up">Sign Up</button></router-link>
           </div>
         </nav>
+
+
+
       </header>
 
       <main>
         <section id="hero" class="hero">
-          <h1>Discover the wonders of Puerto Galera!</h1>
-          <p>More Exciting Deals are waiting for you!</p>
-          <div class="search-bar">
-            <input type="text" placeholder="What are you looking for?">
-            <button>Search</button>
-          </div>
+            <h1>Discover the wonders of Puerto Galera!</h1>
+            <p>More Exciting Deals are waiting for you!</p>
+            <div class="search-bar">
+            <input 
+                type="text" 
+                placeholder="What are you looking for?"
+                @focus="showDropdown = true"
+                @blur="hideDropdown"
+            />
+            <button @click="navigateToSection(searchQuery)">Search</button>
+            <ul v-if="showDropdown" class="dropdown">
+            <li 
+              v-for="category in categories" 
+              :key="category" 
+              @click="selectCategory(category)">
+              {{ category }}
+            </li>
+          </ul>
+            </div>
         </section>
         
         <section id="about-us" class="about-us">
@@ -57,50 +73,97 @@
             </div>
           </div>
         </section>
-  
-        <section id="gallery" class="gallery">
-          <h2>Explore Puerto Galera's Gem</h2>
+
+        <!-- Beaches Section -->
+        <section id="beaches" class="gallery">
+          <h2>Beaches of Puerto Galera</h2>
           <div class="gallery-container">
             <div class="gallery-item">
-              <img src="/src/img/APLAYANG MUNTIAPLAYANG MUNTI.jpg" alt="Tour Package 1">
-              <p>Beach Hopping Tour</p>
+              <img src="/src/img/puertogalera.jpg" alt="White Beach">
+              <p>White Beach - Known for its stunning sunsets and vibrant nightlife.</p>
             </div>
             <div class="gallery-item">
-              <img src="/src/img/VIEWING DECK.jpg" alt="Tour Package 3">
-              <p>Inland Tour</p>
+              <img src="/src/img/sabang-beach.jpg" alt="Sabang Beach">
+              <p>Sabang Beach - A favorite for diving enthusiasts and water sports.</p>
             </div>
             <div class="gallery-item">
-              <img src="/src/img/White Beach.jpg" alt="Tour Package 4">
-              <p>Water Sports Activities</p>
+              <img src="/src/img/sunset-at-aninuan-beach.jpg" alt="Hiking">
+              <p>Aninuan Beach - Swim through splash water to hidden waterfalls.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Activities Section -->
+        <section id="activities" class="gallery">
+          <h2>Activities in Puerto Galera</h2>
+          <div class="gallery-container">
+            <div class="gallery-item">
+              <img src="/src/img/para-sailing.jpg" alt="Snorkeling">
+              <p>Snorkeling - Discover the vibrant marine life around the reefs.</p>
             </div>
             <div class="gallery-item">
-              <img src="/src/img/MUELLE CULTURAL.jpg" alt="Tour Package 2">
-              <p>Snorkeling Adventure</p>
+              <img src="/src/img/jetski.jpg" alt="Diving">
+              <p>Diving - Explore some of the best diving spots in the Philippines.</p>
             </div>
             <div class="gallery-item">
-              <img src="/src/img/Tamaraw-Falls-1.jpg" alt="Tour Package 4">
-              <p>Water Sports Activities</p>
+              <img src="/src/img/Dragon-boat.jpg" alt="Island Hopping">
+              <p>Island Hopping - Enjoy the scenic beauty of nearby islands.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Travel Packages Section -->
+        <section id="travel-packages" class="gallery">
+          <h2>Travel Packages</h2>
+          <div class="gallery-container">
+            <div class="gallery-item">
+              <img src="/src/img/Family-Package.jpg" alt="Family Package">
+              <p>Family Package - Perfect for a fun and relaxing family getaway.</p>
             </div>
             <div class="gallery-item">
-              <img src="/src/img/white-beach-2-1024x576.jpg" alt="Tour Package 4">
-              <p>Water Sports Activities</p>
+              <img src="/src/img/Couple-Package.jpg" alt="Couples Package">
+              <p>Couples Package - Romantic adventures await you.</p>
             </div>
             <div class="gallery-item">
-              <img src="/src/img/sunset-at-aninuan-beach.jpg" alt="Tour Package 4">
-              <p>Water Sports Activities</p>
+              <img src="/src/img/Adventure-Package.jpg" alt="Adventure Package">
+              <p>Adventure Package - Ideal for thrill-seekers and explorers.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Popular Tourist Spots Section -->
+        <section id="tourist-spots" class="gallery">
+          <h2>Popular Tourist Spots</h2>
+          <div class="gallery-container">
+            <div class="gallery-item">
+              <img src="/src/img/Tamaraw-Falls-1.jpg" alt="Tamaraw Falls">
+              <p>Tamaraw Falls - A beautiful waterfall located in a lush valley.</p>
             </div>
             <div class="gallery-item">
-              <img src="/src/img/global-flyboarding-2.webp" alt="Tour Package 4">
-              <p>Water Sports Activities</p>
+              <img src="/src/img/Mount-Halcon.webp" alt="Mount Halcon">
+              <p>Mount Halcon - A challenging trek for adventure lovers.</p>
             </div>
             <div class="gallery-item">
-              <img src="/src/img/para-sailing.jpg" alt="Tour Package 4">
-              <p>Water Sports Activities</p>
+              <img src="/src/img/Ponderosa-Golf-Course.jpg" alt="Ponderosa Golf Course">
+              <p>Ponderosa Golf Course - Scenic views and a unique golfing experience.</p>
             </div>
-            <div class="gallery-item">
-              <img src="/src/img/jetski.jpg" alt="Tour Package 4">
-              <p>Water Sports Activities</p>
-            </div>
+          </div>
+        </section>
+
+        <!-- Explore Section -->
+        <section id="explore" class="explore-section">
+          <h2>Why Explore Puerto Galera With Us</h2>
+          <div class="explore-description">
+            <p>
+              At RM's Travel and Tours, we grant each and every adventurer a personalized experience like no other. 
+              We are aficionados coming from every part of Puerto Galera, passionate about guiding you through this 
+              pocket of paradise we call home.
+            </p>
+            <p>
+              We hold strong the value of being factual. Our tour operators are with you every step through your 
+              booking process, we are there to scratch every inch of curiosity and enquiry that you may have. 
+              We simply want to get you going on a trip of a lifetime.
+            </p>
           </div>
         </section>
   
@@ -136,6 +199,65 @@
       </main>
     </div>
   </template>
+
+  <script>
+  export default {
+    data() {
+      return {
+        showDropdown: false,
+        categories: [
+          "Beaches – White Beach, Sabang Beach",
+          "Resorts and Accommodations – Budget, family-friendly, luxury",
+          "Activities – Snorkeling, diving, hiking, island hopping",
+          "Travel Packages – Families, couples, adventure seekers",
+          "Popular Tourist Spots – Tamaraw Falls, Mount Halcon, Ponderosa Golf Course"
+        ]
+      };
+    },
+    methods: {
+      hideDropdown() {
+        setTimeout(() => {
+          this.showDropdown = false;
+        }, 200);
+      },
+      selectCategory(category) {
+        // Set the search term and close the dropdown
+        this.searchQuery = category;
+        this.showDropdown = false;
+
+        // Call navigate to section immediately
+        this.navigateToSection(category);
+      },
+      navigateToSection(category) {
+        let sectionId = '';
+
+        // Match the category to a section ID
+        switch (category) {
+          case 'Beaches – White Beach, Sabang Beach':
+            sectionId = 'beaches';
+            break;
+          case 'Resorts and Accommodations – Budget, family-friendly, luxury':
+            sectionId = 'resorts';
+            break;
+          case 'Activities – Snorkeling, diving, hiking, island hopping':
+            sectionId = 'activities';
+            break;
+          case 'Travel Packages – Families, couples, adventure seekers':
+            sectionId = 'travel-packages';
+            break;
+          case 'Popular Tourist Spots – Tamaraw Falls, Mount Halcon, Ponderosa Golf Course':
+            sectionId = 'tourist-spots';
+            break;
+          default:
+            return; // Exit if there's no match
+        }
+
+        // Smooth scroll to the matched section
+        document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+  </script>
   
   <script setup>
     import { useRouter } from 'vue-router'; // Ensure it's imported
@@ -333,6 +455,41 @@
     background-color: #2c3e50;
     }
 
+  .search-bar {
+      position: relative;
+      display: flex;
+      /* flex-direction: column; */
+      align-items: center;
+  }
+
+  /* Dropdown Styling */
+  .dropdown {
+      position: absolute;
+      top: 100%; 
+      left: 0;
+      width: 70%;
+      margin-top: 5px;
+      list-style: none;
+      background-color: #2c3e50;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+  }
+
+  /* Dropdown List Items */
+  .dropdown li {
+    padding: 8px;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .dropdown li:hover {
+    background-color: rgba(200, 200, 200, 0.3);
+  }
+
+
     .about-us {
     text-align: center;
     padding: 80px 20px;
@@ -489,6 +646,28 @@
     font-size: 16px;
     line-height: 1.6;
     }
+
+    .explore-section {
+      padding: 50px 20px;
+      background-color: #f4f4f4;
+      text-align: center;
+    }
+
+    .explore-section h2 {
+      font-size: 3.5em;
+      margin-bottom: 50px;
+      margin-top: 40px;
+      color: #333;
+    }
+
+    .explore-description p {
+      font-size: 1.5em;
+      color: #555;
+      line-height: 1.6;
+      max-width: 1450px;
+      margin: 0 auto 20px;
+    }
+
 
     /* Footer Styles */
     .footer {

@@ -1,46 +1,62 @@
 <template>
     <div class="home-page">
-        <HeaderComponent />
-        
-      <main>
-        <section id="hero" class="hero">
-          <h1>Discover the wonders of Puerto Galera!</h1>
-          <p>More Exciting Deals are waiting for you!</p>
-          <div class="search-bar">
-            <input type="text" placeholder="What are you looking for?">
-            <button>Search</button>
-          </div>
-        </section>
-  
-        <section id="about-us" class="about-us">
-          <h2>Little words about us</h2>
-          <p>
-            At RM's Travel and Tours, we grant each and every adventurer a personalized experience like no other. 
-            We are aficionados coming from every part of Puerto Galera, passionate about guiding you through this 
-            pocket of paradise we call home.
-          </p>
-          <p>
-            We hold strong the value of being factual. Our tour operators are with you every step through your 
-            booking process, we are there to scratch every inch of curiosity and enquiry that you may have. 
-            We simply want to get you going on a trip of a lifetime.
-          </p>
-        </section>
-      </main>
+      <header>
+        <div class="logo">
+          <img src="/src/img/logoforRMs.png" alt="RM's Travel and Tours Logo" class="logo-image">
+          <span class="logo-text">RM's Travel and Tours</span>
+        </div>
+        <nav>
+          <ul>
+            <li><router-link to="/home">Home</router-link></li>
+            <li><router-link to="/aboutus">About Us</router-link></li>
+            <li><router-link to="/packages">Packages</router-link></li>
+            <li><router-link to="/feedback">Feedback</router-link></li>
+            <li><router-link to="/contactus">Contact Us</router-link></li>
+            <li class="profile">
+              <a href="#" @click="toggleDropdown">
+                <img :src="profileImage" alt="Profile" class="profile-icon" />
+                <span class="arrow">&#9662;</span>
+              </a>           
+              <ul v-if="isDropdownOpen" class="dropdown">
+                <li><router-link to="/edit-profile">Edit Profile</router-link></li>
+                <li><router-link to="/history">History</router-link></li>
+                <li><a href="#" @click.prevent="logout">Logout</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </header>
     </div>
 </template>
-  
+
 <script>
-  import HeaderComponent from './Header.vue';
+  import { auth } from '../firebaseConfig';
   
   export default {
-    components: {
-      HeaderComponent,
+    data() {
+      return {
+        isDropdownOpen: false,
+        profileImage: '/path/to/default-profile.png', // Placeholder for profile image
+      };
     },
-
+    methods: {
+      toggleDropdown() {
+        this.isDropdownOpen = !this.isDropdownOpen;
+      },
+      async logout() {
+        await auth.signOut();
+        this.$router.push('/login');
+      }
+    },
+    created() {
+      const user = auth.currentUser;
+      if (user) {
+        this.profileImage = user.photoURL || '/path/to/default-profile.png';
+      }
+    }
   };
-
 </script>
-  
+
 <style scoped>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
@@ -127,11 +143,6 @@
     width: 100%; 
     }
 
-    /* Auth Buttons */
-    .auth-buttons {
-    margin-left: auto;
-    }
-
     .profile .dropdown {
         display: block; /* Ensure dropdown shows properly */
         position: absolute;
@@ -174,99 +185,4 @@
         margin-left: 5px; /* Adjust spacing as needed */
     }
 
-    /* Hero Section */
-    .hero {
-    background-image: url('/src/img/heroBg.jpg');
-    background-size: cover;
-    background-position: center;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    color: white;
-    margin-left: -18px;
-    margin-right: -18px;
-    padding: 0 20px;
-    }
-
-    .hero h1 {
-    font-size: 64px; 
-    margin-bottom: 20px;
-    }
-
-    .hero p {
-    font-size: 28px; 
-    margin-bottom: 40px;
-    }
-
-    .search-bar {
-    display: flex;
-    width: 100%;
-    max-width: 700px; 
-    }
-
-    .search-bar input {
-    font-family: 'Poppins', sans-serif;
-    flex-grow: 1;
-    padding: 20px; 
-    font-size: 1.5rem;
-    border: none;
-    border-radius: 5px 0 0 5px;
-    }
-
-    .search-bar button {
-    font-family: 'Poppins', sans-serif;    
-    padding: 20px 40px; 
-    font-size: 1.5rem;
-    background-color: #64b8b1;
-    color: white;
-    border: none;
-    border-radius: 0 5px 5px 0;
-    cursor: pointer;
-    }
-
-    .search-bar button:hover {
-    background-color: #2c3e50;
-    }
-
-    .about-us {
-    padding: 4rem 2rem;
-    background-color: #ffffff;
-    max-width: 800px;
-    margin: 0 auto;
-    }
-
-    .about-us h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    text-align: center;
-    }
-
-    .about-us p {
-    margin-bottom: 1rem;
-    line-height: 1.6;
-    }
-
-    /* Media Queries */
-    @media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        padding: 20px;
-    }
-    nav ul {
-        margin-top: 20px;
-    }
-
-    .hero h1 {
-        font-size: 36px;
-    }
-    }
-
-    html {
-    scroll-behavior: smooth;
-    }
-
 </style>
-  

@@ -62,6 +62,7 @@ const handleSignUp = async () => {
       lastName: lastName.value,
       email: email.value,
       phoneNumber: phoneNumber.value,
+      profileImageUrl: null, // Set as null by default until a profile image is uploaded
       verified: false // Set to false until the email is verified
     });
 
@@ -75,9 +76,8 @@ const handleSignUp = async () => {
   }
 };
 </script>
-
   
-  <style scoped>
+<style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
   
   .signup-page {
@@ -161,17 +161,17 @@ const handleSignUp = async () => {
   }
   
   .login-link {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: 1.5rem;
-  color: white;
-}
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 1.5rem;
+    color: white;
+  }
 
-.login-link a {
-  color: #9cb3bd;
-  text-decoration: underline;
-}
+  .login-link a {
+    color: #9cb3bd;
+    text-decoration: underline;
+  }
 
 
-  </style>
+ </style>
   
