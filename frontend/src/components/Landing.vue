@@ -311,7 +311,7 @@
     .logo-text {
         font-size: 35px; 
         font-weight: bold;
-        color: Black; 
+        color: #155861; 
     }
 
     nav {

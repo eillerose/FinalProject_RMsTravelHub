@@ -2,7 +2,7 @@
   <div class="login-page">
     <div class="login-container">
       <img src="/src/img/logoforRMs.png" alt="Logo" class="logo" />
-      <h1>Log in</h1>
+      <h1>Welcome back!</h1>
       <form @submit.prevent="handleLogin">
         <div class="form-group">
           <label for="username">Email</label>
@@ -99,8 +99,8 @@ export default {
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 600px;
-  min-height: 600px;
+  max-width: 400px;
+  min-height: 400px;
 }
 
 .logo {
@@ -112,31 +112,33 @@ export default {
 
 h1 {
   color: white;
-  font-size: 3rem;
+  font-size: 2rem;
   text-align: center;
   margin-bottom: 2rem;
   margin-top: 2rem;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 label {
-  font-size: 1.75rem;
+  font-size: 1rem;
   display: block;
   color: white;
   margin-bottom: 0.5rem;
+ 
 }
 
 input {
-  font-size: 1.75rem;
+  font-size: 1rem;
   width: 100%;
   padding: 0.75rem;
   border: 1px solid white;
   background-color: transparent;
   color: white;
   border-radius: 4px;
+  font-family: 'Poppins', sans-serif;
 }
 
 input::placeholder {
@@ -147,13 +149,13 @@ button {
   font-family: 'Poppins', sans-serif;
   width: 100%;
   padding: 0.75rem;
-  margin-top: 5rem;
+  margin-top: 3rem;
   background-color: #155861;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 2rem;
+  font-size: 1rem;
   transition: background-color 0.3s ease;
 }
 
@@ -164,7 +166,7 @@ button:hover {
 .signup-link {
   margin-top: 2rem;
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 1rem;
   color: white;
 }
 

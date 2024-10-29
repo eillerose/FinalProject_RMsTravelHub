@@ -2,7 +2,7 @@
   <div class="signup-page">
     <div class="signup-container">
       <img src="/src/img/logoforRMs.png" alt="Logo" class="logo" />
-      <h1>Sign Up</h1>
+      <h1>Create an account</h1>
       <form @submit.prevent="handleSignUp">
         <div class="form-group">
           <label for="first-name">First Name</label>
@@ -62,7 +62,6 @@ const handleSignUp = async () => {
       lastName: lastName.value,
       email: email.value,
       phoneNumber: phoneNumber.value,
-      profileImageUrl: null, // Set as null by default until a profile image is uploaded
       verified: false // Set to false until the email is verified
     });
 
@@ -76,8 +75,9 @@ const handleSignUp = async () => {
   }
 };
 </script>
+
   
-<style scoped>
+  <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
   
   .signup-page {
@@ -94,43 +94,43 @@ const handleSignUp = async () => {
   .signup-container {
     background-color: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(5px);
-    padding: 4rem;
+    padding: 2rem;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     width: 100%;
-    max-width: 700px;
-    min-height: 600px;
+    max-width: 600px;
+    min-height: 500px;
   }
 
   .logo {
     display: block;
     margin: 0 auto;
-    width: 100px; 
-    margin-bottom: 1rem;
+    width: 80px; 
+    margin-bottom: 1.5rem;
     }
   
   h1 {
     color: white;
-    font-size: 3rem;
+    font-size: 2rem;
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: .5rem;
   }
   
   .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
   }
   
   label {
-    font-size: 1.75rem;
+    font-size: .9rem;
     color: white;
     display: block;
     margin-bottom: 0.5rem;
   }
   
   input {
-    font-size: 1.75rem;
+    font-size: .9rem;
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.4rem;
     border: 1px solid white;
     background-color: transparent;
     color: white;
@@ -144,16 +144,17 @@ const handleSignUp = async () => {
   
   button {
     font-family: 'Poppins', sans-serif;
-    width: 100%;
-    padding: 0.75rem;
-    background-color: #155861;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1.5rem;
-    margin-top: 2rem;
-    transition: background-color 0.3s ease;
+  width: 100%;
+  padding: 0.4rem; /* Reduced button padding */
+  background-color: #155861;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  transition: background-color 0.3s ease;
+
   }
   
   button:hover {
@@ -161,17 +162,16 @@ const handleSignUp = async () => {
   }
   
   .login-link {
-    margin-top: 2rem;
-    text-align: center;
-    font-size: 1.5rem;
-    color: white;
-  }
+  margin-top: .5rem;
+  text-align: center;
+  font-size: .9rem;
+  color: white;
+}
 
-  .login-link a {
-    color: #9cb3bd;
-    text-decoration: underline;
-  }
+.login-link a {
+  color: #9cb3bd;
+  text-decoration: underline;
+}
 
 
- </style>
-  
+  </style>

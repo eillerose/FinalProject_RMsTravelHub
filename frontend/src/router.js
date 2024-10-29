@@ -6,6 +6,7 @@ import Homepage from './components/Homepage.vue';
 import AboutUs from './components/AboutUs.vue';
 import EditProfile from './components/EditProfile.vue';
 import Feedback from './components/Feedback.vue';
+import Booking from './components/Booking.vue';
 import ContactUs from './components/ContactUs.vue';
 import EmailVerification from './components/EmailVerification.vue';
 import { getAuth } from 'firebase/auth';
@@ -16,6 +17,7 @@ const routes = [
   { path: '/signup', component: Signup },
   { path: '/aboutus', component: AboutUs },
   { path: '/feedback', component: Feedback },
+  { path: '/booking', component: Booking },
   { path: '/contactus', component: ContactUs },
   { path: '/email-verification', component: EmailVerification },
   { path: '/home', component: Homepage, meta: { requiresAuth: true, requiresVerification: true } },
