@@ -1,6 +1,9 @@
 <template>
   <div class="signup-page">
     <div class="signup-container">
+      <!-- Back Arrow Icon -->
+      <span class="material-icons back-icon" @click="goBack">arrow_back</span>
+      
       <img src="/src/img/logoforRMs.png" alt="Logo" class="logo" />
       <h1>Create an account</h1>
       <form @submit.prevent="handleSignUp">
@@ -38,8 +41,10 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { auth, db, createUserWithEmailAndPassword, setDoc, doc } from '../firebaseConfig';
 import { sendEmailVerification } from 'firebase/auth';
 
@@ -49,103 +54,118 @@ const email = ref('');
 const firstName = ref('');
 const lastName = ref('');
 const phoneNumber = ref('');
+const router = useRouter();
 
 const handleSignUp = async () => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
     const user = userCredential.user;
 
-    // Save user information in Firestore with "verified" field set to false initially
     await setDoc(doc(db, 'users', user.uid), {
       username: username.value,
       firstName: firstName.value,
       lastName: lastName.value,
       email: email.value,
       phoneNumber: phoneNumber.value,
-      verified: false // Set to false until the email is verified
+      verified: false,
     });
 
-    // Send verification email
     await sendEmailVerification(user);
     alert('User signed up successfully! A verification email has been sent to your email address.');
-
   } catch (error) {
     console.error('Error signing up:', error.message);
     alert(`Error: ${error.message}`);
   }
 };
+
+// Define the goBack function
+const goBack = () => {
+  router.push('/'); // Navigate to the landing page
+};
 </script>
 
-  
-  <style scoped>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
-  
-  .signup-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-image: url(/src/img/login-signup.jpg);
-    background-size: cover;
-    background-position: center;
-    font-family: 'Poppins', sans-serif;
-  }
-  
-  .signup-container {
-    background-color: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(5px);
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 600px;
-    min-height: 500px;
-  }
 
-  .logo {
-    display: block;
-    margin: 0 auto;
-    width: 80px; 
-    margin-bottom: 1.5rem;
-    }
   
-  h1 {
-    color: white;
-    font-size: 2rem;
-    text-align: center;
-    margin-bottom: .5rem;
-  }
-  
-  .form-group {
-    margin-bottom: 0.75rem;
-  }
-  
-  label {
-    font-size: .9rem;
-    color: white;
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-  
-  input {
-    font-size: .9rem;
-    width: 100%;
-    padding: 0.4rem;
-    border: 1px solid white;
-    background-color: transparent;
-    color: white;
-    border-radius: 4px;
-  }
-  
-  input::placeholder {
-    color: #E4E0E1;
-    font-family: 'Poppins', sans-serif;
-    }
-  
-  button {
-    font-family: 'Poppins', sans-serif;
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+.signup-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-image: url(/src/img/login-signup.jpg);
+  background-size: cover;
+  background-position: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.signup-container {
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   width: 100%;
-  padding: 0.4rem; /* Reduced button padding */
+  max-width: 600px;
+  min-height: 500px;
+}
+
+/* Style for the back icon */
+.back-icon {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.logo {
+  display: block;
+  margin: 0 auto;
+  width: 80px;
+  margin-bottom: 1.5rem;
+}
+
+h1 {
+  color: white;
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 0.75rem;
+}
+
+label {
+  font-size: 0.9rem;
+  color: white;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+input {
+  font-size: 0.9rem;
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid white;
+  background-color: transparent;
+  color: white;
+  border-radius: 4px;
+}
+
+input::placeholder {
+  color: #E4E0E1;
+  font-family: 'Poppins', sans-serif;
+}
+
+button {
+  font-family: 'Poppins', sans-serif;
+  width: 100%;
+  padding: 0.4rem;
   background-color: #155861;
   color: white;
   border: none;
@@ -154,17 +174,16 @@ const handleSignUp = async () => {
   font-size: 1rem;
   margin-top: 0.5rem;
   transition: background-color 0.3s ease;
+}
 
-  }
-  
-  button:hover {
-    background-color: #4d696d;
-  }
-  
-  .login-link {
-  margin-top: .5rem;
+button:hover {
+  background-color: #4d696d;
+}
+
+.login-link {
+  margin-top: 0.5rem;
   text-align: center;
-  font-size: .9rem;
+  font-size: 0.9rem;
   color: white;
 }
 
@@ -172,7 +191,4 @@ const handleSignUp = async () => {
   color: #9cb3bd;
   text-decoration: underline;
 }
-
-
-  </style>
-  
+</style>
