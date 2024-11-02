@@ -1,6 +1,9 @@
 <template>
   <div class="login-page">
     <div class="login-container">
+      <!-- Back Icon -->
+      <span class="back-icon material-icons" @click="goBack">arrow_back</span>
+      
       <img src="/src/img/logoforRMs.png" alt="Logo" class="logo" />
       <h1>Welcome back!</h1>
       <form @submit.prevent="handleLogin">
@@ -24,10 +27,10 @@
 
 <script>
 import { ref } from 'vue';
-import { auth, db } from '../firebaseConfig'; // Import db for Firestore access
+import { auth, db } from '../firebaseConfig';
 import { signInWithEmailAndPassword, reload } from 'firebase/auth'; 
 import { useRouter } from 'vue-router';
-import { doc, updateDoc } from 'firebase/firestore'; // Import Firestore methods
+import { doc, updateDoc } from 'firebase/firestore';
 
 export default {
   setup() {
@@ -37,28 +40,23 @@ export default {
 
     const handleLogin = async () => {
       try {
-        // Sign in the user
         const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
         const user = userCredential.user;
 
-        // Refresh user profile to update email verification status
         await reload(user);
 
-        // Check email verification status after refresh
         if (user.emailVerified) {
           console.log('User logged in:', user);
 
-          // Update the verified field in Firestore for this user
           const userDocRef = doc(db, 'users', user.uid);
           await updateDoc(userDocRef, {
             verified: true
           });
 
-          // Redirect to home page after successful login and verification
           router.push('/home');
         } else {
           alert('Please verify your email before logging in.');
-          await auth.signOut(); // Log out the user if not verified
+          await auth.signOut();
         }
       } catch (error) {
         console.error('Login failed:', error.message);
@@ -66,20 +64,23 @@ export default {
       }
     };
 
+    const goBack = () => {
+      router.back();
+    };
+
     return {
       email,
       password,
       handleLogin,
+      goBack,
     };
   },
 };
 </script>
 
-
-
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 .login-page {
   display: flex;
@@ -93,14 +94,24 @@ export default {
 }
 
 .login-container {
+  position: relative;
   background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(5px);
   padding: 4rem;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 400px;
-  min-height: 400px;
+  max-width: 600px;
+  min-height: 600px;
+}
+
+.back-icon {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
 }
 
 .logo {
@@ -127,7 +138,6 @@ label {
   display: block;
   color: white;
   margin-bottom: 0.5rem;
- 
 }
 
 input {
