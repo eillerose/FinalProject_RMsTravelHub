@@ -95,6 +95,7 @@
           </form>
         </div>
       </div>
+    <FooterComponent />
     </div>
   </template>
   
@@ -103,11 +104,13 @@
   import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
   import { doc, getDoc, updateDoc } from 'firebase/firestore';
   import HeaderComponent from './Header.vue';
+  import FooterComponent from './Footer.vue';
   
   export default {
     name: 'UserProfile',
     components: {
-      HeaderComponent
+      HeaderComponent,
+      FooterComponent,
     },
     data() {
       return {

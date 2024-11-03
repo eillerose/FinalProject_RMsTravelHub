@@ -1,5 +1,6 @@
 <template>
     <div class="booking-calendar">
+        <HeaderComponent />
       <h2>Book Your Tour Package</h2>
       
       <div class="section-buttons">
@@ -63,11 +64,20 @@
       </div>
   
       <button v-if="activeSection === 'dateTime'" @click="confirmBooking" class="confirm-btn">Confirm Booking</button>
+
+    <FooterComponent />
     </div>
   </template>
   
   <script>
+  import HeaderComponent from './Header.vue';
+  import FooterComponent from './Footer.vue';
+
   export default {
+    components: {
+        HeaderComponent,
+        FooterComponent,
+    },
     data() {
       return {
         activeSection: 'dateTime',

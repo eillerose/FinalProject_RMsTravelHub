@@ -110,7 +110,7 @@
         </div>
       </section>
 
-      <div class="footer">
+  <div class="footer">
   <div class="footer-content">
     <!-- Logo Section -->
     <div class="footer-section footer-logo">
@@ -293,9 +293,6 @@ export default {
 };
 </script>
 
-
-
-
   
   <script setup>
     import { useRouter } from 'vue-router'; // Ensure it's imported
@@ -314,9 +311,9 @@ export default {
     };
   </script>
 
-  <style scoped>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
-    @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 .landing-page {
   font-family: 'Poppins', sans-serif;
