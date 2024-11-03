@@ -1,29 +1,38 @@
 <template>
   <div class="login-page">
-    <div class="login-container">
-      <!-- Back Icon -->
-      <span class="back-icon material-icons" @click="goBack">arrow_back</span>
-      
-      <img src="/src/img/logoforRMs.png" alt="Logo" class="logo" />
-      <h1>Welcome back!</h1>
-      <form @submit.prevent="handleLogin">
-        <div class="form-group">
-          <label for="username">Email</label>
-          <input type="email" v-model="email" placeholder="Enter email" id="email" />
+    <span class="back-icon material-icons" @click="goBack">arrow_back</span> <!-- Moved to the top left -->
+    <div class="login-wrapper">
+      <div class="login-container">
+        <div class="logo-title">
+          <img src="/src/img/logoforRMs.png" alt="Logo" class="logo" />
+          <h2>RM's Travel and Tours</h2>
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" v-model="password" placeholder="Enter password" id="password" />
-        </div>
-        <button type="submit">Log in</button>
-      </form>
-      <p class="signup-link">
-        Don't have an account? 
-        <router-link to="/signup">Sign Up</router-link>
-      </p>
+        <h1>Welcome back!</h1>
+        <p class="subtitle">Leave your footprints in paradise.</p>
+        <p class="description">Thank you for getting back to RM's Travel and Tours. Log in to explore the best travel experiences Puerto Galera has to offer.</p>
+        <form @submit.prevent="handleLogin">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" v-model="email" placeholder="Enter email" id="email" />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" v-model="password" placeholder="Enter password" id="password" />
+          </div>
+          <button type="submit">Log In</button>
+        </form>
+        <p class="signup-link">
+          Don't have an account? 
+          <router-link to="/signup">Sign Up</router-link>
+        </p>
+      </div>
+      <div class="login-image">
+        <img src="/src/img/logsign.jpg" alt="Scenic Puerto Galera" />
+      </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import { ref } from 'vue';
@@ -79,109 +88,159 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 .login-page {
+  font-family: 'Poppins', sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-image: url(/src/img/login-signup.jpg);
-  background-size: cover;
-  background-position: center;
-  font-family: 'Poppins', sans-serif;
-}
-
-.login-container {
-  position: relative;
-  background-color: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(5px);
-  padding: 4rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 600px;
-  min-height: 600px;
+  min-height: 91vh;
+  background-color: #f2f2f2; 
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat; 
+  padding: 2rem;
+  position: relative; 
 }
 
 .back-icon {
   position: absolute;
-  top: 2rem;
-  left: 2rem;
+  top: 40px; 
+  left: 40px; 
   font-size: 24px;
-  color: white;
+  color: black;
   cursor: pointer;
+  z-index: 10; /* Ensures it stays on top of other elements */
+}
+
+.login-wrapper {
+  display: flex;
+  background-color: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 900px; /* Adjusted container width */
+  width: 100%;
+  margin: auto; /* Centers the container */
+}
+
+.login-container {
+  flex: 1;
+  padding: 2rem; /* Reduced padding for a more compact look */
+  max-width: 60%; /* Adjusted container width */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 1rem 0; /* Adds balanced top and bottom margins */
+}
+
+.logo-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .logo {
-  display: block;
-  margin: 0 auto;
-  width: 100px;
-  margin-bottom: 1rem;
+  width: 35px; /* Adjusted logo size */
+}
+
+h2 {
+  font-size: 1rem;
+  color: black;
 }
 
 h1 {
-  color: white;
+  color: black;
   font-size: 2rem;
-  text-align: center;
-  margin-bottom: 2rem;
-  margin-top: 2rem;
+  font-weight: bold;
+  margin: 0; 
+  margin-top: 10%;
+}
+
+.subtitle {
+  color: #6c757d;
+  font-size: .9rem;
+  margin: 1rem 0; 
+  margin-top: 2%;
+}
+
+.description {
+  color: #adb5bd;
+  font-size: .9rem;
+  margin-top: 0%;
 }
 
 .form-group {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.25rem; /* Reduced form group spacing */
 }
 
 label {
-  font-size: 1rem;
+  font-size: .9rem; /* Reduced label font size */
+  font-weight: bold;
   display: block;
-  color: white;
+  color: #495057;
   margin-bottom: 0.5rem;
+  margin-top: 1rem;
 }
 
 input {
-  font-size: 1rem;
-  width: 100%;
+  font-size: .9rem;
+  width: 95%; /* Full width of the form container */
   padding: 0.75rem;
-  border: 1px solid white;
-  background-color: transparent;
-  color: white;
+  border: 1px solid #ced4da;
   border-radius: 4px;
+  background-color: #ffffff;
   font-family: 'Poppins', sans-serif;
 }
 
 input::placeholder {
-  color: rgba(255, 255, 255, 0.7);
+  color: #6c757d;
 }
 
 button {
-  font-family: 'Poppins', sans-serif;
-  width: 100%;
-  padding: 0.75rem;
-  margin-top: 3rem;
-  background-color: #155861;
-  color: white;
+  font-size: 1rem;
+  padding: 0.5rem;
+  margin-left: 6rem;
+  width: 50%; 
+  background-color: #1AA0B6;
+  color: #ffffff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease;
+  margin-top: 1rem;
+  transition: background-color 0.3s;
+  font-family: 'Poppins', sans-serif;
 }
 
 button:hover {
-  background-color: #4d696d;
+  background-color: #0b5ed7;
 }
 
 .signup-link {
-  margin-top: 2rem;
+  margin-top: 1rem; /* Consistent spacing */
   text-align: center;
-  font-size: 1rem;
-  color: white;
+  font-size: 0.9rem;
+  color: #495057;
 }
 
 .signup-link a {
-  color: #9cb3bd;
+  color: #1AA0B6;
   text-decoration: underline;
+  
 }
+
+.login-image {
+  flex: 1;
+  max-width: 55%; /* Adjusted image container width */
+  overflow: hidden;
+}
+
+.login-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 </style>

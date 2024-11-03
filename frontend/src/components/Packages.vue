@@ -1,31 +1,6 @@
 <template>
       <div class="packages-page">
-      <header>
-      <div class="logo">
-        <img src="/src/img/logoforRMs.png" alt="RM's Travel and Tours Logo" class="logo-image">
-        <span class="logo-text">RM's Travel and Tours</span>
-      </div>
-      <nav>
-        <ul>
-          <li><router-link to="/home">Home</router-link></li>
-          <li><router-link to="/about">About Us</router-link></li>
-          <li><router-link to="/packages">Packages</router-link></li>
-          <li><router-link to="/feedback">Feedback</router-link></li>
-          <li><router-link to="/contact">Contact Us</router-link></li>
-          <li class="profile">
-            <a href="#" @click="toggleDropdown">
-              <img :src="profileImage" alt="Profile" class="profile-icon" />
-              <span class="arrow">&#9662;</span>
-            </a>           
-            <ul v-if="isDropdownOpen" class="dropdown">
-              <li><router-link to="/edit-profile">Edit Profile</router-link></li>
-              <li><router-link to="/history">History</router-link></li>
-              <li><a href="#" @click.prevent="logout">Logout</a></li>
-            </ul>
-          </li>
-        </ul>
-      </nav>
-    </header>
+        <HeaderComponent />
     <main>
     <div class="packages-container">
       <h1>Our Travel Packages</h1>
@@ -76,66 +51,31 @@
       </div>
     </div>
 
-    <div class="footer">
-  <div class="footer-content">
-    <!-- Logo Section -->
-    <div class="footer-section footer-logo">
-      <img src="/src/img/logoforRMs.png" alt="RM's Travel and Tours Logo" class="footer-logo-image">
-    </div>
     
     <!-- About Us Section -->
     <div class="footer-section">
       <h3>About Us</h3>
       <p>RM's Travel and Tours is your gateway to unforgettable adventures in Puerto Galera and beyond.</p>
     </div>
-
-    <!-- Other Footer Sections -->
-    <div class="footer-section">
-      <h3>Quick Links</h3>
-      <ul>
-        <li><a href="/home">Home</a></li>
-        <li><a href="/about">About Us</a></li>
-        <li><a href="/packages">Packages</a></li>
-        <li><a href="/feedback">Feedback</a></li>
-        <li><a href="/contact">Contact Us</a></li>
-      </ul>
-    </div>
-    
-    <div class="footer-section">
-      <h3>Contact Info</h3>
-      <p>Email: info@rmstravelandtours.com</p>
-      <p>Phone: +63 123 456 7890</p>
-      <p>Address: Puerto Galera, Oriental Mindoro, Philippines</p>
-    </div>
-
-    <div class="footer-section">
-      <h3>Follow Us</h3>
-      <div class="social-icons">
-        <a href="#" class="social-icon">FB</a>
-        <a href="#" class="social-icon">IG</a>
-        <a href="#" class="social-icon">TW</a>
-      </div>
-    </div>
-  </div>
-  
-  <div class="footer-bottom">
-    © 2023 RM's Travel and Tours. All rights reserved.
-  </div>
-</div>
     </main>
+
+    <FooterComponent />
     </div>
 
     
   </template>
   
   <script setup>
+  import HeaderComponent from './Header.vue';
+  import FooterComponent from './Footer.vue';
+
   import { ref } from 'vue'
   
   const packages = ref([
     {
       name: "Ruby Package",
-      cardImage: new URL('@/assets/pg-background.jpg', import.meta.url).href,
-      modalImage: new URL('@/assets/package1.jpg', import.meta.url).href,
+      cardImage: new URL('/src/img/login-signup.jpg', import.meta.url).href,
+      modalImage: new URL('/src/img/login-signup.jpg', import.meta.url).href,
       description: "Get the best of inland and island tours with the Ruby Package!",
       inclusions: [
         "Airconditioned room", "Cable TV", "WiFi", "Private bathroom",
@@ -148,8 +88,8 @@
     },
     {
       name: "Diamond Package",
-      cardImage: new URL('@/assets/pg-background.jpg', import.meta.url).href,
-      modalImage: new URL('@/assets/package1.jpg', import.meta.url).href,
+      cardImage: new URL('/src/img/login-signup.jpg', import.meta.url).href,
+      modalImage: new URL('/src/img/login-signup.jpg', import.meta.url).href,
       description: "Enjoy a premium vacation experience in Puerto Galera!",
       inclusions: [
         "Airconditioned room", "Cable TV", "WiFi", "Private bathroom",
@@ -163,8 +103,8 @@
     },
     {
       name: "Package 1",
-      cardImage: new URL('@/assets/pg-background.jpg', import.meta.url).href,
-      modalImage: new URL('@/assets/package1.jpg', import.meta.url).href,
+      cardImage: new URL('/src/img/login-signup.jpg', import.meta.url).href,
+      modalImage: new URL('/src/img/login-signup.jpg', import.meta.url).href,
       description: "Great accommodation and Island Hopping with snorkeling options.",
       inclusions: [
         "AC Room", "Cabled TV", "Private Bathroom", "Free use of towels and tissue",
@@ -179,8 +119,8 @@
     },
     {
       name: "Package 2",
-      cardImage: new URL('@/assets/pg-background.jpg', import.meta.url).href,
-      modalImage: new URL('@/assets/package1.jpg', import.meta.url).href,
+      cardImage: new URL('/src/img/login-signup.jpg', import.meta.url).href,
+      modalImage: new URL('/src/img/login-signup.jpg', import.meta.url).href,
       description: "Experience underwater adventures with our snorkeling tour.",
       inclusions: [
         "AC Room", "Cabled TV", "Private Bathroom", "Free WiFi",
@@ -369,6 +309,7 @@ header {
   max-width: 1200px;
   margin: 0 auto;
   font-family: 'Poppins', sans-serif;
+  min-height: 94vh;
 }
 
 h1 {
