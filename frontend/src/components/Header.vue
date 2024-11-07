@@ -97,7 +97,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 5px 15px;
+    padding: 15px 15px;
     background-color: white;
     position: fixed;
     top: 0;
@@ -110,17 +110,18 @@
   .logo {
     display: flex;
     align-items: center;
+    margin-left: 1rem;
   }
   
   .logo-image {
     margin-right: 8px;
-    max-height: 35px;
+    max-height: 40px;
   }
   
   .logo-text {
-    font-size: 16px;
+    font-size: 25px;
     font-weight: 600;
-    color: #333;
+    color: black;
   }
   
   nav ul {
@@ -135,19 +136,19 @@
     position: relative;
     margin: 0 12px;
     cursor: pointer;
-    font-size: 15px;
-    color: #155861;
+    font-size: 16px;
+    color: black;
     transition: color 0.3s ease;
   }
   
   nav ul li a {
-    color: #155861;
+    color: black;
     text-decoration: none;
     transition: color 0.3s ease;
   }
   
   nav ul li:hover a {
-    color: #155861;
+    color: gray;
   }
   
   nav ul li::after {
@@ -157,7 +158,7 @@
     left: 0;
     width: 0;
     height: 2px;
-    background-color: #155861;
+    background-color: gray;
     transition: width 0.3s ease;
   }
   
@@ -213,7 +214,7 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     width: 150px;
-    padding: 5px 0;
+    padding: 10px 0;
   }
   
   .profile .dropdown li {
@@ -224,13 +225,13 @@
   
   .profile .dropdown li a {
     display: block;
-    color: #3498db;
+    color: black;
     text-decoration: none;
   }
   
   .material-icons.profile-icon {
     font-size: 24px;
-    color: #155861;
+    color: black;
     vertical-align: middle;
     cursor: pointer;
   }

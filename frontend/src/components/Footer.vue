@@ -60,7 +60,7 @@
     <style scoped>
     .footer {
       font-family: 'Poppins', sans-serif;
-      background-color: #155861;
+      background-color: #10375C;
       color: white;
       padding: 15px 15px; 
       margin-left: -10px ;
@@ -140,7 +140,7 @@
       width: 35px;
       height: 35px;
       background-color: white;
-      color: #155861;
+      color: #e1effc;
       text-align: center;
       line-height: 35px;
       border-radius: 50%;
@@ -150,7 +150,7 @@
     }
     
     .social-icon:hover {
-      background-color: #64b8b1;
+      background-color: #255992;
       color: white;
     }
     

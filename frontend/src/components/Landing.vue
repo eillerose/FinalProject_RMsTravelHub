@@ -15,9 +15,9 @@
       </nav>
 
       <div class="auth-buttons">
-        <router-link to="/login"><button class="sign-in">Sign In</button></router-link>
-        <router-link to="/signup"><button class="sign-up">Sign Up</button></router-link>
-      </div>
+  <router-link to="/login" class="sign-in">Sign In</router-link>
+  <router-link to="/signup"><button class="sign-up">Sign Up</button></router-link>
+</div>
     </header>
 
     <main>
@@ -110,7 +110,7 @@
         </div>
       </section>
 
-  <div class="footer">
+      <div class="footer">
   <div class="footer-content">
     <!-- Logo Section -->
     <div class="footer-section footer-logo">
@@ -293,6 +293,9 @@ export default {
 };
 </script>
 
+
+
+
   
   <script setup>
     import { useRouter } from 'vue-router'; // Ensure it's imported
@@ -311,28 +314,27 @@ export default {
     };
   </script>
 
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+  <style scoped>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
-.landing-page {
-  font-family: 'Poppins', sans-serif;
-  color: #333;
-}
+  .landing-page {
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+  }
 
 /* Header Styling */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 5px 37px;
   background-color: white;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000; 
 }
 
 .logo {
@@ -410,14 +412,25 @@ nav ul li:hover a {
   color: #333;
 }
 
-/* Auth Buttons */
 .auth-buttons {
   display: flex;
   align-items: center;
   gap: 20px;
 }
+/* Simple link styling for Sign In */
+.sign-in {
+  font-size: 18px;
+  color: #155861;
+  text-decoration: none;
+  cursor: pointer;
+}
 
-.sign-in, .sign-up {
+.sign-in:hover {
+ text-decoration: underline;
+  color: #333; /* Optional: changes color on hover */
+}
+
+.sign-up {
   font-family: 'Poppins', sans-serif;
   padding: 5px 15px;
   font-size: 18px;
@@ -425,16 +438,7 @@ nav ul li:hover a {
   cursor: pointer;
 }
 
-.sign-in {
-  background-color: transparent;
-  border: 2px solid #155861;
-  color: #155861;
-}
 
-.sign-in:hover {
-  background-color: #155861;
-  color: white;
-}
 
 .sign-up {
   background-color: transparent;
@@ -452,7 +456,7 @@ nav ul li:hover a {
   background-image: url('/src/img/heroBg.jpg');
   background-size: cover;
   background-position: center;
-  height: 100vh;
+  height: 88vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -460,6 +464,11 @@ nav ul li:hover a {
   text-align: center;
   color: white;
   padding: 0 20px;
+  margin-left:1rem;
+  margin-right:1.5rem;
+  margin-top: 4.4rem;
+  margin-bottom: 5rem;
+  border-radius: 20px;
 }
 
 .hero h1 {
@@ -545,8 +554,6 @@ nav ul li:hover a {
 }
 
 
-
-
 /* Tabs Styling */
 .tabs {
   display: flex;
@@ -554,6 +561,7 @@ nav ul li:hover a {
   margin: 20px 0;
   gap: 20px;
 }
+
 
 .tabs span {
   cursor: pointer;
@@ -572,6 +580,9 @@ nav ul li:hover a {
 /* Gallery Styling */
 
 /* Center the title inside content-gallery */
+
+
+
 .content-gallery h2 {
   text-align: center;
   font-size: 4em; /* Adjust font size as needed */
@@ -589,10 +600,13 @@ nav ul li:hover a {
   max-width: 100%;
   margin: 0 auto;
   overflow: hidden;
+  margin-bottom: 10rem;
+  margin-top: 3rem;
+  
 }
 
 .content-gallery {
-  background-color: #ffffff;
+  background-color: WHITE;
 
 }
 
@@ -650,17 +664,15 @@ nav ul li:hover a {
   margin: 5px 0 0;
 }
 
-
-
-
-
 .about-us {
   text-align: center;
   padding: 60px 20px;
   background-color: #f9f9f9;
+  height: 100vh;
 }
 
 .about-us h2 {
+  margin-top: 6rem;
   font-size: 45px;
   margin-bottom: 20px;
   color: #333;
@@ -943,3 +955,6 @@ html {
   scroll-behavior: smooth;
 }
 </style>
+
+
+  

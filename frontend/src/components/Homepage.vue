@@ -1,27 +1,35 @@
 <template>
   <div class="home-page">
-      <HeaderComponent />
-      
+    <HeaderComponent />
+
     <main>
       <section id="hero" class="hero">
-        <h1>Discover Puerto Galera!</h1>
-        <p class="subtitle">Make Your Tour Amazing With Us</p>
-        <p class="description">Explore the beauty of Puerto Galera with customized tours, breathtaking sights, and unforgettable experiences. Let us be your guide to a journey of a lifetime!</p>
-        
-        <!-- Button to view packages -->
-        <button @click="goToPackages" class="btn-primary">Explore Our Packages</button>
+        <!-- Video background -->
+        <video autoplay muted loop class="hero-video">
+          <source src="/src/video/heroVideo.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+
+        <div class="hero-content">
+          <h1>Discover <span>Puerto Galera!</span></h1>
+          <p class="subtitle">Make Your Tour Amazing With Us</p>
+          <p class="description">Explore the beauty of Puerto Galera with customized tours, breathtaking sights, and unforgettable experiences. Let us be your guide to a journey of a lifetime!</p>
+
+          <!-- Button to view packages -->
+          <button @click="goToPackages" class="btn-primary">Explore Our Packages</button>
+        </div>
       </section>
 
       <section id="about-us" class="about-us">
         <h2>Little words about us</h2>
         <p>
-          At RM's Travel and Tours, we grant each and every adventurer a personalized experience like no other. 
-          We are aficionados coming from every part of Puerto Galera, passionate about guiding you through this 
+          At RM's Travel and Tours, we grant each and every adventurer a personalized experience like no other.
+          We are aficionados coming from every part of Puerto Galera, passionate about guiding you through this
           pocket of paradise we call home.
         </p>
         <p>
-          We hold strong the value of being factual. Our tour operators are with you every step through your 
-          booking process, we are there to scratch every inch of curiosity and enquiry that you may have. 
+          We hold strong the value of being factual. Our tour operators are with you every step through your
+          booking process, we are there to scratch every inch of curiosity and enquiry that you may have.
           We simply want to get you going on a trip of a lifetime.
         </p>
       </section>
@@ -29,6 +37,7 @@
     <FooterComponent />
   </div>
 </template>
+
 
 <script>
 import HeaderComponent from './Header.vue';
@@ -58,6 +67,8 @@ export default {
 
 <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Ephesis&display=swap');
+
 
   .about-us {
   padding: 4rem 2rem;
@@ -76,64 +87,70 @@ export default {
   margin-bottom: 1rem;
   line-height: 1.6;
   }
-
   .hero {
-  background-image: url('/src/img/heroBg.jpg');
-  background-size: cover;
-  background-position: center;
-  height: 100vh;
+  position: relative;
+  height: 98vh;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
   color: white;
-  margin-left: -18px;
-  margin-right: -18px;
-  padding: 0 20px;
-  }
+  overflow: hidden;
+}
 
+.hero-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
 
 .hero h1 {
-  font-size: 3rem;
-  font-weight: bold;
-  margin: 0 0 20px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-family: 'Poppins', sans-serif;
+  font-size: 70px;
+  margin-bottom: 5px;
 }
 
 .subtitle {
-  font-size: 1.5rem;
-  margin: 0 0 20px;
-  color: #f0e68c; /* Optional color to make the subtitle pop */
+  font-family: 'Ephesis', cursive;
+  font-size: 3rem;
+  margin: 0 0 10px;
+  color: white;
 }
 
 .description {
+  font-family: 'Poppins', sans-serif;
   font-size: 1.2rem;
   margin-bottom: 40px;
-  max-width: 600px;
-  color: #dcdcdc;
+  max-width: 800px;
+  color: white;
 }
 
 .btn-primary {
-  padding: 10px 20px;
+  font-family: 'Poppins', sans-serif;
+  padding: 15px 25px;
   font-size: 1.1rem;
   color: #fff;
-  background-color: #ff8c00; /* Orange color */
-  border: none;
-  border-radius: 5px;
+  background-color: #2ec4b6;
+  border: 2px solid white;
+  border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-.btn-primary:hover {
-  background-color: #ffa500; /* Lighter orange on hover */
+.about-us h2{
+  font-weight: bold;
+  font-size: 2rem;
 }
-
-.btn-primary:focus {
-  outline: none;
-  box-shadow: 0 0 5px rgba(255, 140, 0, 0.8);
-}
-
-
 
   /* Media Queries */
   @media (max-width: 768px) {

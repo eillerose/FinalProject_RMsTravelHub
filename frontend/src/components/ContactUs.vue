@@ -1,6 +1,5 @@
 <template>
     <div>
-        <!-- Integrating the Header component at the top -->
         <HeaderComponent />
         <div class="contact-section">
             <div class="banner">
@@ -205,7 +204,7 @@ export default {
 .info-item .material-symbols-outlined {
     margin-right: 15px;
     font-size: 35px; /* Larger icon size */
-    color: #027E89;
+    color: #003a79;
 }
 
 .info-item div {
@@ -255,6 +254,7 @@ export default {
 
 .form-group input,
 .form-group textarea {
+    font-family: 'Poppins', sans-serif;
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
@@ -268,7 +268,8 @@ textarea {
 }
 
 button {
-    background-color: #007BFF;
+    font-family: 'Poppins', sans-serif;
+    background-color: #fdb812;
     color: #fff;
     padding: 10px 15px;
     margin-top: 2rem;
@@ -281,7 +282,7 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #F3C623;
 }
 
 .map-container {
