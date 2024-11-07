@@ -8,11 +8,11 @@
       <nav>
         <ul>
           <li><router-link to="/home">Home</router-link></li>
-
-            <!-- About Us Dropdown -->
-            <li class="dropdown-container" @mouseenter="openDropdown('aboutUs')" @mouseleave="closeDropdown">
-            <a href="#" @click.prevent>About Us</a>
-            <ul v-if="dropdownOpen === 'aboutUs'" class="dropdown-menu">
+          
+          <!-- About Us Dropdown -->
+          <li class="dropdown-container" @mouseenter="openDropdown('aboutus')" @mouseleave="closeDropdown">
+            <router-link to="/aboutus">About Us</router-link>
+            <ul v-if="dropdownOpen === 'aboutus'" class="dropdown-menu">
               <li><router-link to="/tour-guide">Tour Guide</router-link></li>
               <li><router-link to="/feedback">Feedback</router-link></li>
             </ul>
