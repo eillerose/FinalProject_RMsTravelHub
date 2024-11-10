@@ -1,10 +1,6 @@
 <template>
   <div class="login-page">
-<<<<<<< HEAD
     <span class="back-icon material-icons" @click="goBack">arrow_back</span>
-=======
-    <span class="back-icon material-icons" @click="goBack">arrow_back</span> <!-- Moved to the top left -->
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
     <div class="login-wrapper">
       <div class="login-container">
         <div class="logo-title">
@@ -21,7 +17,6 @@
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-<<<<<<< HEAD
             <div class="password-container">
               <input
                 :type="showPassword ? 'text' : 'password'"
@@ -44,14 +39,6 @@
         </p>
         <p class="signup-link">
           Don't have an account?
-=======
-            <input type="password" v-model="password" placeholder="Enter password" id="password" />
-          </div>
-          <button type="submit">Log In</button>
-        </form>
-        <p class="signup-link">
-          Don't have an account? 
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
           <router-link to="/signup">Sign Up</router-link>
         </p>
       </div>
@@ -142,40 +129,22 @@ export default {
   justify-content: center;
   align-items: center;
   min-height: 91vh;
-<<<<<<< HEAD
   background-color: #f2f2f2;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   padding: 2rem;
   position: relative;
-=======
-  background-color: #f2f2f2; 
-  background-size: cover; 
-  background-position: center; 
-  background-repeat: no-repeat; 
-  padding: 2rem;
-  position: relative; 
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
 }
 
 .back-icon {
   position: absolute;
-<<<<<<< HEAD
   top: 40px;
   left: 40px;
   font-size: 24px;
   color: black;
   cursor: pointer;
   z-index: 10;
-=======
-  top: 40px; 
-  left: 40px; 
-  font-size: 24px;
-  color: black;
-  cursor: pointer;
-  z-index: 10; /* Ensures it stays on top of other elements */
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
 }
 
 .login-wrapper {
@@ -184,34 +153,19 @@ export default {
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-<<<<<<< HEAD
   max-width: 900px;
   width: 100%;
   margin: auto;
-=======
-  max-width: 900px; /* Adjusted container width */
-  width: 100%;
-  margin: auto; /* Centers the container */
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
 }
 
 .login-container {
   flex: 1;
-<<<<<<< HEAD
   padding: 2rem;
   max-width: 60%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   margin: 1rem 0;
-=======
-  padding: 2rem; /* Reduced padding for a more compact look */
-  max-width: 60%; /* Adjusted container width */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin: 1rem 0; /* Adds balanced top and bottom margins */
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
 }
 
 .logo-title {
@@ -221,11 +175,7 @@ export default {
 }
 
 .logo {
-<<<<<<< HEAD
   width: 35px;
-=======
-  width: 35px; /* Adjusted logo size */
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
 }
 
 h2 {
@@ -237,22 +187,14 @@ h1 {
   color: black;
   font-size: 2rem;
   font-weight: bold;
-<<<<<<< HEAD
   margin: 0;
-=======
-  margin: 0; 
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
   margin-top: 10%;
 }
 
 .subtitle {
   color: #6c757d;
   font-size: .9rem;
-<<<<<<< HEAD
   margin: 1rem 0;
-=======
-  margin: 1rem 0; 
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
   margin-top: 2%;
 }
 
@@ -267,11 +209,7 @@ h1 {
 }
 
 label {
-<<<<<<< HEAD
   font-size: .9rem;
-=======
-  font-size: .9rem; /* Reduced label font size */
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
   font-weight: bold;
   display: block;
   color: #495057;
@@ -281,11 +219,7 @@ label {
 
 input {
   font-size: .9rem;
-<<<<<<< HEAD
   width: 95%;
-=======
-  width: 95%; /* Full width of the form container */
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
   padding: 0.75rem;
   border: 1px solid #ced4da;
   border-radius: 4px;
@@ -314,11 +248,7 @@ button {
   font-size: 1rem;
   padding: 0.5rem;
   margin-left: 6rem;
-<<<<<<< HEAD
   width: 50%;
-=======
-  width: 50%; 
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
   background-color: #1AA0B6;
   color: #ffffff;
   border: none;
@@ -334,11 +264,7 @@ button:hover {
 }
 
 .signup-link {
-<<<<<<< HEAD
   margin-top: 1rem;
-=======
-  margin-top: 1rem; /* Consistent spacing */
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
   text-align: center;
   font-size: 0.9rem;
   color: #495057;
@@ -352,11 +278,7 @@ button:hover {
 
 .login-image {
   flex: 1;
-<<<<<<< HEAD
   max-width: 55%;
-=======
-  max-width: 55%; /* Adjusted image container width */
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
   overflow: hidden;
 }
 
@@ -366,7 +288,6 @@ button:hover {
   object-fit: cover;
 }
 
-<<<<<<< HEAD
 .forgot-password-link {
   text-align: center;
   font-size: 0.9rem;
@@ -397,6 +318,4 @@ button:hover {
   color: #6c757d; /* Icon color */
   font-size: 1rem; /* Icon size */
 }
-=======
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
 </style>

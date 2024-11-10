@@ -8,32 +8,39 @@
       <nav>
         <ul>
           <li><router-link to="/home">Home</router-link></li>
-          
+          <li><router-link to="/packages">Packages</router-link></li>
+
           <!-- About Us Dropdown -->
-          <li class="dropdown-container" @mouseenter="openDropdown('aboutus')" @mouseleave="closeDropdown">
+          <li
+            class="dropdown-container"
+            @mouseenter="openDropdown('aboutus')"
+            @mouseleave="closeDropdown('aboutus')"
+          >
             <router-link to="/aboutus">About Us</router-link>
             <ul v-if="dropdownOpen === 'aboutus'" class="dropdown-menu">
               <li><router-link to="/tour-guide">Tour Guide</router-link></li>
               <li><router-link to="/feedback">Feedback</router-link></li>
             </ul>
           </li>
-          
+
           <!-- Services Dropdown -->
-          <li class="dropdown-container" @mouseenter="openDropdown('services')" @mouseleave="closeDropdown">
+          <li
+            class="dropdown-container"
+            @mouseenter="openDropdown('services')"
+            @mouseleave="closeDropdown('services')"
+          >
             <a href="#" @click.prevent>Services</a>
             <ul v-if="dropdownOpen === 'services'" class="dropdown-menu">
-              <li><router-link to="/packages">Packages</router-link></li>
               <li><router-link to="/hotel">Hotel</router-link></li>
               <li><router-link to="/activities">Activities</router-link></li>
             </ul>
           </li>
-          
 
-          
-          <li><router-link to="/booking">Book Now</router-link></li>
+          <!-- Conditionally Render Book Now Link -->
+          <li v-if="canAccessBooking"><router-link to="/booking">Book Now</router-link></li>
           <li><router-link to="/contactus">Contact Us</router-link></li>
-          
-          <!-- Profile Dropdown -->
+
+          <!-- Profile Dropdown (Click to Open/Close) -->
           <li class="profile">
             <a href="#" @click="toggleProfileDropdown">
               <span class="material-icons profile-icon">person</span>
@@ -49,40 +56,45 @@
   </div>
 </template>
 
-<script>
-import { auth } from '../firebaseConfig';
+<script setup>
+import { ref, onMounted } from 'vue';
 
-export default {
-  data() {
-    return {
-      dropdownOpen: null,
-      isProfileDropdownOpen: false,
-      profileImage: '/path/to/default-profile.png', // Placeholder for profile image
-    };
-  },
-  methods: {
-    openDropdown(menu) {
-      this.dropdownOpen = menu;
-    },
-    closeDropdown() {
-      this.dropdownOpen = null;
-    },
-    toggleProfileDropdown() {
-      this.isProfileDropdownOpen = !this.isProfileDropdownOpen;
-    },
-    async logout() {
-      await auth.signOut();
-      this.$router.push('/login');
-    }
-  },
-  created() {
-    const user = auth.currentUser;
-    if (user) {
-      this.profileImage = user.photoURL || '/path/to/default-profile.png';
-    }
+const dropdownOpen = ref(null);
+const isProfileDropdownOpen = ref(false);
+// const canAccessBooking = ref(true); // or set based on your logic
+
+// Open dropdown based on identifier
+const openDropdown = (menu) => {
+  dropdownOpen.value = menu;
+};
+
+// Close dropdown
+const closeDropdown = (menu) => {
+  if (dropdownOpen.value === menu) {
+    dropdownOpen.value = null;
   }
 };
+
+// Toggle profile dropdown
+const toggleProfileDropdown = () => {
+  isProfileDropdownOpen.value = !isProfileDropdownOpen.value;
+};
+
+// Close profile dropdown if clicked outside
+const handleClickOutside = (event) => {
+  const profileDropdown = document.querySelector('.profile');
+  if (profileDropdown && !profileDropdown.contains(event.target)) {
+    isProfileDropdownOpen.value = false;
+  }
+};
+
+// Attach click outside listener on mount
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
@@ -97,7 +109,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 15px;
+  padding: 15px 15px;
   background-color: white;
   position: fixed;
   top: 0;
@@ -110,17 +122,18 @@ header {
 .logo {
   display: flex;
   align-items: center;
+  margin-left: 1rem;
 }
 
 .logo-image {
   margin-right: 8px;
-  max-height: 35px;
+  max-height: 40px;
 }
 
 .logo-text {
-  font-size: 16px;
+  font-size: 25px;
   font-weight: 600;
-  color: #333;
+  color: black;
 }
 
 nav ul {
@@ -135,19 +148,19 @@ nav ul li {
   position: relative;
   margin: 0 12px;
   cursor: pointer;
-  font-size: 15px;
-  color: #155861;
+  font-size: 16px;
+  color: black;
   transition: color 0.3s ease;
 }
 
 nav ul li a {
-  color: #155861;
+  color: black;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 nav ul li:hover a {
-  color: #155861;
+  color: gray;
 }
 
 nav ul li::after {
@@ -157,7 +170,7 @@ nav ul li::after {
   left: 0;
   width: 0;
   height: 2px;
-  background-color: #155861;
+  background-color: gray;
   transition: width 0.3s ease;
 }
 
@@ -213,7 +226,7 @@ nav ul li:hover::after {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   width: 150px;
-  padding: 5px 0;
+  padding: 10px 0;
 }
 
 .profile .dropdown li {
@@ -224,13 +237,13 @@ nav ul li:hover::after {
 
 .profile .dropdown li a {
   display: block;
-  color: #3498db;
+  color: black;
   text-decoration: none;
 }
 
 .material-icons.profile-icon {
   font-size: 24px;
-  color: #155861;
+  color: black;
   vertical-align: middle;
   cursor: pointer;
 }

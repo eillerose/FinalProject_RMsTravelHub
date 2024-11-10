@@ -28,7 +28,6 @@
             </div>
             <div class="form-group">
               <label for="username">Username</label>
-<<<<<<< HEAD
               <input v-model="username" type="text" placeholder="Enter your username" id="username" required />            </div>
           </div>
           <div class="form-group">
@@ -51,18 +50,6 @@
                 {{ showConfirmPassword ? 'visibility_off' : 'visibility' }}
               </span>
             </div>
-=======
-              <input v-model="username" type="text" placeholder="Enter your username" id="username" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input v-model="email" type="email" placeholder="Enter your email" id="email" />
-          </div>
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input v-model="password" type="password" placeholder="Enter your password" id="password" />
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
           </div>
           <button type="submit">Sign Up</button>
         </form>
@@ -78,13 +65,6 @@
   </div>
 </template>
 
-<<<<<<< HEAD
-=======
-
-
-
-
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -327,7 +307,6 @@ button:hover {
   object-fit: cover;
 }
 
-<<<<<<< HEAD
 /* Add styles for the password visibility icon */
 .password-field {
   position: relative;
@@ -343,7 +322,3 @@ button:hover {
 }
 
 </style>
-=======
-
-</style>
->>>>>>> f7296e3644ea47b03ec1dc99f468bcfd9afe60c1
