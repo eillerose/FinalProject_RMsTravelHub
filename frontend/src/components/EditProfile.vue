@@ -95,6 +95,7 @@
           </form>
         </div>
       </div>
+    <FooterComponent />
     </div>
   </template>
   
@@ -103,11 +104,13 @@
   import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
   import { doc, getDoc, updateDoc } from 'firebase/firestore';
   import HeaderComponent from './Header.vue';
+  import FooterComponent from './Footer.vue';
   
   export default {
     name: 'UserProfile',
     components: {
-      HeaderComponent
+      HeaderComponent,
+      FooterComponent,
     },
     data() {
       return {
@@ -316,7 +319,7 @@
   input[type="email"],
   input[type="tel"],
   textarea {
-    width: 100%;
+    width: 80%;
     padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;

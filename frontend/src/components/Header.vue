@@ -8,16 +8,37 @@
       <nav>
         <ul>
           <li><router-link to="/home">Home</router-link></li>
-          <li><router-link to="/aboutus">About Us</router-link></li>
-          <li><router-link to="/packages">Packages</router-link></li>
-          <li><router-link to="/feedback">Feedback</router-link></li>
+
+          <!-- About Us Dropdown -->
+          <li class="dropdown-container" @mouseenter="openDropdown('aboutus')" @mouseleave="closeDropdown">
+            <router-link to="/aboutus">About Us</router-link>
+            <ul v-if="dropdownOpen === 'aboutus'" class="dropdown-menu">
+              <li><router-link to="/tour-guide">Tour Guide</router-link></li>
+              <li><router-link to="/feedback">Feedback</router-link></li>
+            </ul>
+          </li>
+          
+          <!-- Services Dropdown -->
+          <li class="dropdown-container" @mouseenter="openDropdown('services')" @mouseleave="closeDropdown">
+            <a href="#" @click.prevent>Services</a>
+            <ul v-if="dropdownOpen === 'services'" class="dropdown-menu">
+              <li><router-link to="/packages">Packages</router-link></li>
+              <li><router-link to="/hotel">Hotel</router-link></li>
+              <li><router-link to="/activities">Activities</router-link></li>
+            </ul>
+          </li>
+          
+
+          
           <li><router-link to="/booking">Book Now</router-link></li>
           <li><router-link to="/contactus">Contact Us</router-link></li>
+          
+          <!-- Profile Dropdown -->
           <li class="profile">
-            <a href="#" @click="toggleDropdown">
+            <a href="#" @click="toggleProfileDropdown">
               <span class="material-icons profile-icon">person</span>
-            </a>           
-            <ul v-if="isDropdownOpen" class="dropdown">
+            </a>
+            <ul v-if="isProfileDropdownOpen" class="dropdown">
               <li><router-link to="/edit-profile">Profile</router-link></li>
               <li><a href="#" @click.prevent="logout">Logout</a></li>
             </ul>
@@ -29,159 +50,189 @@
 </template>
 
 <script>
-  import { auth } from '../firebaseConfig';
-  
-  export default {
-    data() {
-      return {
-        isDropdownOpen: false,
-        profileImage: '/path/to/default-profile.png', // Placeholder for profile image
-      };
+import { auth } from '../firebaseConfig';
+
+export default {
+  data() {
+    return {
+      dropdownOpen: null,
+      isProfileDropdownOpen: false,
+      profileImage: '/path/to/default-profile.png', // Placeholder for profile image
+    };
+  },
+  methods: {
+    openDropdown(menu) {
+      this.dropdownOpen = menu;
     },
-    methods: {
-      toggleDropdown() {
-        this.isDropdownOpen = !this.isDropdownOpen;
-      },
-      async logout() {
-        await auth.signOut();
-        this.$router.push('/login');
-      }
+    closeDropdown() {
+      this.dropdownOpen = null;
     },
-    created() {
-      const user = auth.currentUser;
-      if (user) {
-        this.profileImage = user.photoURL || '/path/to/default-profile.png';
-      }
+    toggleProfileDropdown() {
+      this.isProfileDropdownOpen = !this.isProfileDropdownOpen;
+    },
+    async logout() {
+      await auth.signOut();
+      this.$router.push('/login');
     }
-  };
+  },
+  created() {
+    const user = auth.currentUser;
+    if (user) {
+      this.profileImage = user.photoURL || '/path/to/default-profile.png';
+    }
+  }
+};
 </script>
 
 <style scoped>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
-    @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
-    .home-page {
-        font-family: 'Poppins', sans-serif;
-        color: #333;
-    }
+.home-page {
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+}
 
-    header {
-        font-family: 'Poppins', sans-serif;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px 15px;
-        background-color: white; 
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1000; 
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
-    }
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 15px;
+  background-color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-    .logo {
-        display: flex;
-        align-items: center; 
-    }
+.logo {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+}
 
-    .logo-image {
-        margin-right: 8px;
-        max-height: 35px; /* Reduced height for a smaller logo */
-    }
+.logo-image {
+  margin-right: 8px;
+  max-height: 40px;
+}
 
-    .logo-text {
-        font-size: 16px; /* Slightly smaller font */
-        font-weight: 600;
-        color: #333; 
-    }
+.logo-text {
+  font-size: 25px;
+  font-weight: 600;
+  color: black;
+}
 
-    nav {
-        display: flex;
-        align-items: center;
-    }
+nav ul {
+  display: flex;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  gap: 12px;
+}
 
-    nav ul {
-        display: flex;
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-        gap: 12px;
-    }
+nav ul li {
+  position: relative;
+  margin: 0 12px;
+  cursor: pointer;
+  font-size: 16px;
+  color: black;
+  transition: color 0.3s ease;
+}
 
-    nav ul li {
-        font-family: 'Poppins', sans-serif;
-        position: relative;
-        margin: 0 12px; 
-        cursor: pointer;
-        font-size: 15px; 
-        color: #155861;
-        transition: color 0.3s ease;
-    }
+nav ul li a {
+  color: black;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
 
-    nav ul li a {
-        color: #155861;
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
+nav ul li:hover a {
+  color: gray;
+}
 
-    nav ul li:hover a {
-        color: #E4E0E1;
-    }
+nav ul li::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: gray;
+  transition: width 0.3s ease;
+}
 
-    nav ul li::after {
-        content: '';
-        position: absolute;
-        bottom: -5px;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background-color: #155861;
-        transition: width 0.3s ease;
-    }
+nav ul li:hover::after {
+  width: 100%;
+}
 
-    nav ul li:hover::after {
-        width: 100%; 
-    }
+/* Dropdown styling */
+.dropdown-container {
+  position: relative;
+}
 
-    .profile .dropdown {
-        display: block;
-        position: absolute;
-        top: 150%; 
-        right: 0;
-        background-color: white;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-        width: 150px; /* Adjusted width for a more compact dropdown */
-        padding: 5px 0;
-    }
+.dropdown-menu {
+  display: block;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  width: 150px;
+  padding: 5px 0;
+}
 
-    .profile .dropdown li {
-        list-style: none;
-        padding: 8px 16px;
-        text-align: left;
-        display: block;
-    }
+.dropdown-menu li {
+  list-style: none;
+  padding: 8px 16px;
+  text-align: left;
+}
 
-    .profile .dropdown li a {
-        display: block;
-        color: #3498db;
-        text-decoration: none;
-        padding: 5px 0;
-        text-transform: uppercase;
-        text-align: left;
-    }
+.dropdown-menu li a {
+  display: block;
+  color: #3498db;
+  text-decoration: none;
+  padding: 5px 0;
+}
 
-    .profile {
-        margin-right: 12px; /* Reduced margin for a more compact header */
-    }
+/* Profile dropdown */
+.profile {
+  margin-right: 12px;
+}
 
-    .material-icons.profile-icon {
-        font-size: 24px; /* Smaller icon size */
-        color: #155861;
-        vertical-align: middle;
-        cursor: pointer;
-    }
+.profile .dropdown {
+  display: block;
+  position: absolute;
+  top: 150%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  width: 150px;
+  padding: 10px 0;
+}
+
+.profile .dropdown li {
+  list-style: none;
+  padding: 8px 16px;
+  text-align: left;
+}
+
+.profile .dropdown li a {
+  display: block;
+  color: black;
+  text-decoration: none;
+}
+
+.material-icons.profile-icon {
+  font-size: 24px;
+  color: black;
+  vertical-align: middle;
+  cursor: pointer;
+}
 </style>

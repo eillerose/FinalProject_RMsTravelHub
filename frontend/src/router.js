@@ -1,27 +1,37 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Landing from './components/Landing.vue';
-import Login from './components/Login.vue';
-import Signup from './components/Signup.vue';
-import Homepage from './components/Homepage.vue';
 import AboutUs from './components/AboutUs.vue';
-import EditProfile from './components/EditProfile.vue';
-import Feedback from './components/Feedback.vue';
+import Activities from './components/Activities.vue';
 import Booking from './components/Booking.vue';
 import ContactUs from './components/ContactUs.vue';
+import EditProfile from './components/EditProfile.vue';
 import EmailVerification from './components/EmailVerification.vue';
+import Feedback from './components/Feedback.vue';
+import Homepage from './components/Homepage.vue';
+import Hotel from './components/Hotel.vue';
+import Landing from './components/Landing.vue';
+import Login from './components/Login.vue';
+import Packages from './components/Packages.vue';
+import Signup from './components/Signup.vue';
+import TourGuide from './components/TourGuide.vue';
+import adminRoutes from './router/adminRoutes';
 import { getAuth } from 'firebase/auth';
 
 const routes = [
   { path: '/', component: Landing },
-  { path: '/login', component: Login },
-  { path: '/signup', component: Signup },
   { path: '/aboutus', component: AboutUs },
-  { path: '/feedback', component: Feedback },
+  { path: '/activities', component: Activities },
   { path: '/booking', component: Booking },
   { path: '/contactus', component: ContactUs },
-  { path: '/email-verification', component: EmailVerification },
-  { path: '/home', component: Homepage, meta: { requiresAuth: true, requiresVerification: true } },
   { path: '/edit-profile', component: EditProfile, meta: { requiresAuth: true } },
+  { path: '/email-verification', component: EmailVerification },
+  { path: '/feedback', component: Feedback },
+  { path: '/home', component: Homepage, meta: { requiresAuth: true, requiresVerification: true } },
+  { path: '/hotel', component: Hotel },
+  { path: '/login', component: Login },
+  { path: '/packages', component: Packages },
+  { path: '/signup', component: Signup },
+  { path: '/tour-guide', component: TourGuide },
+  ...adminRoutes,
 ];
 
 const router = createRouter({
