@@ -148,7 +148,7 @@ export default {
     margin-top: 4rem;
     margin-bottom: 1rem;
     font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Added text shadow for readability */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .banner p {

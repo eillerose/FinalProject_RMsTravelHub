@@ -1,190 +1,298 @@
 <template>
-    <div class="about-us">
-      <HeaderComponent />
-      <main>
-        <section class="hero">
-          <h1>ABOUT US</h1>
-          <p>Your Gateway to Unforgettable Adventures in Puerto Galera</p>
-        </section>
-  
-        <section class="logo-mission-vision">
-          <div class="logo">
-            <img src="/src/img/logoforRMs.png?height=200&width=200" alt="RM's Travel and Tours Logo">
+  <div class="about-us">
+    <HeaderComponent />
+    <main>
+      <div class="banner">
+            <h1>About Us</h1>
+            <p>Your Gateway to Unforgettable Adventures in Puerto Galera</p>
+        </div>
+
+      <div class="about-section">
+        
+        <div class="cards-container">
+          <div class="card vision-card">
+            <h2>Our Vision</h2>
+            <p>To be the leading innovators in Puerto Galera's tourism, offering unparalleled beach experiences that create lasting memories.</p>
           </div>
-          <div class="mission-vision">
-            <div class="mission">
-              <h2>Our Mission</h2>
-              <p>To provide exceptional travel experiences that showcase the beauty of Puerto Galera while promoting sustainable tourism and supporting local communities.</p>
-            </div>
-            <div class="vision">
-              <h2>Our Vision</h2>
-              <p>To be the leading travel agency in Puerto Galera, known for our commitment to customer satisfaction, environmental stewardship, and innovative tour packages.</p>
-            </div>
+
+          <div class="card mission-card">
+            <h2>Our Mission</h2>
+            <p>To deliver exceptional, personalized beach adventures that showcase Puerto Galera's natural beauty while promoting sustainable tourism.</p>
           </div>
-        </section>
-  
-        <section class="why-choose-us">
-          <h2>Why Plan Your Travel With Us?</h2>
-          <div class="reasons">
-            <div class="reason">
-              <h3>Local Expertise</h3>
-              <p>Our team of local experts knows Puerto Galera inside out, ensuring you get the most authentic experience.</p>
-            </div>
-            <div class="reason">
-              <h3>Customized Packages</h3>
-              <p>We tailor our tours to meet your specific needs and preferences, creating unforgettable memories.</p>
-            </div>
-            <div class="reason">
-              <h3>Sustainable Tourism</h3>
-              <p>We're committed to preserving Puerto Galera's natural beauty through responsible tourism practices.</p>
-            </div>
-            <div class="reason">
-              <h3>24/7 Support</h3>
-              <p>Our dedicated team is always available to assist you throughout your journey.</p>
-            </div>
+
+          <div class="card description-card">
+            <p>At RM's Travel and Tours, we're passionate about sharing the wonders of Puerto Galera's pristine beaches and vibrant marine life. Our team of local experts is dedicated to crafting unforgettable experiences that connect you with the heart of our tropical paradise.</p>
           </div>
-        </section>
-      </main>
-    </div>
-  </template>
-  
-  <script>
-  import HeaderComponent from './Header.vue';
-  
-  export default {
-    components: {
-      HeaderComponent,
-    },
-  };
-  </script>
-  
-  <style scoped>
-  .about-us {
-    font-family: 'Poppins', sans-serif;
-    color: #333;
-    line-height: 1.6;
+        </div>
+      </div>
+
+      <section class="why-choose-us">
+        <h2>Why Plan Your Travel With Us?</h2>
+        <div class="reasons">
+          <div class="reason" v-for="(reason, index) in reasons" :key="index">
+            <span class="material-symbols-outlined icon">{{ reason.icon }}</span>
+            <h3>{{ reason.title }}</h3>
+            <p>{{ reason.description }}</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import HeaderComponent from './Header.vue';
+
+const reasons = ref([
+  {
+    icon: 'pin_drop',
+    title: 'Local Expertise',
+    description: 'Our team of local experts knows Puerto Galera inside out, ensuring you get the most authentic experience.'
+  },
+  {
+    icon: 'package',
+    title: 'Customized Packages',
+    description: 'We tailor our tours to meet your specific needs and preferences, creating unforgettable memories.'
+  },
+  {
+    icon: 'eco',
+    title: 'Sustainable Tourism',
+    description: 'We\'re committed to preserving Puerto Galera\'s natural beauty through responsible tourism practices.'
+  },
+  {
+    icon: 'support_agent',
+    title: '24/7 Support',
+    description: 'Our dedicated team is always available to assist you throughout your journey.'
   }
-  
-  main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  .hero {
-    background-image: url('/src/img/hero-bg.jpg'); /* Replace with the path to your background image */
+]);
+</script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0');
+
+.about-us {
+  font-family: 'Poppins', sans-serif;
+  background-color: #e6f7ff;
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+.banner {
+    width: 98%;
+    background-image: url('/src/img/heroBg.jpg');
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
     text-align: center;
-    padding: 60px 20px;
-    margin-bottom: 40px;
-    color: white; 
-    position: relative;
-    margin-left: -10rem;
-    margin-right: -10rem;
-  }
-  
-  
-  .hero::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); 
-    z-index: 1;
-  }
-  
-  .hero h1,
-  .hero p {
-    position: relative;
-    z-index: 2; 
-  }
-  
-  .hero h1 {
-    font-size: 2.5em;
-    margin-bottom: 10px;
-  }
-  
-  .hero p {
-    font-size: 1.2em;
-  }
-  
-  .logo-mission-vision {
+    color: #fff;
+    padding: 0 20px;
+    height: 25vh;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 40px;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.banner h1 {
+    font-size: 4rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.banner p {
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.about-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  position: relative;
+}
+
+.logo-container {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 3rem;
+  background: white;
+  border-radius: 50%;
+  padding: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  z-index: 2;
+}
+
+.logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.vision-card, .mission-card {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.description-card {
+  grid-column: 1 / -1;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card h2 {
+  color: #00A3C4;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.card p {
+  color: #4A5568;
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .cards-container {
+    grid-template-columns: 1fr;
   }
-  
-  .logo {
-    flex: 1;
-    text-align: center;
+  .logo-container {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 2rem;
   }
-  
-  .logo img {
-    max-width: 100%;
-    height: auto;
+}
+
+.why-choose-us {
+  background-color: #caf0f8;
+  padding: 60px;
+  border-radius: 8px;
+  text-align: center;
+  margin: 4rem 5%;
+}
+
+.why-choose-us h2 {
+  text-align: center;
+  margin-bottom: 5rem;
+  font-size: 3rem;
+  font-weight: bold;
+  color: black;
+}
+
+.reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+  margin-bottom: 4rem;
+}
+
+.reason {
+  position: relative;
+  background-color: #f8f9fa;
+  padding: 40px 20px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  max-width: 300px;
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.reason:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  outline: 2px solid #219ebc;
+  outline-offset: -4px;
+}
+
+.reason .icon {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 40px;
+  color: #219ebc;
+  background-color: #fff;
+  border-radius: 50%;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.reason h3 {
+  color: black;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 25px;
+}
+
+.reason p {
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 768px) {
+  .about-section {
+    padding: 2rem 1rem;
   }
-  
-  .mission-vision {
-    flex: 2;
-    padding-left: 40px;
+
+  .decorative-circle {
+    width: 60px;
+    height: 60px;
+    top: 1rem;
+    right: 1rem;
   }
-  
-  .mission,
-  .vision {
-    margin-bottom: 20px;
+
+  .card {
+    padding: 1.5rem;
   }
-  
-  h2 {
-    color: #2c3e50;
-    margin-bottom: 10px;
+
+  .card h2 {
+    font-size: 1.5rem;
   }
-  
+
+  .card p {
+    font-size: 1rem;
+  }
+
   .why-choose-us {
-    background-color: #f8f9fa;
-    padding: 40px;
-    border-radius: 8px;
+    padding: 40px 20px;
   }
-  
+
   .why-choose-us h2 {
-    text-align: center;
-    margin-bottom: 30px;
+    font-size: 2rem;
+    margin-bottom: 3rem;
   }
-  
+
   .reasons {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+    gap: 40px;
   }
-  
+
   .reason {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: none;
   }
-  
-  .reason h3 {
-    color: #3498db;
-    margin-bottom: 10px;
-  }
-  
-  @media (max-width: 768px) {
-    .logo-mission-vision {
-      flex-direction: column;
-    }
-  
-    .mission-vision {
-      padding-left: 0;
-      margin-top: 20px;
-    }
-  
-    .reasons {
-      grid-template-columns: 1fr;
-    }
-  }
-  </style>
+}
+</style>

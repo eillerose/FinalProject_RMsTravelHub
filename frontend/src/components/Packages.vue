@@ -352,7 +352,7 @@ h1 {
 }
 
 .package-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-5px); 
 }
 
 .package-image {
@@ -472,8 +472,8 @@ p {
 }
 
 .large-modal {
-    max-width: 1000px; 
-    height: 66vh; 
+    max-width: 1200px; 
+    height: 63vh; 
 }
 
 .large-modal h2 {
