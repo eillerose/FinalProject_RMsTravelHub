@@ -119,6 +119,7 @@ export default {
       skipHotelOption: false,
       steps: ['Date & Time', 'Hotel', 'Room', 'Guest Info', 'Confirm'],
       booking: {
+        package: null,
         checkInDate: null,
         checkInTime: '',
         hotel: null,
@@ -225,7 +226,7 @@ export default {
         guestName: '',
         email: '',
         phone: '',
-        guests: 1
+        guests: 0
       };
     },
     formatDateTime(date, time) {

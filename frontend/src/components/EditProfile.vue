@@ -123,9 +123,6 @@
       <table class="booking-table">
         <thead>
           <tr>
-            <!-- <th>Booking ID</th> -->
-            <!-- <th>Hotel</th>
-            <th>Room</th> -->
             <th>Name</th>
             <th>Email</th>
             <th>Status</th>
