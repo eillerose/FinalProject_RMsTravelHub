@@ -293,10 +293,6 @@ export default {
 };
 </script>
 
-
-
-
-  
   <script setup>
     import { useRouter } from 'vue-router'; // Ensure it's imported
 
@@ -505,7 +501,7 @@ nav ul li:hover a {
 .search-bar button {
   padding: 10px 15px;
   font-size: 16px;
-  background-color: #64b8b1;
+  background-color: #91c7df;
   color: white;
   border: none;
   border-radius: 0 4px 4px 0;
@@ -576,10 +572,6 @@ nav ul li:hover a {
   color: #000;
   border-bottom: 2px solid #000;
 }
-
-/* Gallery Styling */
-
-/* Center the title inside content-gallery */
 
 
 

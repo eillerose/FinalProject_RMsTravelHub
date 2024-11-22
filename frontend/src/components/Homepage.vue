@@ -49,67 +49,34 @@
               </div>
             </div>
           </div>
-
           <button class="nav-btn next" @click="nextSlide">
             <span class="material-symbols-outlined">arrow_forward_ios</span>
           </button>
         </div>
       </section>
 
-
-      
       <section id="about-us" class="about-us">
-    <div class="container">
-      <h2 class="section-title">Little words about us</h2>
-      <div class="content">
-        <p>
-          At RM's Travel and Tours, we grant each and every adventurer a personalized experience like no other.
-          We are aficionados coming from every part of Puerto Galera, passionate about guiding you through this
-          pocket of paradise we call home.
-        </p>
-        <p>
-          We hold strong the value of being factual. Our tour operators are with you every step through your
-          booking process, we are there to scratch every inch of curiosity and enquiry that you may have.
-          We simply want to get you going on a trip of a lifetime.
-        </p>
-      </div>
-      <div class="features">
-        <div class="feature">
-          <div class="icon-wrapper blue">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <div class="container">
+          <h2 class="section-title">Little words about us</h2>
+          <div class="content">
+            <p>
+              At RM's Travel and Tours, we grant each and every adventurer a personalized experience like no other.
+              We are aficionados coming from every part of Puerto Galera, passionate about guiding you through this
+              pocket of paradise we call home.
+            </p>
+            <p>
+              We hold strong the value of being factual. Our tour operators are with you every step through your
+              booking process, we are there to scratch every inch of curiosity and enquiry that you may have.
+              We simply want to get you going on a trip of a lifetime!
+            </p>
           </div>
-          <h3>Personalized</h3>
-          <p>Tailored experiences for every traveler</p>
         </div>
-        <div class="feature">
-          <div class="icon-wrapper green">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-            </svg>
-          </div>
-          <h3>Local Expertise</h3>
-          <p>Guides with deep local knowledge</p>
-        </div>
-        <div class="feature">
-          <div class="icon-wrapper yellow">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-            </svg>
-          </div>
-          <h3>Unforgettable</h3>
-          <p>Creating memories that last a lifetime</p>
-        </div>
-      </div>
-    </div>
-  </section>
+      </section>
 
     </main>
     <FooterComponent />
   </div>
 </template>
-
 
 <script>
 import { ref, computed } from 'vue';
@@ -234,16 +201,20 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Ephesis&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0');
 
-/* Existing styles */
 .hero {
   position: relative;
-  height: 98vh;
+  height: 88vh;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
   color: white;
   overflow: hidden;
+  margin-left:1rem;
+  margin-right:1.5rem;
+  margin-top: 4.4rem;
+  margin-bottom: 2rem;
+  border-radius: 20px;
 }
 
 .hero-video {
@@ -295,10 +266,9 @@ export default {
   transition: background-color 0.3s ease;
 }
 
-/* Best Deals Section Styles */
 .best-deals {
   padding: 4rem 2rem;
-  background-color: #f5f5f5;
+  background-color: #ffffff;
   text-align: center;
   min-height: 70vh;
   display: flex;
@@ -310,13 +280,13 @@ export default {
   font-family: 'Poppins', sans-serif;
   font-size: 3rem;
   color: #333;
-  margin-top: -1rem;
+  margin-top: -10rem;
   margin-bottom: 0.5rem;
 }
 
 .deals-subtitle {
   font-family: 'Poppins', sans-serif;
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #666;
   margin-top: -0.5rem;
   margin-bottom: 2rem;
@@ -325,16 +295,16 @@ export default {
 .category-buttons {
   display: flex;
   justify-content: center;
-  gap: 6rem;
+  gap: 4rem;
   margin-bottom: 2rem;
 }
 
 .category-btn {
   font-family: 'Poppins', sans-serif;
-  font-size: 20px;
-  padding: 0.6rem 1.5rem;
+  font-size: 18px;
+  padding: 0.4rem 1.5rem;
   border: none;
-  border-radius: 5px;
+  border-radius: 7px;
   background: transparent;
   color: #666;
   cursor: pointer;
@@ -342,7 +312,7 @@ export default {
 }
 
 .category-btn.active {
-  background-color: #2ec4b6;
+  background-color: #048dad;
   color: white;
 }
 
@@ -429,103 +399,34 @@ export default {
 }
 
 .about-us {
-  background-color: #ffffff;
-  padding: 4rem 1rem;
-  font-family: 'Poppins', sans-serif;
+  padding: 4rem 2rem;
+  background-color: #f8f9fa;
+  text-align: center;
 }
 
-.container {
-  max-width: 64rem;
+.about-us .container {
+  max-width: 800px;
   margin: 0 auto;
 }
 
-.section-title {
-  font-size: 3rem;
-  font-weight: bold;
-  color: #1f2937;
+.about-us .section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.5rem;
+  color: #333;
   margin-bottom: 2rem;
-  text-align: center;
 }
 
-.content {
-  margin-bottom: 3rem;
-  max-width: 48rem;
-  margin-left: auto;
-  margin-right: auto;
+.about-us .content {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.6;
 }
 
-.content p {
-  font-size: 1.125rem;
-  color: #4b5563;
-  line-height: 1.75;
-  margin-bottom: 1.5rem;
+.about-us .content p {
+  margin-bottom: 1rem;
 }
 
-.features {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2rem;
-}
-
-.feature {
-  text-align: center;
-  flex: 1;
-  min-width: 200px;
-  max-width: 300px;
-}
-
-.icon-wrapper {
-  width: 4rem;
-  height: 4rem;
-  margin: 0 auto 1rem;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon {
-  width: 2rem;
-  height: 2rem;
-}
-
-.blue {
-  background-color: #dbeafe;
-}
-
-.blue .icon {
-  color: #3b82f6;
-}
-
-.green {
-  background-color: #d1fae5;
-}
-
-.green .icon {
-  color: #10b981;
-}
-
-.yellow {
-  background-color: #fef3c7;
-}
-
-.yellow .icon {
-  color: #f59e0b;
-}
-
-.feature h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
-}
-
-.feature p {
-  color: #4b5563;
-}
-
-/* Media Queries */
 @media (max-width: 768px) {
   header {
     flex-direction: column;
@@ -557,18 +458,10 @@ export default {
   .nav-btn {
     display: none;
   }
-
-  .features {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .feature {
-    max-width: 100%;
-  }
 }
 
 html {
   scroll-behavior: smooth;
 }
 </style>
+

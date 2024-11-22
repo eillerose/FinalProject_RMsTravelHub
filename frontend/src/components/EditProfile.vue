@@ -342,20 +342,23 @@ export default {
 <style scoped>
 .user-profile {
   font-family: 'Poppins', sans-serif;
-  max-width: 1200px;
+  max-width: 2000px;
   margin: 0 auto;
-  padding: 7rem;
 }
 
 .page-title {
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: bold;
+  margin-top: 5rem;
   margin-bottom: 1rem;
+  margin-left: 4rem;
 }
 
 .nav-tabs {
   border-bottom: 1px solid #ddd;
   margin-bottom: 5rem;
+  margin-left: 4rem;
+  margin-right: 4rem;
 }
 
 .tab {
@@ -377,9 +380,10 @@ export default {
 }
 
 .profile-container {
+
   display: flex;
-  gap: 4rem;
   align-items: flex-start;
+  min-height: 70vh;
 }
 
 .profile-left {
@@ -387,6 +391,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-left: 10rem;
 }
 
 .profile-image {
@@ -425,6 +430,9 @@ export default {
 
 .profile-right {
   flex: 2;
+  max-width: 90vh;
+  margin-right: 10rem;
+  margin-left: -4rem;
 }
 
 .form-container {
@@ -502,6 +510,7 @@ export default {
 .profile-right input[type="text"],
 .profile-right input[type="email"],
 .profile-right input[type="tel"] {
+  font-family: 'Poppins', sans-serif;
   width: 95%;
   padding: 0.75rem 1rem;
   font-size: 1rem;
@@ -514,6 +523,7 @@ export default {
 .profile-right input[type="text"]:focus,
 .profile-right input[type="email"]:focus,
 .profile-right input[type="tel"]:focus {
+  font-family: 'Poppins', sans-serif;
   border-color: #80bdff;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
@@ -600,7 +610,7 @@ export default {
 .profile-image-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-top: -2rem;
 }
 
 .profile-image-wrapper {
@@ -612,7 +622,7 @@ export default {
 .camera-icon {
   position: absolute;
   right: 5px;
-  bottom: -8px;
+  bottom: 10px;
   width: 40px;
   height: 40px;
   background-color: #ddd;
@@ -654,15 +664,15 @@ export default {
 
 label {
   display: block;
-  margin-bottom: 0.5rem;
   color: #666;
-  font-size: 0.9rem;
+  font-size: .85rem;
 }
 
 input[type="text"],
 input[type="email"],
 input[type="tel"],
 textarea {
+  font-family: 'Poppins', sans-serif;
   width: 97%;
   padding: 0.75rem;
   border: 1px solid #ddd;
@@ -678,6 +688,7 @@ textarea {
 }
 
 .save-button {
+  font-family: 'Poppins', sans-serif;
   background-color: #4CAF50;
   color: white;
   border: none;
@@ -687,6 +698,8 @@ textarea {
   cursor: pointer;
   width: 100%;
   transition: background-color 0.2s;
+  margin-top: -3rem;
+
 }
 
 .save-button:hover {

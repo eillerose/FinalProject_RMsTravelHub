@@ -134,7 +134,7 @@ export default {
 .banner {
     font-family: 'Poppins', sans-serif;
     width: 100%;
-    background-image: url('/src/img/heroBg.jpg');
+    background-color: #013240;
     background-size: cover;
     background-position: center;
     text-align: center;
@@ -144,6 +144,7 @@ export default {
 }
 
 .banner h1 {
+    color: #ffffff;
     font-size: 4rem;
     margin-top: 4rem;
     margin-bottom: 1rem;
@@ -153,7 +154,7 @@ export default {
 
 .banner p {
     font-size: 18px;
-    margin-top: 0;
+    margin-top: -2rem;
     margin-bottom: 0;
 }
 
@@ -204,7 +205,7 @@ export default {
 .info-item .material-symbols-outlined {
     margin-right: 15px;
     font-size: 35px; /* Larger icon size */
-    color: #003a79;
+    color: #048dad;
 }
 
 .info-item div {
@@ -269,7 +270,7 @@ textarea {
 
 button {
     font-family: 'Poppins', sans-serif;
-    background-color: #fdb812;
+    background-color: #048dad;
     color: #fff;
     padding: 10px 15px;
     margin-top: 2rem;
@@ -281,9 +282,6 @@ button {
     transition: background-color 0.3s; /* Smooth hover transition */
 }
 
-button:hover {
-    background-color: #F3C623;
-}
 
 .map-container {
     margin-top: 20px; /* Space between the form and the map */
