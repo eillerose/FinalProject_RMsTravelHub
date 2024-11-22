@@ -15,12 +15,11 @@ import Signup from './components/Signup.vue';
 import TourGuide from './components/TourGuide.vue';
 import { getAuth } from 'firebase/auth';
 
-// Remove duplicate route for '/booking' and adjust import path
 const routes = [
   { path: '/', component: Landing },
   { path: '/aboutus', component: AboutUs },
   { path: '/activities', component: Activities },
-  { path: '/booking', name: 'booking', component: () => import('./components/Booking.vue'), meta: { requiresAuth: true, requiresButtonClick: true } },
+  { path: '/booking', component: Booking },
   { path: '/contactus', component: ContactUs },
   { path: '/edit-profile', component: EditProfile, meta: { requiresAuth: true } },
   { path: '/email-verification', component: EmailVerification },
@@ -31,16 +30,7 @@ const routes = [
   { path: '/packages', component: Packages },
   { path: '/signup', component: Signup },
   { path: '/tour-guide', component: TourGuide },
-
-  // Hidden route for "Book Now" page
-{
-  path: '/booking',
-  name: 'booking',
-  component: () => import('./components/Booking.vue'), // Add a comma here
-  // meta: { requiresButtonClick: true }
-}
 ];
-
 
 const router = createRouter({
   history: createWebHistory(),
@@ -60,9 +50,6 @@ router.beforeEach((to, from, next) => {
     } else {
       next(); // Proceed to the route if authenticated and verified
     }
-  } else if (to.meta.requiresButtonClick && from.name !== 'Packages') {
-    // Prevent direct access to "Book Now" unless coming from "Packages"
-    next('/packages');
   } else {
     next(); // Proceed if no authentication or verification is required
   }

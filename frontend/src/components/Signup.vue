@@ -28,7 +28,8 @@
             </div>
             <div class="form-group">
               <label for="username">Username</label>
-              <input v-model="username" type="text" placeholder="Enter your username" id="username" required />            </div>
+              <input v-model="username" type="text" placeholder="Enter your username" id="username" required />
+            </div>
           </div>
           <div class="form-group">
             <label for="email">Email</label>
@@ -37,7 +38,8 @@
           <div class="form-group">
             <label for="password">Password</label>
             <div class="password-field">
-              <input v-model="password" :type="showPassword ? 'text' : 'password'" placeholder="Enter your password" id="password" required />              <span class="material-icons view-icon" @click="togglePasswordVisibility">
+              <input v-model="password" :type="showPassword ? 'text' : 'password'" placeholder="Enter your password" id="password" required />
+              <span class="material-icons view-icon" @click="togglePasswordVisibility">
                 {{ showPassword ? 'visibility_off' : 'visibility' }}
               </span>
             </div>
@@ -107,6 +109,7 @@ const handleSignUp = async () => {
       email: email.value,
       phoneNumber: phoneNumber.value,
       verified: false,
+      role: 'user',
     });
 
     // Send verification email

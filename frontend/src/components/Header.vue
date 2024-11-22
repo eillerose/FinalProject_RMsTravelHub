@@ -8,7 +8,6 @@
       <nav>
         <ul>
           <li><router-link to="/home">Home</router-link></li>
-          <li><router-link to="/packages">Packages</router-link></li>
 
           <!-- About Us Dropdown -->
           <li
@@ -36,11 +35,22 @@
             </ul>
           </li>
 
-          <!-- Conditionally Render Book Now Link -->
-          <li v-if="canAccessBooking"><router-link to="/booking">Book Now</router-link></li>
+          <!-- Packages Dropdown -->
+          <li
+            class="dropdown-container"
+            @mouseenter="openDropdown('packages')"
+            @mouseleave="closeDropdown('packages')"
+          >
+            <router-link to="/packages">Packages</router-link>
+            <ul v-if="dropdownOpen === 'packages'" class="dropdown-menu">
+              <li><router-link to="/booking">Book Now</router-link></li>
+            </ul>
+          </li>
+
+            <!-- Contact Us Page -->
           <li><router-link to="/contactus">Contact Us</router-link></li>
 
-          <!-- Profile Dropdown (Click to Open/Close) -->
+          <!-- Profile Dropdown -->
           <li class="profile">
             <a href="#" @click="toggleProfileDropdown">
               <span class="material-icons profile-icon">person</span>
@@ -61,7 +71,7 @@ import { ref, onMounted } from 'vue';
 
 const dropdownOpen = ref(null);
 const isProfileDropdownOpen = ref(false);
-// const canAccessBooking = ref(true); // or set based on your logic
+const canAccessBooking = ref(true); // Replace with actual logic
 
 // Open dropdown based on identifier
 const openDropdown = (menu) => {
@@ -92,7 +102,6 @@ const handleClickOutside = (event) => {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
 });
-
 </script>
 
 
@@ -246,5 +255,19 @@ nav ul li:hover::after {
   color: black;
   vertical-align: middle;
   cursor: pointer;
+}
+
+.book-now-button {
+  background-color: #ff5733;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.book-now-button:hover {
+  background-color: #e04d28;
 }
 </style>

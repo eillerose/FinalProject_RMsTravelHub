@@ -52,8 +52,9 @@
 
 <script>
 import { ref } from 'vue';
-import { auth } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig';
 import { signInWithEmailAndPassword, sendPasswordResetEmail, reload } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'vue-router';
 
 export default {
@@ -71,8 +72,26 @@ export default {
         await reload(user);
 
         if (user.emailVerified) {
-          console.log('User logged in:', user);
-          router.push('/home');
+          // Fetch user role from Firestore
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const userRole = userData.role;
+
+            console.log('User logged in:', user);
+            
+            // Redirect based on user role
+            if (userRole === 'admin') {
+              router.push('/admin');
+            } else {
+              router.push('/home');
+            }
+          } else {
+            console.error('User document not found');
+            alert('User data not found. Please contact support.');
+            await auth.signOut();
+          }
         } else {
           alert('Please verify your email before logging in.');
           await auth.signOut();

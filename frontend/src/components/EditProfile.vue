@@ -11,7 +11,7 @@
 
   <!-- User Profile Section -->
   <div v-if="activeTab === 'profile'">
-    <h2 class="section-title">User Profile</h2>
+    <!-- <h2 class="section-title">User Profile</h2> -->
     <div class="profile-container">
       <div class="profile-left">
         <div class="profile-image">
@@ -29,31 +29,35 @@
       
       <div class="profile-right">
         <div class="form-container">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="first-name">First Name</label>
-              <input v-model="firstName" type="text" id="first-name" placeholder="Add the first name here" readonly>
+          <div class="user-info">
+            <div class="name-row">
+              <div class="form-group">
+                <label for="first-name">First Name</label>
+                <input v-model="firstName" type="text" id="first-name" placeholder="Add the first name here" readonly class="first-name-input">
+              </div>
+              <div class="form-group">
+                <label for="last-name">Last Name</label>
+                <input v-model="lastName" type="text" id="last-name" placeholder="Add the last name here" readonly class="last-name-input">
+              </div>
             </div>
             <div class="form-group">
-              <label for="last-name">Last Name</label>
-              <input v-model="lastName" type="text" id="last-name" placeholder="Add the last name here" readonly>
+              <label for="email">Email</label>
+              <input v-model="email" type="email" id="email" placeholder="Add the email here" readonly>
             </div>
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input v-model="email" type="email" id="email" placeholder="Add the email here" readonly>
-          </div>
-          <div class="form-group">
-            <label for="phone-number">Phone Number</label>
-            <input v-model="phoneNumber" type="tel" id="phone-number" placeholder="Add the phone number here" readonly>
-          </div>
-          <div class="form-group">
-            <label for="address">Address</label>
-            <input v-model="address" type="text" id="address" placeholder="Add the phone address here" readonly>
+            <div class="form-group">
+              <label for="address">Address</label>
+              <input v-model="address" type="text" id="address" placeholder="Add the address here" readonly>
+            </div>
+            <div class="form-group">
+              <label for="phone-number">Phone Number</label>
+              <input v-model="phoneNumber" type="tel" id="phone-number" placeholder="Add the phone number here" readonly>
+            </div>
           </div>
           <button @click="openModal" class="edit-profile-btn">Edit Profile</button>
         </div>
       </div>
+    </div>
+
     </div>
   </div>
     <!-- Modal for Editing Profile -->
@@ -61,38 +65,75 @@
       <div class="modal-content">
         <span class="close" @click="closeModal">&times;</span>
         <h2>Edit Profile</h2>
-        <form @submit.prevent="saveProfile">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="edit-first-name">First Name</label>
-              <input v-model="firstName" type="text" id="edit-first-name" required>
+        <form @submit.prevent="saveProfile" class="edit-form">
+          <div class="form-fields">
+            <div class="personal-info">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit-first-name">First Name</label>
+                  <input 
+                    v-model="firstName"
+                    type="text"
+                    id="edit-first-name"
+                    placeholder="Enter first name"
+                    required
+                    class="first-name-input"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="edit-last-name">Last Name</label>
+                  <input 
+                    v-model="lastName"
+                    type="text"
+                    id="edit-last-name"
+                    placeholder="Enter last name"
+                    required
+                    class="last-name-input"
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="edit-email">Email</label>
+                <input 
+                  v-model="email"
+                  type="email"
+                  id="edit-email"
+                  placeholder="Enter email"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="edit-address">Address</label>
+                <input 
+                  v-model="address"
+                  type="text"
+                  id="edit-address"
+                  placeholder="Enter address"
+                />
+              </div>
+              <div class="form-group">
+                <label for="edit-phone-number">Phone Number</label>
+                <input 
+                  v-model="phoneNumber"
+                  type="tel"
+                  id="edit-phone-number"
+                  placeholder="Enter phone number"
+                />
+              </div>
+              <div class="form-group">
+                <label for="edit-bio">Bio</label>
+                <textarea 
+                  v-model="bio"
+                  id="edit-bio"
+                  placeholder="Enter bio"
+                  rows="3"
+                ></textarea>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="edit-last-name">Last Name</label>
-              <input v-model="lastName" type="text" id="edit-last-name" required>
-            </div>
+            <button type="submit" class="save-button">
+              Save Changes
+            </button>
           </div>
-          <div class="form-group">
-            <label for="edit-email">Email</label>
-            <input v-model="email" type="email" id="edit-email" required>
-          </div>
-          <div class="form-group">
-            <label for="edit-phone-number">Phone Number</label>
-            <input v-model="phoneNumber" type="tel" id="edit-phone-number">
-          </div>
-          <div class="form-group">
-            <label for="edit-address">Address</label>
-            <input v-model="address" type="text" id="edit-address">
-          </div>
-          <div class="form-group">
-            <label for="edit-bio">Bio</label>
-            <textarea v-model="bio" id="edit-bio"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="edit-profile-image">Profile Image</label>
-            <input type="file" @change="onFileChange" id="edit-profile-image" accept="image/*">
-          </div>
-          <button type="submit" class="save-button">Save Changes</button>
         </form>
       </div>
     </div>
@@ -239,7 +280,6 @@
   </div>
 
   <FooterComponent />
-  </div>
 </template>
 
 <script>
@@ -426,20 +466,23 @@ export default {
 
 .user-profile {
   font-family: 'Poppins', sans-serif;
-  max-width: 1200px;
+  max-width: 2000px;
   margin: 0 auto;
-  padding: 7rem;
 }
 
 .page-title {
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: bold;
+  margin-top: 5rem;
   margin-bottom: 1rem;
+  margin-left: 4rem;
 }
 
 .nav-tabs {
   border-bottom: 1px solid #ddd;
-  margin-bottom: 2rem;
+  margin-bottom: 5rem;
+  margin-left: 4rem;
+  margin-right: 4rem;
 }
 
 .tab {
@@ -461,9 +504,10 @@ export default {
 }
 
 .profile-container {
+
   display: flex;
-  gap: 4rem;
   align-items: flex-start;
+  min-height: 70vh;
 }
 
 .profile-left {
@@ -471,6 +515,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-left: 10rem;
 }
 
 .profile-image {
@@ -478,11 +523,17 @@ export default {
   height: 200px;
   border-radius: 50%;
   overflow: hidden;
-  margin-bottom: 1.5rem;
   background-color: #f0f0f0;
+  position: relative;
 }
 
-.profile-image img,
+.profile-image img {
+  position: absolute;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+}
+
 .image-placeholder {
   width: 100%;
   height: 100%;
@@ -490,18 +541,22 @@ export default {
 }
 
 .user-name {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
+  font-size: 2rem;
 }
 
 .user-bio {
   text-align: center;
   color: #666;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  margin-top: -1.8rem;
+  font-style: italic;
 }
 
 .profile-right {
   flex: 2;
+  max-width: 90vh;
+  margin-right: 10rem;
+  margin-left: -4rem;
 }
 
 .form-container {
@@ -509,43 +564,31 @@ export default {
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 5rem;
+  margin-top: -2rem;
 }
 
-.form-row {
+.user-info {
+  margin-bottom: 1rem;
+}
+
+.name-row {
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.form-row .form-group {
+.name-row .form-group {
   flex: 1;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
+.info-item {
+  margin-bottom: 1rem;
 }
 
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-textarea {
-  width: 80%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-input[readonly] {
-  background-color: #f9f9f9;
+.info-item strong {
+  font-weight: 600;
+  margin-right: 0.5rem;
 }
 
 .edit-profile-btn {
@@ -558,11 +601,90 @@ input[readonly] {
   cursor: pointer;
   width: 100%;
   transition: background-color 0.2s;
+  margin-top: 1rem;
 }
 
 .edit-profile-btn:hover {
   background-color: #45a049;
 }
+.profile-right .form-container {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-right .user-info {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.profile-right .form-group {
+  margin-bottom: 0;
+}
+
+.profile-right label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.profile-right input[type="text"],
+.profile-right input[type="email"],
+.profile-right input[type="tel"] {
+  font-family: 'Poppins', sans-serif;
+  width: 95%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background-color: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.profile-right input[type="text"]:focus,
+.profile-right input[type="email"]:focus,
+.profile-right input[type="tel"]:focus {
+  font-family: 'Poppins', sans-serif;
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.profile-right .name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.profile-right .name-row .first-name-input,
+.profile-right .name-row .last-name-input {
+  width: 140%;
+  max-width: 288px;
+}
+
+.profile-right .edit-profile-btn {
+  margin-top: 2rem;
+  background-color: #007bff;
+  border-color: #007bff;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+}
+
+.profile-right .edit-profile-btn:hover {
+  background-color: #0056b3;
+  border-color: #004085;
+}
+
+.profile-right .edit-profile-btn:active {
+  transform: translateY(1px);
+}
+
 
 .modal {
   position: fixed;
@@ -587,15 +709,110 @@ input[readonly] {
   overflow-y: auto;
 }
 
-.close {
-  float: right;
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.modal-header h2 {
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
   cursor: pointer;
   color: #666;
+  padding: 0;
+}
+
+.profile-image-container {
+  display: flex;
+  justify-content: center;
+  margin-top: -2rem;
+}
+
+.profile-image-wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.camera-icon {
+  position: absolute;
+  right: 5px;
+  bottom: 10px;
+  width: 40px;
+  height: 40px;
+  background-color: #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid white;
+  color: white;
+  z-index: 10;
+}
+
+.hidden {
+  display: none;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;}
+
+.personal-info .form-row {
+  display: flex;
+  gap: 2rem;
+}
+
+.personal-info .form-row .form-group {
+  flex: 1;
+}
+
+.personal-info {
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  color: #666;
+  font-size: .85rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+textarea {
+  font-family: 'Poppins', sans-serif;
+  width: 97%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.first-name-input,
+.last-name-input {
+  width: 100%;
+  max-width: 230px;
 }
 
 .save-button {
+  font-family: 'Poppins', sans-serif;
   background-color: #4CAF50;
   color: white;
   border: none;
@@ -604,8 +821,15 @@ input[readonly] {
   border-radius: 4px;
   cursor: pointer;
   width: 100%;
-  margin-top: 1rem;
+  transition: background-color 0.2s;
+  margin-top: -3rem;
+
 }
+
+.save-button:hover {
+  background-color: #45a049;
+}
+
 .history-content {
 padding: 20px;
 background: white;
