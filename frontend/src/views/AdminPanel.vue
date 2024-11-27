@@ -46,10 +46,11 @@ const menuItems = [
   { name: 'Logbook', path: '/admin/logbook' },
   { name: 'Packages', path: '/admin/packages' },
   { name: 'Staffs', path: '/admin/staffs' },
+  { name: 'Hotels', path: '/admin/hotels' },
   { name: 'Assign', path: '/admin/assign' },
   { name: 'Guest', path: '/admin/guest' },
   { name: 'Feedback', path: '/admin/feedback' },
-  
+  { name: 'Logout', path: '/login' },
 ]
 </script>
 

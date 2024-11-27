@@ -7,12 +7,14 @@
             <h2>Package Components</h2>
             
             <!-- Tabs -->
-            <div class="tabs">
+            <div class="tabs" role="tablist">
               <button
                 v-for="tab in tabs"
                 :key="tab"
                 @click="currentTab = tab"
                 :class="{ active: currentTab === tab }"
+                role="tab"
+                :aria-selected="currentTab === tab"
               >
                 {{ tab }}
               </button>
@@ -20,24 +22,28 @@
 
             <!-- Component List -->
             <div class="scrollable-content component-list">
-                <div v-for="item in filteredComponents" :key="item.id" class="component-item">
-                  <div class="component-info">
-                    <div>
-                      <label>{{ item.name }}</label>
-                      <div class="price">Price: Php{{ item.price }}</div>
-                    </div>
-                  </div>
-                  <div class="button-group">
-                    <button v-if="showCheckboxes && !item.selected" class="select-button" @click="selectComponent(item)">
-                      Select
-                    </button>
-                    <button v-if="showCheckboxes && item.selected" class="remove-button" @click="removeComponent(item)">
-                      Remove
-                    </button>
-                    <button class="view-details" @click="viewDetails(item)">Details</button>
+              <div v-if="loading.components" class="loading-indicator">
+                <div class="loader" aria-hidden="true"></div>
+                <span class="sr-only">Loading components...</span>
+              </div>
+              <div v-else v-for="item in filteredComponents" :key="item.id" class="component-item">
+                <div class="component-info">
+                  <div>
+                    <label>{{ item.name }}</label>
+                    <div class="price">Price: Php{{ item.price }}</div>
                   </div>
                 </div>
+                <div class="button-group">
+                  <button v-if="showCheckboxes && !isComponentSelected(item)" class="select-button" @click="selectComponent(item)">
+                    Select
+                  </button>
+                  <button v-if="showCheckboxes && isComponentSelected(item)" class="remove-button" @click="removeComponent(item)">
+                    Remove
+                  </button>
+                  <button class="view-details" @click="viewDetails(item)">Details</button>
+                </div>
               </div>
+            </div>
 
             <div class="fixed-button">
               <button @click="showAddComponentModal = true">Add New Component</button>
@@ -49,10 +55,17 @@
             <h2>Package Templates</h2>
             
             <div class="scrollable-content template-list">
-              <div v-for="pkg in packages" :key="pkg.id" class="template-item" @click="selectPackage(pkg)">
+              <div v-if="loading.packages" class="loading-indicator">
+                <div class="loader" aria-hidden="true"></div>
+                <span class="sr-only">Loading packages...</span>
+              </div>
+              <div v-else v-for="pkg in packages" :key="pkg.id" class="template-item" @click="selectPackage(pkg)">
                 <div class="template-info">
                   <span>{{ pkg.name }}</span>
-                  <button class="delete" @click.stop="confirmDeletePackage(pkg.id)">Delete</button>
+                  <button class="delete" @click.stop="confirmDeletePackage(pkg.id)" :disabled="loading.deleting === pkg.id">
+                    <span v-if="loading.deleting === pkg.id" class="loader small" aria-hidden="true"></span>
+                    <span v-else>Delete</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -69,46 +82,81 @@
           <div class="card package-details">
             <h2>Package Details</h2>
             
-            <div class="form">
-              <div class="form-group">
-                <label>Package Name</label>
-                <input 
-                  v-model="packageDetails.name"
-                  type="text" 
-                  placeholder="Package Name" 
-                  required
-                  :class="{ 'input-error': !packageDetails.name }"
-                />
-              </div>
+            <div class="scrollable-content">
+              <div class="form">
+                <div class="form-group">
+                  <label for="package-name">Package Name</label>
+                  <input 
+                    id="package-name"
+                    v-model="packageDetails.name"
+                    type="text" 
+                    placeholder="Package Name" 
+                    required
+                    :class="{ 'input-error': !packageDetails.name }"
+                  />
+                </div>
 
-              <div class="form-group">
-                <label>Description</label>
-                <textarea 
-                  v-model="packageDetails.description"
-                  rows="4"
-                ></textarea>
-              </div>
+                <div class="form-group">
+                  <label for="package-description">Description</label>
+                  <textarea 
+                    id="package-description"
+                    v-model="packageDetails.description"
+                    rows="4"
+                  ></textarea>
+                </div>
 
-              <div class="form-group">
-                <label>Discount (%)</label>
-                <input 
-                  v-model="packageDetails.discount"
-                  type="number" 
-                  placeholder="0"
-                />
-              </div>
+                <div class="form-group">
+                  <label for="package-discount">Discount (%)</label>
+                  <input 
+                    id="package-discount"
+                    v-model="packageDetails.discount"
+                    type="number" 
+                    placeholder="0"
+                  />
+                </div>
 
-              <div class="total-price">
-                Total Estimated Price: Php{{ totalPrice }}
-              </div>
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input 
+                      v-model="packageDetails.includePackageOptions"
+                      type="checkbox"
+                    />
+                    Include Package Options
+                  </label>
+                </div>
 
-              <div v-if="packageDetails.discount > 0" class="discounted-price">
-                Discounted Price: Php{{ discountedPrice }}
-              </div>
+                <div class="form-group">
+                  <label for="package-image">Package Image</label>
+                  <input 
+                    id="package-image"
+                    type="file" 
+                    @change="handleFileUpload" 
+                    accept="image/*"
+                    ref="fileInput"
+                  />
+                  <div v-if="uploadProgress > 0 && uploadProgress < 100" class="progress-bar" role="progressbar" :aria-valuenow="uploadProgress" aria-valuemin="0" aria-valuemax="100">
+                    <div :style="{ width: `${uploadProgress}%` }" class="progress"></div>
+                  </div>
+                  <img v-if="packageDetails.imageUrl" :src="packageDetails.imageUrl" alt="Package Image" class="preview-image" />
+                </div>
 
+                <div class="total-price">
+                  Total Estimated Price: Php{{ totalPrice }}
+                </div>
+
+                <div v-if="packageDetails.discount > 0" class="discounted-price">
+                  Discounted Price: Php{{ discountedPrice }}
+                </div>
+              </div>
+            </div>
+
+            <div class="fixed-bottom-buttons">
               <div class="button-group">
                 <button class="cancel" @click="cancelPackageChanges">Cancel</button>
-                <button class="save" @click="savePackageChanges">Save Changes</button>
+                <button class="save" @click="savePackageChanges" :disabled="loading.saving">
+                  <span v-if="loading.saving" class="loader small" aria-hidden="true"></span>
+                  <span v-else>Save Changes</span>
+                </button>
               </div>
             </div>
           </div>
@@ -117,71 +165,157 @@
           <div class="card selected-components">
             <h2>Selected Components</h2>
             <div class="scrollable-content selected-list">
-              <div v-for="component in selectedComponents" :key="component.id" class="selected-item">
-                <div>
-                  <div class="component-name">{{ component.name }}</div>
-                  <div class="price">Price: Php{{ component.price }}</div>
+              <div v-for="type in componentTypes" :key="type">
+                <h3>{{ type }}</h3>
+                <div v-for="component in getComponentsByType(type)" :key="component.id" class="selected-item">
+                  <div>
+                    <div class="component-name">{{ component.name }}</div>
+                    <div class="price">Price: Php{{ component.price }}</div>
+                  </div>
+                  <button class="remove" @click="removeComponent(component)">Remove</button>
                 </div>
-                <button class="remove" @click="removeComponent(component)">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Package Options -->
+          <div class="card package-options">
+            <h2>Package Options</h2>
+            <div class="scrollable-content">
+              <div v-if="!creatingNewOption && !editingOption">
+                <div v-for="option in packageOptions" :key="option.id" class="package-option-item">
+                  <div class="option-header">
+                    <h3>{{ option.name }}</h3>
+                    <div>
+                      <button 
+                        v-if="packageDetails.includePackageOptions" 
+                        @click.stop="toggleOptionSelection(option)" 
+                        :class="{ 'selected': isOptionSelected(option) }"
+                      >
+                        {{ isOptionSelected(option) ? 'Selected' : 'Select' }}
+                      </button>
+                      <button 
+                        v-else 
+                        @click.stop="deletePackageOption(option.id)" 
+                        class="delete-button"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                  <div class="details-hint" @click="editPackageOption(option)">Click to view and edit details</div>
+                </div>
+              </div>
+              <div v-else class="package-option-form">
+                <div class="form-group">
+                  <label for="package-option-name">Package Option Name</label>
+                  <input 
+                    id="package-option-name"
+                    v-model="newPackageOption.name" 
+                    type="text" 
+                    placeholder="Package Option Name" 
+                    class="form-input"
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label>Pricing Per Pax</label>
+                  <div v-for="(price, index) in newPackageOption.pricing" :key="index" class="price-row">
+                    <input 
+                      v-model="price.pax" 
+                      placeholder="Pax Range (e.g, 1-2)" 
+                      class="form-input"
+                    />
+                    <input 
+                      v-model.number="price.price" 
+                      type="number" 
+                      placeholder="Price Per Head" 
+                      class="form-input"
+                    />
+                    <button @click="removePricing(index)" class="remove-button">Remove</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="fixed-bottom-buttons">
+              <div v-if="!creatingNewOption && !editingOption">
+                <button @click="startCreatingNewOption" class="create-button">Create New Package Option</button>
+              </div>
+              <div v-else class="button-group">
+                <button @click="cancelPackageOptionChanges" class="cancel-button">Cancel</button>
+                <button @click="addPricing" class="add-button">Add Pricing Option</button>
+                <button @click="savePackageOption" class="save-button" :disabled="loading.saving">
+                  <span v-if="loading.saving" class="loader small" aria-hidden="true"></span>
+                  <span v-else>{{ editingOption ? 'Update' : 'Save' }}</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Add Component Modal -->
-        <div v-if="showAddComponentModal" class="modal">
+        <div v-if="showAddComponentModal" class="modal" role="dialog" aria-labelledby="add-component-title">
           <div class="modal-content">
-            <h2>Add New Component</h2>
+            <h2 id="add-component-title">Add New Component</h2>
             <div class="form-group">
-              <label>Name</label>
-              <input v-model="newComponent.name" type="text" placeholder="Component Name" />
+              <label for="new-component-name">Name</label>
+              <input id="new-component-name" v-model="newComponent.name" type="text" placeholder="Component Name" />
             </div>
             <div class="form-group">
-              <label>Price</label>
-              <input v-model="newComponent.price" type="number" placeholder="Price" />
+              <label for="new-component-price">Price</label>
+              <input id="new-component-price" v-model.number="newComponent.price" type="number" placeholder="Price" />
             </div>
             <div class="form-group">
-              <label>Description</label>
-              <textarea v-model="newComponent.description" rows="4" placeholder="Description"></textarea>
+              <label for="new-component-description">Description</label>
+              <textarea id="new-component-description" v-model="newComponent.description" rows="4" placeholder="Description"></textarea>
             </div>
             <div class="form-group">
-              <label>Type</label>
-              <select v-model="newComponent.type">
+              <label for="new-component-type">Type</label>
+              <select id="new-component-type" v-model="newComponent.type">
                 <option v-for="tab in tabs" :key="tab" :value="tab">{{ tab }}</option>
               </select>
             </div>
             <div class="button-group">
               <button @click="closeModal('addComponent')">Cancel</button>
-              <button @click="addComponent">Add Component</button>
+              <button @click="addComponent" :disabled="loading.adding">
+                <span v-if="loading.adding" class="loader small" aria-hidden="true"></span>
+                <span v-else>Add Component</span>
+              </button>
             </div>
           </div>
         </div>
 
         <!-- View Details Modal with Edit and Delete Options -->
-        <div v-if="showViewDetailsModal" class="modal">
+        <div v-if="showViewDetailsModal" class="modal" role="dialog" aria-labelledby="edit-component-title">
           <div class="modal-content">
-            <h2>Component Details</h2>
+            <h2 id="edit-component-title">Edit Component</h2>
             <div>
-              <label><strong>Name:</strong></label>
-              <input v-model="selectedComponentDetails.name" type="text" />
+              <label for="edit-component-name"><strong>Name:</strong></label>
+              <input id="edit-component-name" v-model="selectedComponentDetails.name" type="text" />
             </div>
             <div>
-              <label><strong>Price:</strong></label>
-              <input v-model="selectedComponentDetails.price" type="number" />
+              <label for="edit-component-price"><strong>Price:</strong></label>
+              <input id="edit-component-price" v-model="selectedComponentDetails.price" type="number" />
             </div>
             <div>
-              <label><strong>Type:</strong></label>
-              <select v-model="selectedComponentDetails.type">
+              <label for="edit-component-type"><strong>Type:</strong></label>
+              <select id="edit-component-type" v-model="selectedComponentDetails.type">
                 <option v-for="tab in tabs" :key="tab" :value="tab">{{ tab }}</option>
               </select>
             </div>
             <div>
-              <label><strong>Description:</strong></label>
-              <textarea v-model="selectedComponentDetails.description"></textarea>
+              <label for="edit-component-description"><strong>Description:</strong></label>
+              <textarea id="edit-component-description" v-model="selectedComponentDetails.description"></textarea>
             </div>
             <div class="button-group">
-              <button @click="saveComponentDetails">Save</button>
-              <button @click="deleteComponent">Delete</button>
+              <button @click="saveComponentDetails" :disabled="loading.saving">
+                <span v-if="loading.saving" class="loader small" aria-hidden="true"></span>
+                <span v-else>Update</span>
+              </button>
+              <button @click="deleteComponent" :disabled="loading.deleting">
+                <span v-if="loading.deleting" class="loader small" aria-hidden="true"></span>
+                <span v-else>Delete</span>
+              </button>
               <button @click="closeModal('viewDetails')">Close</button>
             </div>
           </div>
@@ -190,105 +324,136 @@
     </template>
 
     <script setup>
-    import { ref, computed, onMounted } from 'vue';
-    import { db } from '../firebaseConfig';
+    import { ref, computed, onMounted, watch } from 'vue';
+    import { db, storage } from '../firebaseConfig';
     import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+    import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
     // Firestore collections
     const componentsCollection = collection(db, 'components');
     const packagesCollection = collection(db, 'packages');
+    const packageOptionsCollection = collection(db, 'packageOptions');
 
     // State variables
-    const tabs = ['Accommodation', 'Tours', 'Activities', 'Transport', 'Additional'];
-    const currentTab = ref('Accommodation');
+    const tabs = ref(['Accommodations', 'Island Tours', 'Inland Tours', 'Activities', 'Transport']);
+    const currentTab = ref('Accommodations');
     const showCheckboxes = ref(false);  
 
     // Data storage
     const components = ref([]);
     const packages = ref([]);
+    const packageOptions = ref([]);
 
     // Modal controls and temporary storage
     const showAddComponentModal = ref(false);
     const showViewDetailsModal = ref(false);
     const selectedComponentDetails = ref({});
-    const newComponent = ref({ name: '', price: 0, type: 'Accommodation', description: '' });
-    const packageDetails = ref({ id: null, name: '', description: '', discount: 0, components: [] });
+    const newComponent = ref({ name: '', price: 0, type: 'Accommodations', description: '' });
+    const packageDetails = ref({ 
+      id: null, 
+      name: '', 
+      description: '', 
+      discount: 0, 
+      components: [], 
+      includePackageOptions: false,
+      selectedOptions: [],
+      imageUrl: ''
+    });
 
+    // Package options
+    const packageOptionsData = ref({
+      paymentTerms: 'full',
+      terms: ''
+    });
 
-    // Fetch components and packages on mount
-    const fetchComponents = async () => {
-      const snapshot = await getDocs(componentsCollection);
-      components.value = snapshot.docs.map(doc => ({ id: doc.id, selected: false, ...doc.data() }));
-    };
+    // New package option
+    const creatingNewOption = ref(false);
+    const editingOption = ref(false);
+    const newPackageOption = ref({
+      id: null,
+      name: '',
+      pricing: [
+        { pax: '1-2', price: 0 },
+        { pax: '3-4', price: 0 },
+      ],
+    });
 
-    const fetchPackages = async () => {
-      const snapshot = await getDocs(packagesCollection);
-      packages.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    };
+    // Loading states
+    const loading = ref({
+      components: false,
+      packages: false,
+      packageOptions: false,
+      saving: false,
+      deleting: null,
+      adding: false
+    });
 
+    // Upload progress
+    const uploadProgress = ref(0);
+    const fileInput = ref(null);
+
+    // Fetch data on mount
     onMounted(() => {
       fetchComponents();
       fetchPackages();
+      fetchPackageOptions();
     });
 
+    // Fetch functions
+    const fetchComponents = async () => {
+      loading.value.components = true;
+      try {
+        const snapshot = await getDocs(componentsCollection);
+        components.value = snapshot.docs.map(doc => ({ id: doc.id, selected: false, ...doc.data() }));
+      } catch (error) {
+        console.error("Error fetching components:", error);
+      } finally {
+        loading.value.components = false;
+      }
+    };
 
-    // Reusable function to clear package details
+    const fetchPackages = async () => {
+      loading.value.packages = true;
+      try {
+        const snapshot = await getDocs(packagesCollection);
+        packages.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      } catch (error) {
+        console.error("Error fetching packages:", error);
+      } finally {
+        loading.value.packages = false;
+      }
+    };
+
+    const fetchPackageOptions = async () => {
+      loading.value.packageOptions = true;
+      try {
+        const snapshot = await getDocs(packageOptionsCollection);
+        packageOptions.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      } catch (error) {
+        console.error("Error fetching package options:", error);
+      } finally {
+        loading.value.packageOptions = false;
+      }
+    };
+
+    // Package details functions
     const clearPackageDetails = () => {
-      packageDetails.value = { id: null, name: '', description: '', discount: 0, components: [] };
+      packageDetails.value = { 
+        id: null, 
+        name: '', 
+        description: '', 
+        discount: 0, 
+        components: [], 
+        includePackageOptions: false,
+        selectedOptions: [],
+        imageUrl: ''
+      };
       components.value.forEach(component => (component.selected = false));
       showCheckboxes.value = false;
+      packageOptionsData.value = { paymentTerms: 'full', terms: '' };
+      resetFileInput();
     };
 
-    const closeModal = (modalName) => {
-      if (modalName === 'addComponent') {
-        showAddComponentModal.value = false;
-        newComponent.value = { name: '', price: 0, type: 'Accommodation', description: '' };
-      } else if (modalName === 'viewDetails') {
-        showViewDetailsModal.value = false;
-        selectedComponentDetails.value = {};
-      }
-    };
-
-    // Reusable function to close modals and clear component details
-    const closeAddComponentModal = () => {
-      showAddComponentModal.value = false;
-      newComponent.value = { name: '', price: 0, type: 'Accommodation', description: '' };
-    };
-
-    // Add Component
-    const addComponent = async () => {
-      if (newComponent.value.name && newComponent.value.price) {
-        const docRef = await addDoc(componentsCollection, {
-          ...newComponent.value,
-          price: Number(newComponent.value.price),
-          selected: false
-        });
-        components.value.push({ id: docRef.id, ...newComponent.value });
-        closeAddComponentModal(); // Reset modal and input fields
-      }
-    };
-
-    // Filtered components by tab
-    const filteredComponents = computed(() =>
-      components.value.filter(component => component.type === currentTab.value)
-    );
-
-    // Select component for package
-    const selectComponent = (item) => {
-      item.selected = true;
-      packageDetails.value.components.push(item);
-    };
-
-    // Remove component from package
-    const removeComponent = (component) => {
-      packageDetails.value.components = packageDetails.value.components.filter(c => c.id !== component.id);
-      components.value.find(c => c.id === component.id).selected = false; // Deselect in the main list
-    };
-
-    // Selected components for display
-    const selectedComponents = computed(() => packageDetails.value.components);
-
-    // Package operations
     const createNewPackage = () => {
       clearPackageDetails();
       showCheckboxes.value = true;
@@ -298,353 +463,744 @@
       clearPackageDetails();
     };
 
-    // Select package and load details into the form for editing
     const selectPackage = async (pkg) => {
-      // Set package details from the selected package
       packageDetails.value = {
         id: pkg.id,
         name: pkg.name,
         description: pkg.description,
         discount: pkg.discount,
-        components: []
+        components: pkg.components || [],
+        includePackageOptions: pkg.includePackageOptions || false,
+        selectedOptions: pkg.selectedOptions || [],
+        imageUrl: pkg.imageUrl || ''
       };
 
-      // Load selected components and mark them as selected in the main list
       components.value.forEach((component) => {
-        component.selected = pkg.components.includes(component.id);
-        if (component.selected) {
-          packageDetails.value.components.push(component); // Add to the selected components list
-        }
+        component.selected = packageDetails.value.components.some(pc => pc.id === component.id);
       });
-      
-      // Show checkboxes for editing
+
       showCheckboxes.value = true;
-    };  
+    };
 
-
-    // Save changes for package
     const savePackageChanges = async () => {
       if (!packageDetails.value.name) {
         alert('Package name is required');
         return;
       }
-      
-      const newPackage = {
-        name: packageDetails.value.name,
-        description: packageDetails.value.description,
-        discount: packageDetails.value.discount,
-        components: packageDetails.value.components.map(c => c.id)
-      };
-      
-      if (packageDetails.value.id) {
-        const packageRef = doc(db, 'packages', packageDetails.value.id);
-        await updateDoc(packageRef, newPackage);
-      } else {
-        await addDoc(packagesCollection, newPackage);
+
+      loading.value.saving = true;
+      try {
+        const newPackage = {
+          name: packageDetails.value.name,
+          description: packageDetails.value.description,
+          discount: packageDetails.value.discount,
+          components: packageDetails.value.components,
+          paymentTerms: packageOptionsData.value.paymentTerms,
+          terms: packageOptionsData.value.terms,
+          includePackageOptions: packageDetails.value.includePackageOptions,
+          selectedOptions: packageDetails.value.selectedOptions,
+          imageUrl: packageDetails.value.imageUrl
+        };
+        
+        if (packageDetails.value.id) {
+          const packageRef = doc(db, 'packages', packageDetails.value.id);
+          await updateDoc(packageRef, newPackage);
+        } else {
+          await addDoc(packagesCollection, newPackage);
+        }
+        
+        await fetchPackages();
+        resetFileInput();
+        packageDetails.value.imageUrl = '';
+        cancelPackageChanges();
+      } catch (error) {
+        console.error("Error saving package:", error);
+      } finally {
+        loading.value.saving = false;
       }
-      
-      await fetchPackages();
-      cancelPackageChanges();
     };
 
-    // Computed total price for selected components without discount
-    const totalPrice = computed(() => {
-      const subtotal = packageDetails.value.components.reduce((sum, component) => sum + component.price, 0);
-      return subtotal.toFixed(2); // Format to 2 decimal places for currency
-    });
+    // Component functions
+    const addComponent = async () => {
+      if (newComponent.value.name) {
+        loading.value.adding = true;
+        try {
+          const docRef = await addDoc(componentsCollection, {
+            ...newComponent.value,
+            price: Number(newComponent.value.price),
+            selected: false
+          });
+          const newComponentWithId = { id: docRef.id, ...newComponent.value, selected: false };
+          components.value.push(newComponentWithId);
+          closeModal('addComponent');
+          newComponent.value = { name: '', price: 0, type: 'Accommodations', description: '' };
+        } catch (error) {
+          console.error("Error adding component:", error);
+        } finally {
+          loading.value.adding = false;
+        }
+      }
+    };
 
-    // Computed price with discount applied
-    const discountedPrice = computed(() => {
-      const discountFactor = (100 - packageDetails.value.discount) / 100;
-      return (totalPrice.value * discountFactor).toFixed(2); // Format to 2 decimal places
-    });
+    const selectComponent = (item) => {
+      item.selected = true;
+      packageDetails.value.components.push({
+        id: item.id,
+        name: item.name,
+        type: item.type
+      });
+    };
 
+    const removeComponent = (component) => {
+      packageDetails.value.components = packageDetails.value.components.filter(c => c.id !== component.id);
+      components.value.find(c => c.id === component.id).selected = false;
+    };
 
-    // Viewing and editing details
+    const isComponentSelected = (component) => {
+      return packageDetails.value.components.some(c => c.id === component.id);
+    };
+
     const viewDetails = (item) => {
       selectedComponentDetails.value = { ...item };
       showViewDetailsModal.value = true;
     };
 
-    // Save updated component details
     const saveComponentDetails = async () => {
       if (selectedComponentDetails.value.id) {
-        const docRef = doc(componentsCollection, selectedComponentDetails.value.id);
-        await updateDoc(docRef, {
-          name: selectedComponentDetails.value.name,
-          price: Number(selectedComponentDetails.value.price),
-          type: selectedComponentDetails.value.type,
-          description: selectedComponentDetails.value.description,
-        });
-        fetchComponents(); // Refresh the components list to reflect changes
-        closeModal('viewDetails');
+        loading.value.saving = true;
+        try {
+          const docRef = doc(componentsCollection, selectedComponentDetails.value.id);
+          await updateDoc(docRef, {
+            name: selectedComponentDetails.value.name,
+            price: Number(selectedComponentDetails.value.price),
+            type: selectedComponentDetails.value.type,
+            description: selectedComponentDetails.value.description,
+          });
+          const index = components.value.findIndex(c => c.id === selectedComponentDetails.value.id);
+          if (index !== -1) {
+            components.value[index] = { ...components.value[index], ...selectedComponentDetails.value };
+          }
+          closeModal('viewDetails');
+        } catch (error) {
+          console.error("Error updating component:", error);
+        } finally {
+          loading.value.saving = false;
+        }
       }
     };
 
-    // Edit component in details modal
-    const editComponent = async () => {
-      const componentRef = doc(db, 'components', selectedComponentDetails.value.id);
-      await updateDoc(componentRef, selectedComponentDetails.value);
-      await fetchComponents();
-      closeViewDetailsModal();
-    };
-
-    // Delete component in details modal
     const deleteComponent = async () => {
       if (confirm('Are you sure you want to delete this component?')) {
-        const componentRef = doc(db, 'components', selectedComponentDetails.value.id);
-        await deleteDoc(componentRef);
-        await fetchComponents();
-        closeViewDetailsModal();
+        loading.value.deleting = true;
+        try {
+          const componentRef = doc(db, 'components', selectedComponentDetails.value.id);
+          await deleteDoc(componentRef);
+          await fetchComponents();
+          closeModal('viewDetails');
+        } catch (error) {
+          console.error("Error deleting component:", error);
+        } finally {
+          loading.value.deleting = false;
+        }
       }
     };
 
-    // Confirm delete package
+    // Package option functions
+    const toggleOptionSelection = (option) => {
+      const index = packageDetails.value.selectedOptions.findIndex(o => o.id === option.id);
+      if (index !== -1) {
+        packageDetails.value.selectedOptions.splice(index, 1);
+      } else {
+        packageDetails.value.selectedOptions.push(option);
+      }
+    };
+
+    const isOptionSelected = (option) => {
+      return packageDetails.value.selectedOptions.some(o => o.id === option.id);
+    };
+
+    const startCreatingNewOption = () => {
+      creatingNewOption.value = true;
+      editingOption.value = false;
+      resetNewPackageOption();
+    };
+
+    const cancelPackageOptionChanges = () => {
+      creatingNewOption.value = false;
+      editingOption.value = false;
+      resetNewPackageOption();
+    };
+
+    const resetNewPackageOption = () => {
+      newPackageOption.value = {
+        id: null,
+        name: '',
+        pricing: [
+          { pax: '1-2', price: 0 },
+          { pax: '3-4', price: 0 },
+        ],
+      };
+    };
+
+    const addPricing = () => {
+      newPackageOption.value.pricing.push({ pax: '', price: 0 });
+    };
+
+    const removePricing = (index) => {
+      newPackageOption.value.pricing.splice(index, 1);
+    };
+
+    const savePackageOption = async () => {
+      if (!newPackageOption.value.name) {
+        alert('Package option name is required');
+        return;
+      }
+
+      loading.value.saving = true;
+      try {
+        if (editingOption.value) {
+          const optionRef = doc(db, 'packageOptions', newPackageOption.value.id);
+          await updateDoc(optionRef, newPackageOption.value);
+          const index = packageOptions.value.findIndex(o => o.id === newPackageOption.value.id);
+          if (index !== -1) {
+            packageOptions.value[index] = { ...newPackageOption.value };
+          }
+        } else {
+          const docRef = await addDoc(collection(db, 'packageOptions'), newPackageOption.value);
+          packageOptions.value.push({ ...newPackageOption.value, id: docRef.id });
+        }
+        cancelPackageOptionChanges();
+      } catch (error) {
+        console.error("Error saving package option:", error);
+        alert('An error occurred while saving the package option. Please try again.');
+      } finally {
+        loading.value.saving = false;
+      }
+    };
+
+    const editPackageOption = (option) => {
+      newPackageOption.value = JSON.parse(JSON.stringify(option));
+      editingOption.value = true;
+      creatingNewOption.value = false;
+    };
+
+    const deletePackageOption = async (id) => {
+      if (confirm('Are you sure you want to delete this package option?')) {
+        try {
+          await deleteDoc(doc(db, 'packageOptions', id));
+          packageOptions.value = packageOptions.value.filter(option => option.id !== id);
+        } catch (error) {
+          console.error("Error deleting package option:", error);
+          alert('An error occurred while deleting the package option. Please try again.');
+        }
+      }
+    };
+
+    // File upload functions
+    const handleFileUpload = async (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const storageReference = storageRef(storage, `package_images/${Date.now()}_${file.name}`);
+        const uploadTask = uploadBytesResumable(storageReference, file);
+
+        uploadTask.on('state_changed', 
+          (snapshot) => {
+            uploadProgress.value = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          },
+          (error) => {
+            console.error("Error uploading file:", error);
+          },
+          async () => {
+            try {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              packageDetails.value.imageUrl = downloadURL;
+              
+              if (packageDetails.value.id) {
+                const packageRef = doc(db, 'packages', packageDetails.value.id);
+                await updateDoc(packageRef, { imageUrl: downloadURL });
+              }
+            } catch (error) {
+              console.error("Error getting download URL:", error);
+            }
+          }
+        );
+      }
+    };
+
+    const resetFileInput = () => {
+      if (fileInput.value) {
+        fileInput.value.value = '';
+      }
+      uploadProgress.value = 0;
+    };
+
+    // Computed properties
+    const filteredComponents = computed(() =>
+      components.value.filter(component => component.type === currentTab.value)
+    );
+
+    const totalPrice = computed(() => {
+      const subtotal = packageDetails.value.components.reduce((sum, component) => {
+        const fullComponent = components.value.find(c => c.id === component.id);
+        return sum + (fullComponent ? fullComponent.price : 0);
+      }, 0);
+      return subtotal.toFixed(2);
+    });
+
+    const discountedPrice = computed(() => {
+      const discountFactor = (100 - packageDetails.value.discount) / 100;
+      return (totalPrice.value * discountFactor).toFixed(2);
+    });
+
+    const componentTypes = computed(() => {
+      return [...new Set(packageDetails.value.components.map(c => c.type))];
+    });
+
+    // Helper functions
+    const closeModal = (modalName) => {
+      if (modalName === 'addComponent') {
+        showAddComponentModal.value = false;
+        newComponent.value = { name: '', price: 0, type: 'Accommodations', description: '' };
+      } else if (modalName === 'viewDetails') {
+        showViewDetailsModal.value = false;
+        selectedComponentDetails.value = {};
+      }
+    };
+
     const confirmDeletePackage = async (id) => {
       if (confirm('Are you sure you want to delete this package?')) {
-        await deleteDoc(doc(db, 'packages', id));
-        await fetchPackages();
+        loading.value.deleting = id;
+        try {
+          await deleteDoc(doc(db, 'packages', id));
+          await fetchPackages();
+        } catch (error) {
+          console.error("Error deleting package:", error);
+        } finally {
+          loading.value.deleting = false;
+        }
       }
     };
+
+    const getComponentsByType = (type) => {
+      return packageDetails.value.components.filter(c => c.type === type);
+    };
+
+    // Watch effect
+    watch(() => packageDetails.value.includePackageOptions, (newValue) => {
+      if (!newValue) {
+        packageDetails.value.selectedOptions = [];
+      }
+    });
     </script>
 
+    <style scoped>
+      .package-manager {
+        padding: 15px;
+        font-family: Arial, sans-serif;
+      }
 
+      .top-row, .bottom-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 22px;
+      }
 
-  <style scoped>
-  .package-manager {
-    padding: 15px;
-    font-family: Arial, sans-serif;
-  }
+      .bottom-row {
+        width: 100%;
+        justify-content: space-between;
+      }
 
-  .top-row, .bottom-row {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 22px;
-  }
+      .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 16px;
+        background-color: white;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        height: 450px;
+      }
 
-  .card {
-    border: 1px solid #e0e0e0;
-    border-radius: 16px;
-    background-color: white;
-    padding-top: 20px;
-    padding-right: 40px;
-    padding-left: 30px;
-    padding-bottom: 30px;
-    display: flex;
-    flex-direction: column;
-    height: 450px; /* Set a fixed height */
-  }
+      .package-components {
+        flex: 1;
+      }
 
-  h2 {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 16px;
-  }
+      .package-templates {
+        width: 400px;
+      }
 
-  .tabs {
-    display: flex;
-    background-color: #f0f0f0;
-    border-radius: 8px;
-    padding: 4px;
-    margin-bottom: 24px;
-  }
+      .package-details {
+        width: 35%;
+        display: flex;
+        flex-direction: column;
+      }
 
-  .tabs button {
-    flex: 1;
-    padding: 5px 16px;
-    font-size: 14px;
-    border: none;
-    background: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s, box-shadow 0.3s;
-  }
+      .selected-components {
+        width: 25%;
+      }
 
-  .tabs button.active {
-    background-color: white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  }
+      .selected-components .scrollable-content {
+        max-height: 350px;
+        overflow-y: auto;
+      }
 
-  .scrollable-content {
-    flex-grow: 1;
-    overflow-y: auto;
-    margin-bottom: 16px;
-  }
+      .package-options {
+        width: 40%;
+      }
 
-  .component-list, .template-list, .selected-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
+      h2 {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 16px;
+      }
 
-  .component-item, .selected-item, .template-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+      .tabs {
+        display: flex;
+        background-color: #b0a9a9;
+        border-radius: 5px;
+        padding: 2px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+      }
 
-  .component-info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
+      .tabs button {
+        flex: 1 0 auto;
+        padding: 5px 16px;
+        font-size: 14px;
+        border: none;
+        background: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s;
+        white-space: nowrap;
+        margin: 2px;
+      }
 
-  .price {
-    font-size: 14px;
-    color: #666;
-  }
+      .tabs button.active {
+        background-color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
 
-  button {
-    padding: 10px 16px;
-    font-size: 12px;
-    font-weight: 500;
-    border: 1px solid #e0e0e0;
-    background-color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
+      .scrollable-content {
+        flex-grow: 1;
+        overflow-y: auto;
+        margin-bottom: 13px;
+        scrollbar-width: thin;
+      }
 
-  button:hover {
-    background-color: #5b5a5a82;
-  }
+      .package-details .scrollable-content {
+        padding-right: 10px;
+      }
 
-  .fixed-button {
-    margin-top: auto;
-  }
+      .component-list, .template-list, .selected-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
 
-  .fixed-button button {
-    width: 100%;
-    padding: 10px 24px;
-    background-color: #f0f0f0;
-  }
+      .component-item, .selected-item, .template-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-  .fixed-button button:hover{
-    background-color: #5b5a5a82;
-  }
+      .component-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
 
-  .template-item {
-    padding: 16px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    cursor: pointer;
-  }
+      .price {
+        font-size: 14px;
+        color: #666;
+      }
 
-  .template-item:hover {
-    background-color: #f0f0f0;
-  }
+      button {
+        padding: 10px 16px;
+        font-size: 12px;
+        font-weight: 500;
+        border: 1px solid #e0e0e0;
+        background-color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
 
-  .template-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width:  100%;
-  }
+      button:hover {
+        background-color: #f0f0f0;
+      }
 
-  .package-components {
-    flex: 1;
-  }
+      .fixed-button {
+        margin-top: auto;
+      }
 
-  .package-templates, .package-details {
-    width: 400px;
-  }
+      .fixed-button button {
+        width: 100%;
+        padding: 10px 24px;
+        background-color: #f0f0f0;
+      }
 
-  .form-group {
-    margin-bottom: 16px;
-  }
+      .template-item {
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+      }
 
-  label {
-    display: block;
-    font-size: 14px;
-    margin-bottom: 8px;
-  }
+      .template-item:hover {
+        background-color: #f0f0f0;
+      }
 
-  input, textarea, select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 14px;
-  }
+      .template-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
 
-  textarea {
-    resize: vertical;
-  }
+      .form-group {
+        margin-bottom: 16px;
+      }
 
-  .total-price {
-    font-size: 14px;
-    font-weight: bold;
-    margin-top: 16px;
-  }
+      label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
 
-  .button-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-  }
+      input, textarea, select {
+        width: 95%;
+        padding: 8px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 12px;
+      }
 
-  .button-group button {
-    flex: 1;
-  }
+      textarea {
+        resize: vertical;
+      }
 
-  .save {
-    background-color: #f0f0f0;
-  }
+      .total-price, .discounted-price {
+        font-size: 14px;
+        font-weight: bold;
+        margin-top: 16px;
+      }
 
-  .selected-components {
-    flex: 1;
-  }
+      .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+      }
 
-  .component-name {
-    font-weight: bold;
-  }
+      .button-group button {
+        flex: 1;
+      }
 
-  input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-  }
+      .save {
+        background-color: #f0f0f0;
+      }
 
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
+      .component-name {
+        font-weight: bold;
+      }
 
-  input[type="number"] {
-    -moz-appearance: textfield;
-    -webkit-appearance: none;
-    appearance: none;
-  }
+      .modal {
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-  .modal {
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+      .modal-content {
+        background-color: #fefefe;
+        padding: 25px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 8px;
+      }
 
-  .modal-content {
-    background-color: #fefefe;
-    padding: 50px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 500px;
-    border-radius: 8px;
-  }
+      .delete {
+        background-color: #ff4d4f;
+        color: white;
+      }
 
-  .delete {
-    background-color: #ff4d4f;
-    color: white;
-  }
+      .delete:hover {
+        background-color: #ff7875;
+      }
 
-  .delete:hover {
-    background-color: #ff7875;
-  }
-  </style>
+      .loading-indicator {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .loader {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-right: 10px;
+      }
+
+      .loader.small {
+        width: 12px;
+        height: 12px;
+        border-width: 2px;
+        margin-right: 5px;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .package-option-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+        cursor: pointer;
+      }
+
+      .package-option-item:hover {
+        background-color: #f0f0f0;
+      }
+
+      .package-option-item h3 {
+        margin-top: 0;
+        margin-bottom: 8px;
+      }
+
+      .package-option-form {
+        padding: 20px;
+        border-radius: 8px;
+        background-color: white;
+      }
+
+      .price-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+        align-items: center;
+      }
+
+      .form-input {
+        padding: 8px 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      .option-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .create-button, .cancel-button, .add-button, .save-button, .delete-button {
+        padding: 10px 16px;
+        font-size: 12px;
+        font-weight: 500;
+        border: 1px solid #e0e0e0;
+        background-color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .create-button:hover, .cancel-button:hover, .add-button:hover, .save-button:hover, .delete-button:hover {
+        background-color: #f0f0f0;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 8px;
+      }
+
+      .button-group button {
+        flex: 1;
+      }
+
+      .fixed-bottom-buttons {
+        margin-top: auto;
+        padding-top: 16px;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .delete-button {
+        background-color: #ff4d4f;
+        color: white;
+      }
+
+      .delete-button:hover {
+        background-color: #ff7875;
+      }
+
+      .details-hint {
+        font-size: 12px;
+        color: #999;
+        margin-top: -13px;
+      }
+
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .checkbox-label input[type="checkbox"] {
+        margin-right: 8px;
+        width: auto;
+      }
+
+      .preview-image {
+        max-width: 100%;
+        max-height: 200px;
+        margin-top: 10px;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 10px;
+        background-color: #e0e0e0;
+        border-radius: 5px;
+        margin-top: 10px;
+      }
+
+      .progress {
+        height: 100%;
+        background-color: #4caf50;
+        border-radius: 5px;
+        transition: width 0.3s ease;
+      }
+
+      .package-image-container {
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .package-image {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 8px;
+      }
+      </style>

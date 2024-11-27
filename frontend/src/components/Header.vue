@@ -10,29 +10,46 @@
           <li><router-link to="/home">Home</router-link></li>
 
           <!-- About Us Dropdown -->
-          <li class="dropdown-container" @mouseenter="openDropdown('aboutus')" @mouseleave="closeDropdown">
+          <li
+            class="dropdown-container"
+            @mouseenter="openDropdown('aboutus')"
+            @mouseleave="closeDropdown('aboutus')"
+          >
             <router-link to="/aboutus">About Us</router-link>
             <ul v-if="dropdownOpen === 'aboutus'" class="dropdown-menu">
               <li><router-link to="/tour-guide">Tour Guide</router-link></li>
               <li><router-link to="/feedback">Feedback</router-link></li>
             </ul>
           </li>
-          
+
           <!-- Services Dropdown -->
-          <li class="dropdown-container" @mouseenter="openDropdown('services')" @mouseleave="closeDropdown">
+          <li
+            class="dropdown-container"
+            @mouseenter="openDropdown('services')"
+            @mouseleave="closeDropdown('services')"
+          >
             <a href="#" @click.prevent>Services</a>
             <ul v-if="dropdownOpen === 'services'" class="dropdown-menu">
-              <li><router-link to="/packages">Packages</router-link></li>
               <li><router-link to="/hotel">Hotel</router-link></li>
               <li><router-link to="/activities">Activities</router-link></li>
             </ul>
           </li>
-          
 
-          
-          <li><router-link to="/booking">Book Now</router-link></li>
+          <!-- Packages Dropdown -->
+          <li
+            class="dropdown-container"
+            @mouseenter="openDropdown('packages')"
+            @mouseleave="closeDropdown('packages')"
+          >
+            <router-link to="/packages">Packages</router-link>
+            <ul v-if="dropdownOpen === 'packages'" class="dropdown-menu">
+              <li><router-link to="/booking">Book Now</router-link></li>
+            </ul>
+          </li>
+
+          <!-- Contact Us Page -->
           <li><router-link to="/contactus">Contact Us</router-link></li>
-          
+
           <!-- Profile Dropdown -->
           <li class="profile">
             <a href="#" @click="toggleProfileDropdown">
@@ -40,7 +57,7 @@
             </a>
             <ul v-if="isProfileDropdownOpen" class="dropdown">
               <li><router-link to="/edit-profile">Profile</router-link></li>
-              <li><a href="#" @click.prevent="logout">Logout</a></li>
+              <li><a href="#" @click.prevent="handleLogout">Logout</a></li>
             </ul>
           </li>
         </ul>
@@ -49,39 +66,58 @@
   </div>
 </template>
 
-<script>
-import { auth } from '../firebaseConfig';
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { getAuth, signOut } from 'firebase/auth';
 
-export default {
-  data() {
-    return {
-      dropdownOpen: null,
-      isProfileDropdownOpen: false,
-      profileImage: '/path/to/default-profile.png', // Placeholder for profile image
-    };
-  },
-  methods: {
-    openDropdown(menu) {
-      this.dropdownOpen = menu;
-    },
-    closeDropdown() {
-      this.dropdownOpen = null;
-    },
-    toggleProfileDropdown() {
-      this.isProfileDropdownOpen = !this.isProfileDropdownOpen;
-    },
-    async logout() {
-      await auth.signOut();
-      this.$router.push('/login');
-    }
-  },
-  created() {
-    const user = auth.currentUser;
-    if (user) {
-      this.profileImage = user.photoURL || '/path/to/default-profile.png';
-    }
+const router = useRouter();
+const auth = getAuth();
+
+const dropdownOpen = ref(null);
+const isProfileDropdownOpen = ref(false);
+const canAccessBooking = ref(true); // Replace with actual logic
+
+// Open dropdown based on identifier
+const openDropdown = (menu) => {
+  dropdownOpen.value = menu;
+};
+
+// Close dropdown
+const closeDropdown = (menu) => {
+  if (dropdownOpen.value === menu) {
+    dropdownOpen.value = null;
   }
 };
+
+// Toggle profile dropdown
+const toggleProfileDropdown = () => {
+  isProfileDropdownOpen.value = !isProfileDropdownOpen.value;
+};
+
+// Close profile dropdown if clicked outside
+const handleClickOutside = (event) => {
+  const profileDropdown = document.querySelector('.profile');
+  if (profileDropdown && !profileDropdown.contains(event.target)) {
+    isProfileDropdownOpen.value = false;
+  }
+};
+
+// Logout function
+const handleLogout = async () => {
+  try {
+    await signOut(auth);
+    localStorage.removeItem('user');
+    router.push('/login');
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+};
+
+// Attach click outside listener on mount
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
 </script>
 
 <style scoped>
@@ -235,4 +271,19 @@ nav ul li:hover::after {
   vertical-align: middle;
   cursor: pointer;
 }
+
+.book-now-button {
+  background-color: #ff5733;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.book-now-button:hover {
+  background-color: #e04d28;
+}
 </style>
+

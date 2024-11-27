@@ -1,5 +1,5 @@
 <template>
-        <HeaderComponent />
+  <HeaderComponent />
   <div class="booking-form">
     <h2>Book Your Stay</h2>
     <div class="booking-steps">
@@ -9,56 +9,55 @@
       </div>
     </div>
 
-    <!-- Step 1: Date and Time Selection -->
+    <!-- Step 1: Package Selection -->
     <div v-if="currentStep === 0" class="booking-step">
-      <h3>Select Dates and Times</h3>
-      <div class="date-time-inputs">
-        <div class="input-group">
-          <label for="check-in-date">Check-in Date</label>
-          <input type="date" id="check-in-date" v-model="booking.checkInDate" required>
-        </div>
-        <div class="input-group">
-          <label for="check-in-time">Check-in Time</label>
-          <input type="time" id="check-in-time" v-model="booking.checkInTime" required>
-        </div>
-        <div class="input-group">
-          <label for="check-out-date">Check-out Date</label>
-          <input type="date" id="check-out-date" v-model="booking.checkOutDate" required>
-        </div>
-        <div class="input-group">
-          <label for="check-out-time">Check-out Time</label>
-          <input type="time" id="check-out-time" v-model="booking.checkOutTime" required>
+      <h3>Select Package</h3>
+      <div class="package-options">
+        <div v-for="pkg in packages" :key="pkg.id" class="package-option">
+          <input type="radio" :id="pkg.id" :value="pkg" v-model="booking.package">
+          <label :for="pkg.id">
+            <strong>{{ pkg.name }}</strong>
+            <p>{{ pkg.description }}</p>
+            <p>Price: ₱{{ pkg.price }}</p>
+          </label>
         </div>
       </div>
     </div>
 
-    <!-- Step 2: Hotel Selection -->
+    <!-- Step 2: Date and Time Selection -->
     <div v-if="currentStep === 1" class="booking-step">
-      <h3>Select Hotel</h3>
+      <h3>Select Date and Time</h3>
+      <Calendar 
+        v-model:checkInDate="booking.checkInDate"
+        v-model:checkInTime="booking.checkInTime"
+        @add-recurring="handleRecurring"
+      />
+    </div>
+
+    <!-- Step 3: Hotel and Room Selection -->
+    <div v-if="currentStep === 2" class="booking-step">
+      <h3>Select Hotel and Room</h3>
       <div class="hotel-options">
         <div v-for="hotel in hotels" :key="hotel.id" class="hotel-option">
-          <input type="radio" :id="hotel.id" :value="hotel" v-model="booking.hotel" required>
-          <label :for="hotel.id">
-            <strong>{{ hotel.name }}</strong>
-            <p>{{ hotel.description }}</p>
-          </label>
+          <h4>{{ hotel.name }}</h4>
+          <p>{{ hotel.description }}</p>
+          <div class="room-options">
+            <div v-for="room in hotel.rooms" :key="room.id" class="room-option">
+              <input 
+                type="radio" 
+                :id="room.id" 
+                :value="{ hotel, room }" 
+                v-model="booking.hotelAndRoom"
+                @change="updateBooking(hotel, room)"
+              >
+              <label :for="room.id">
+                <strong>{{ room.name }}</strong> - ₱{{ room.price }} per night
+                <p>Capacity: {{ room.capacity }} pax</p>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- Step 3: Room Selection -->
-    <div v-if="currentStep === 2" class="booking-step">
-      <h3>Select Room</h3>
-      <div v-if="booking.hotel" class="room-options">
-        <div v-for="room in booking.hotel.rooms" :key="room.id" class="room-option">
-          <input type="radio" :id="room.id" :value="room" v-model="booking.room" required>
-          <label :for="room.id">
-            <strong>{{ room.name }}</strong> - ₱{{ room.price }} per night
-            <p>Capacity: {{ room.capacity }} pax</p>
-          </label>
-        </div>
-      </div>
-      <p v-else class="error-message">Please select a hotel first.</p>
     </div>
 
     <!-- Step 4: Guest Information -->
@@ -79,319 +78,433 @@
         </div>
         <div class="input-group">
           <label for="guests">Number of Guests</label>
-          <input type="number" id="guests" v-model="booking.guests" :min="1" :max="booking.room ? booking.room.capacity : 1" required>
+          <input type="number" id="guests" v-model="booking.guests" :min="1" :max="booking.hotelAndRoom ? booking.hotelAndRoom.room.capacity : 1" required>
         </div>
-      </div>
-    </div>
-
-    <!-- Step 5: Summary and Confirmation -->
-    <div v-if="currentStep === 4" class="booking-step">
-      <h3>Booking Summary</h3>
-      <div class="booking-summary">
-        <p><strong>Check-in:</strong> {{ formatDateTime(booking.checkInDate, booking.checkInTime) }}</p>
-        <p><strong>Check-out:</strong> {{ formatDateTime(booking.checkOutDate, booking.checkOutTime) }}</p>
-        <p><strong>Hotel:</strong> {{ booking.hotel ? booking.hotel.name : 'Not selected' }}</p>
-        <p><strong>Room:</strong> {{ booking.room ? booking.room.name : 'Not selected' }}</p>
-        <p><strong>Guests:</strong> {{ booking.guests }}</p>
-        <p><strong>Total Price:</strong> ₱{{ calculateTotalPrice() }}</p>
-        <p><strong>Guest Name:</strong> {{ booking.guestName }}</p>
-        <p><strong>Email:</strong> {{ booking.email }}</p>
-        <p><strong>Phone:</strong> {{ booking.phone }}</p>
       </div>
     </div>
 
     <div class="form-navigation">
       <button v-if="currentStep > 0" @click="prevStep" class="prev-btn">Previous</button>
       <button v-if="currentStep < steps.length - 1" @click="nextStep" class="next-btn">Next</button>
-      <button v-if="currentStep === steps.length - 1" @click="confirmBooking" class="confirm-btn">Confirm Booking</button>
+      <button v-if="currentStep === steps.length - 1" @click="showSummaryModal" class="confirm-btn">Review Booking</button>
     </div>
-    <!-- <FooterComponent /> -->
+
+    <!-- Booking Summary Modal -->
+    <div v-if="showModal" class="modal">
+      <div class="modal-content">
+        <span class="close" @click="showModal = false">&times;</span>
+        <h2>Booking Summary</h2>
+        <div class="booking-summary">
+          <p><strong>Package:</strong> {{ booking.package.name }}</p>
+          <p><strong>Check-in:</strong> {{ formatDateTime(booking.checkInDate, booking.checkInTime) }}</p>
+          <p><strong>Hotel:</strong> {{ booking.hotelAndRoom ? booking.hotelAndRoom.hotel.name : 'Not selected' }}</p>
+          <p><strong>Room:</strong> {{ booking.hotelAndRoom ? booking.hotelAndRoom.room.name : 'Not selected' }}</p>
+          <p><strong>Guests:</strong> {{ booking.guests }}</p>
+          <p><strong>Total Price:</strong> ₱{{ calculateTotalPrice() }}</p>
+          <p><strong>Guest Name:</strong> {{ booking.guestName }}</p>
+          <p><strong>Email:</strong> {{ booking.email }}</p>
+          <p><strong>Phone:</strong> {{ booking.phone }}</p>
+        </div>
+        <button @click="confirmBooking" class="confirm-btn">Confirm Booking</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import { ref, reactive } from 'vue';
+import { getAuth } from "firebase/auth";
+import { db } from "../firebaseConfig";
+import { addDoc, collection } from "firebase/firestore";
 import HeaderComponent from './Header.vue';
-// import FooterComponent from './Footer.vue';
+import Calendar from './CalendarUser.vue';
 
 export default {
   components: {
-        HeaderComponent,
-        // FooterComponent,
+    HeaderComponent,
+    Calendar,
   },
   
-  data() {
-    return {
-      currentStep: 0,
-      steps: ['Dates', 'Hotel', 'Room', 'Guest Info', 'Confirm'],
-      booking: {
-        checkInDate: '',
-        checkInTime: '',
-        checkOutDate: '',
-        checkOutTime: '',
-        hotel: null,
-        room: null,
-        guestName: '',
-        email: '',
-        phone: '',
-        guests: 1
+  setup() {
+    const currentStep = ref(0);
+    const showModal = ref(false);
+    const steps = ['Package', 'Date & Time', 'Hotel & Room', 'Guest Info'];
+    
+    const booking = reactive({
+      package: null,
+      checkInDate: null,
+      checkInTime: '',
+      hotelAndRoom: null,
+      guestName: '',
+      email: '',
+      phone: '',
+      guests: 1
+    });
+
+    const packages = [
+      {
+        id: 'package1',
+        name: "Package 1",
+        description: "Great accommodation and Island Hopping with snorkeling options.",
+        price: 5000
       },
-      hotels: [
-        {
-          id: 'agbing',
-          name: 'Agbing Seaside View Resort',
-          description: 'Beachfront resort with free Wi-Fi, air conditioning, cable TV, and RestoBar.',
-          rooms: [
-            { id: 'agbing-standard', name: 'Standard Room', capacity: 2, price: 2000 },
-            { id: 'agbing-deluxe', name: 'Deluxe Room', capacity: 4, price: 3000 },
-            { id: 'agbing-super-deluxe', name: 'Super Deluxe Room', capacity: 5, price: 3500 },
-            { id: 'agbing-barkada', name: 'Barkada Room', capacity: 10, price: 5000 },
-            { id: 'agbing-family', name: 'Family Room', capacity: 6, price: 4000 },
-            { id: 'agbing-family-kitchen', name: 'Family Room with Kitchen', capacity: 6, price: 4500 },
-            { id: 'agbing-barkada-kitchen', name: 'Barkada/Family Room with Kitchen', capacity: 14, price: 6000 }
-          ]
-        },
-        {
-          id: 'luckeh',
-          name: 'Luckeh 5J Beach Resort',
-          description: 'All rooms have air conditioning and Wi-Fi.',
-          rooms: [
-            { id: 'luckeh-super-deluxe', name: 'Super Deluxe Room', capacity: 6, price: 3500 },
-            { id: 'luckeh-deluxe', name: 'Deluxe Room', capacity: 4, price: 2500 }
-          ]
-        }
-      ]
-    }
-  },
-  methods: {
-    nextStep() {
-      if (this.currentStep < this.steps.length - 1) {
-        if (this.currentStep === 0 && !this.isDateTimeValid()) {
-          alert('Please select valid check-in and check-out dates and times.')
-          return
-        }
-        if (this.currentStep === 1 && !this.booking.hotel) {
-          alert('Please select a hotel before proceeding.')
-          return
-        }
-        if (this.currentStep === 2 && !this.booking.room) {
-          alert('Please select a room before proceeding.')
-          return
-        }
-        this.currentStep++
+      {
+        id: 'package2',
+        name: "Package 2",
+        description: "Experience underwater adventures with our snorkeling tour.",
+        price: 6000
+      },
+      {
+        id: 'packageDiamond',
+        name: "Package Diamond",
+        description: "Enjoy a memorable vacation with snorkeling, inland, and island tours.",
+        price: 8000
+      },
+      {
+        id: 'packageRuby',
+        name: "Package Ruby",
+        description: "Experience underwater adventures with our snorkeling tour.",
+        price: 7000
       }
-    },
-    prevStep() {
-      if (this.currentStep > 0) {
-        this.currentStep--
+    ];
+
+    const hotels = [
+      {
+        id: 'agbing',
+        name: 'Agbing Seaside View Resort',
+        description: 'Beachfront resort with free Wi-Fi, air conditioning, cable TV, and RestoBar.',
+        rooms: [
+          { id: 'agbing-standard', name: 'Standard Room', capacity: 2, price: 2000 },
+          { id: 'agbing-deluxe', name: 'Deluxe Room', capacity: 4, price: 3000 },
+          { id: 'agbing-super-deluxe', name: 'Super Deluxe Room', capacity: 5, price: 3500 },
+          { id: 'agbing-barkada', name: 'Barkada Room', capacity: 10, price: 5000 },
+          { id: 'agbing-family', name: 'Family Room', capacity: 6, price: 4000 },
+          { id: 'agbing-family-kitchen', name: 'Family Room with Kitchen', capacity: 6, price: 4500 },
+          { id: 'agbing-barkada-kitchen', name: 'Barkada/Family Room with Kitchen', capacity: 14, price: 6000 }
+        ]
+      },
+      {
+        id: 'luckeh',
+        name: 'Luckeh 5J Beach Resort',
+        description: 'All rooms have air conditioning and Wi-Fi.',
+        rooms: [
+          { id: 'luckeh-super-deluxe', name: 'Super Deluxe Room', capacity: 6, price: 3500 },
+          { id: 'luckeh-deluxe', name: 'Deluxe Room', capacity: 4, price: 2500 }
+        ]
       }
-    },
-    calculateTotalPrice() {
-      if (!this.booking.room || !this.booking.checkInDate || !this.booking.checkOutDate) {
-        return 0
+    ];
+
+    const nextStep = () => {
+      if (currentStep.value < steps.length - 1) {
+        if (currentStep.value === 0 && !booking.package) {
+          alert('Please select a package.');
+          return;
+        }
+        if (currentStep.value === 1 && !isDateTimeValid()) {
+          alert('Please select a valid check-in date and time.');
+          return;
+        }
+        if (currentStep.value === 2 && !booking.hotelAndRoom) {
+          alert('Please select a hotel and room.');
+          return;
+        }
+        currentStep.value++;
       }
-      const checkIn = new Date(`${this.booking.checkInDate}T${this.booking.checkInTime}`)
-      const checkOut = new Date(`${this.booking.checkOutDate}T${this.booking.checkOutTime}`)
-      const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24))
-      return this.booking.room.price * nights
-    },
-    confirmBooking() {
-      console.log('Booking confirmed:', this.booking)
-      alert('Your booking has been confirmed! Thank you for choosing our hotel.')
-      this.resetForm()
-    },
-    resetForm() {
-      this.currentStep = 0
-      this.booking = {
-        checkInDate: '',
+    };
+
+    const prevStep = () => {
+      if (currentStep.value > 0) {
+        currentStep.value--;
+      }
+    };
+
+    const updateBooking = (hotel, room) => {
+      booking.hotelAndRoom = { hotel, room };
+      booking.guests = 1;
+    };
+
+    const showSummaryModal = () => {
+      if (!isGuestInfoValid()) {
+        alert('Please fill in all guest information fields.');
+        return;
+      }
+      showModal.value = true;
+    };
+
+    const calculateTotalPrice = () => {
+      if (!booking.package || !booking.hotelAndRoom) {
+        return 0;
+      }
+      return booking.package.price + booking.hotelAndRoom.room.price;
+    };
+
+    const confirmBooking = async () => {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) {
+          alert("You must be logged in to make a booking.");
+          return;
+        }
+
+        const bookingsRef = collection(db, "bookings");
+        await addDoc(bookingsRef, {
+          ...booking,
+          userId: user.uid,
+          status: "Pending",
+          createdAt: new Date(),
+          totalPrice: calculateTotalPrice()
+        });
+        alert("Your booking has been confirmed! Thank you for choosing our hotel.");
+        resetForm();
+        showModal.value = false;
+      } catch (error) {
+        console.error("Error creating booking:", error);
+        alert("There was an error creating the booking.");
+      }
+    };
+
+    const resetForm = () => {
+      currentStep.value = 0;
+      Object.assign(booking, {
+        package: null,
+        checkInDate: null,
         checkInTime: '',
-        checkOutDate: '',
-        checkOutTime: '',
-        hotel: null,
-        room: null,
+        hotelAndRoom: null,
         guestName: '',
         email: '',
         phone: '',
         guests: 1
-      }
-    },
-    formatDateTime(date, time) {
-      if (!date || !time) return 'Not selected'
-      const dateObj = new Date(`${date}T${time}`)
+      });
+    };
+
+    const formatDateTime = (date, time) => {
+      if (!date || !time) return 'Not selected';
+      const dateObj = new Date(date);
+      dateObj.setHours(parseInt(time.split(':')[0]), parseInt(time.split(':')[1]));
       return dateObj.toLocaleString('en-US', { 
         year: 'numeric', 
         month: 'long', 
         day: 'numeric', 
         hour: '2-digit', 
         minute: '2-digit'
-      })
-    },
-    isDateTimeValid() {
-      const checkIn = new Date(`${this.booking.checkInDate}T${this.booking.checkInTime}`)
-      const checkOut = new Date(`${this.booking.checkOutDate}T${this.booking.checkOutTime}`)
-      const now = new Date()
-      return checkIn > now && checkOut > checkIn
-    }
-  },
-  watch: {
-    'booking.hotel'() {
-      this.booking.room = null
-      this.booking.guests = 1
-    },
-    'booking.room'() {
-      if (this.booking.room && this.booking.guests > this.booking.room.capacity) {
-        this.booking.guests = this.booking.room.capacity
-      }
-    }
+      });
+    };
+
+    const isDateTimeValid = () => {
+      if (!booking.checkInDate || !booking.checkInTime) return false;
+      const checkIn = new Date(booking.checkInDate);
+      checkIn.setHours(parseInt(booking.checkInTime.split(':')[0]), parseInt(booking.checkInTime.split(':')[1]));
+      const now = new Date();
+      return checkIn > now;
+    };
+
+    const isGuestInfoValid = () => {
+      return booking.guestName && booking.email && booking.phone && booking.guests > 0;
+    };
+
+    const handleRecurring = (event) => {
+      // Handle recurring bookings if needed
+      console.log('Recurring booking:', event);
+    };
+
+    return {
+      currentStep,
+      showModal,
+      steps,
+      booking,
+      packages,
+      hotels,
+      nextStep,
+      prevStep,
+      updateBooking,
+      showSummaryModal,
+      calculateTotalPrice,
+      confirmBooking,
+      formatDateTime,
+      handleRecurring
+    };
   }
 }
 </script>
 
 <style scoped>
 .booking-form {
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 800px;
+  margin: 150px auto;
+  text-align: center;
   padding: 20px;
   background-color: #f8f9fa;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-h2 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 20px;
-}
-
 .booking-steps {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .step {
   flex: 1;
-  text-align: center;
   padding: 10px;
-  background-color: #e9ecef;
-  color: #6c757d;
-  border-radius: 4px;
-  font-size: 14px;
+  text-align: center;
+  font-weight: bold;
+  color: #666;
+  border-bottom: 3px solid #ddd;
+  transition: color 0.3s, border-color 0.3s;
 }
 
 .step.active {
-  background-color: #007bff;
-  color: white;
+  color: #007bff;
+  border-color: #007bff;
 }
 
 .step.completed {
-  background-color: #28a745;
-  color: white;
+  color: #28a745;
+  border-color: #28a745;
 }
 
 .booking-step {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
-h3 {
-  color: #495057;
+.package-options,
+.hotel-options,
+.room-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.package-option,
+.hotel-option,
+.room-option {
+  flex: 1 1 48%;
+  background-color: #fff;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.3s;
+}
+
+.package-option:hover,
+.hotel-option:hover,
+.room-option:hover {
+  border-color: #007bff;
+}
+
+.package-option input,
+.hotel-option input,
+.room-option input {
+  margin-right: 10px;
+}
+
+.package-option label,
+.hotel-option label,
+.room-option label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+  color: #333;
+}
+
+.guest-form .input-group {
   margin-bottom: 15px;
 }
 
-.date-time-inputs, .guest-form {
-  display: grid;
-  gap: 15px;
+.input-group label {
+  font-weight: bold;
+  color: #666;
 }
 
-.input-group {
-  display: flex;
-  flex-direction: column;
-}
-
-label {
-  margin-bottom: 5px;
-  color: #495057;
-}
-
-input[type="date"],
-input[type="time"],
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="number"] {
-  padding: 10px;
-  border: 1px solid #ced4da;
+.input-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 16px;
-}
-
-.hotel-options, .room-options {
-  display: grid;
-  gap: 15px;
-}
-
-.hotel-option, .room-option {
-  display: flex;
-  align-items: flex-start;
-}
-
-.hotel-option input[type="radio"],
-.room-option input[type="radio"] {
-  margin-right: 10px;
-  margin-top: 5px;
-}
-
-.hotel-option label,
-.room-option label {
-  flex: 1;
-}
-
-.hotel-option p,
-.room-option p {
-  margin: 5px 0 0;
-  font-size: 14px;
-  color: #6c757d;
-}
-
-.booking-summary p {
-  margin: 10px 0;
 }
 
 .form-navigation {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
+  gap: 10px;
 }
 
-button {
+.prev-btn,
+.next-btn,
+.confirm-btn {
   padding: 10px 20px;
+  border-radius: 8px;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
   transition: background-color 0.3s;
+  color: #fff;
 }
 
 .prev-btn {
-  background-color: #6c757d;
-  color: white;
+  background-color: #95a5a6;
 }
 
-.next-btn, .confirm-btn {
+.prev-btn:hover {
+  background-color: #7f8c8d;
+}
+
+.next-btn {
   background-color: #007bff;
-  color: white;
 }
 
-button:hover {
-  opacity: 0.9;
+.next-btn:hover {
+  background-color: #0056b3;
 }
 
-.error-message {
-  color: #dc3545;
-  font-size: 14px;
-  margin-top: 10px;
+.confirm-btn {
+  background-color: #28a745;
 }
 
-@media (max-width: 600px) {
+.confirm-btn:hover {
+  background-color: #218838;
+}
+
+.modal {
+  display: flex;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 600px;
+  border-radius: 8px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
   .booking-form {
     padding: 15px;
   }
@@ -403,10 +516,6 @@ button:hover {
   .step {
     flex-basis: 50%;
     margin-bottom: 10px;
-  }
-
-  .date-time-inputs {
-    grid-template-columns: 1fr;
   }
 
   .form-navigation {

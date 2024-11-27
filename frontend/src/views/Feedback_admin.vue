@@ -9,7 +9,11 @@
         </div>
       </div>
       <div class="card-content">
-        <div class="table-container">
+        <div v-if="loading.feedbacks" class="loading-indicator">
+          <div class="loader"></div>
+          Loading feedbacks...
+        </div>
+        <div v-else class="table-container">
           <table>
             <thead>
               <tr>
@@ -33,14 +37,28 @@
                 <td>{{ feedback.email }}</td>
                 <td>{{ truncateFeedback(feedback.message) }}</td>
                 <td>
-                  <select v-model="feedback.status" @change="updateFeedbackStatus(feedback)" @click.stop>
+                  <select 
+                    v-model="feedback.status" 
+                    @change="updateFeedbackStatus(feedback)" 
+                    @click.stop
+                    :disabled="loading.updateStatus === feedback.id"
+                  >
                     <option>New</option>
                     <option>In Progress</option>
                     <option>Resolved</option>
                   </select>
+                  <span v-if="loading.updateStatus === feedback.id" class="loader small"></span>
                 </td>
                 <td>
-                  <button @click.stop="archiveFeedback(feedback)" class="archive-btn" title="Archive">🗑️</button>
+                  <button 
+                    @click.stop="archiveFeedback(feedback)" 
+                    class="archive-btn" 
+                    title="Archive"
+                    :disabled="loading.archive === feedback.id"
+                  >
+                    <span v-if="loading.archive === feedback.id" class="loader small"></span>
+                    <span v-else>🗑️</span>
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -66,15 +84,34 @@
         <button @click="closeActiveView" class="close-btn">❌</button>
       </div>
       <div class="card-content">
-        <div v-for="feedback in archivedFeedbacks" :key="feedback.id" class="archived-feedback">
-          <h4>{{ feedback.name }}</h4>
-          <p>{{ truncateFeedback(feedback.message, 100) }}</p>
-          <p><strong>Email:</strong> {{ feedback.email }}</p>
-          <p><strong>Status:</strong> {{ feedback.status }}</p>
+        <div v-if="loading.archives" class="loading-indicator">
+          <div class="loader"></div>
+          Loading archived feedbacks...
+        </div>
+        <div v-else class="archived-feedbacks-list">
+          <div 
+            v-for="feedback in archivedFeedbacks" 
+            :key="feedback.id" 
+            class="archived-feedback"
+            :class="{ 'selected': selectedArchivedFeedback && selectedArchivedFeedback.id === feedback.id }"
+            @click="selectArchivedFeedback(feedback)"
+          >
+            <h4>{{ feedback.name }}</h4>
+            <p>{{ truncateFeedback(feedback.message, 100) }}</p>
+            <p><strong>Email:</strong> {{ feedback.email }}</p>
+            <p><strong>Status:</strong> {{ feedback.status }}</p>
+          </div>
         </div>
       </div>
       <div class="fixed-button-container">
-        <button @click="restoreFeedback(selectedFeedback)" class="btn btn-secondary">Restore</button>
+        <button 
+          @click="restoreFeedback(selectedArchivedFeedback)" 
+          class="btn btn-secondary"
+          :disabled="!selectedArchivedFeedback || loading.restore"
+        >
+          <span v-if="loading.restore" class="loader small"></span>
+          <span v-else>Restore</span>
+        </button>
       </div>
     </div>
 
@@ -110,7 +147,14 @@
         </div>
       </div>
       <div class="fixed-button-container">
-        <button @click="addReply" class="btn btn-primary">Send Reply</button>
+        <button 
+          @click="addReply" 
+          class="btn btn-primary"
+          :disabled="loading.addReply"
+        >
+          <span v-if="loading.addReply" class="loader small"></span>
+          <span v-else>Send Reply</span>
+        </button>
       </div>
     </div>
 
@@ -172,10 +216,21 @@ const feedbacks = ref([]);
 const archivedFeedbacks = ref([]);
 const newReply = ref('');
 const selectedFeedback = ref(null);
+const selectedArchivedFeedback = ref(null);
 const activeView = ref(null);
 const searchTerm = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 10;
+
+// Loading states
+const loading = ref({
+  feedbacks: false,
+  updateStatus: null,
+  archive: null,
+  restore: false,
+  addReply: false,
+  archives: false
+});
 
 // Computed properties
 const filteredFeedbacks = computed(() => {
@@ -215,6 +270,7 @@ const truncateId = (id, maxLength = 8) => {
 
 // Fetch feedbacks from Firestore
 const fetchFeedbacks = async () => {
+  loading.value.feedbacks = true;
   try {
     feedbacks.value = [];
     archivedFeedbacks.value = [];
@@ -250,11 +306,14 @@ const fetchFeedbacks = async () => {
   } catch (error) {
     console.error('Error fetching feedbacks:', error);
     alert('Failed to fetch feedbacks. Please check your database connection.');
+  } finally {
+    loading.value.feedbacks = false;
   }
 };
 
 // Update feedback status in Firestore
 const updateFeedbackStatus = async (feedback) => {
+  loading.value.updateStatus = feedback.id;
   try {
     const feedbackRef = doc(db, 'contacts', feedback.id);
     await updateDoc(feedbackRef, { status: feedback.status });
@@ -262,6 +321,8 @@ const updateFeedbackStatus = async (feedback) => {
   } catch (error) {
     console.error('Error updating feedback status:', error);
     alert('Failed to update status');
+  } finally {
+    loading.value.updateStatus = null;
   }
 };
 
@@ -269,6 +330,7 @@ const updateFeedbackStatus = async (feedback) => {
 const archiveFeedback = async (feedback) => {
   if (!confirm('Are you sure you want to archive this feedback?')) return;
 
+  loading.value.archive = feedback.id;
   try {
     const feedbackRef = doc(db, 'contacts', feedback.id);
     await updateDoc(feedbackRef, { archived: true });
@@ -280,11 +342,16 @@ const archiveFeedback = async (feedback) => {
   } catch (error) {
     console.error('Error archiving feedback:', error);
     alert('Failed to archive feedback');
+  } finally {
+    loading.value.archive = null;
   }
 };
 
 // Restore archived feedback
 const restoreFeedback = async (feedback) => {
+  if (!feedback) return;
+
+  loading.value.restore = true;
   try {
     const feedbackRef = doc(db, 'contacts', feedback.id);
     await updateDoc(feedbackRef, { archived: false });
@@ -292,10 +359,13 @@ const restoreFeedback = async (feedback) => {
     archivedFeedbacks.value = archivedFeedbacks.value.filter((fb) => fb.id !== feedback.id);
     feedbacks.value.push({ ...feedback, archived: false });
 
+    selectedArchivedFeedback.value = null;
     alert('Feedback restored successfully!');
   } catch (error) {
     console.error('Error restoring feedback:', error);
     alert('Failed to restore feedback');
+  } finally {
+    loading.value.restore = false;
   }
 };
 
@@ -306,6 +376,7 @@ const addReply = async () => {
     return;
   }
 
+  loading.value.addReply = true;
   try {
     const replyDoc = {
       text: newReply.value,
@@ -328,6 +399,8 @@ const addReply = async () => {
   } catch (error) {
     console.error('Error adding reply:', error);
     alert('Failed to add reply');
+  } finally {
+    loading.value.addReply = false;
   }
 };
 
@@ -363,10 +436,16 @@ const selectFeedback = (feedback) => {
   activeView.value = null;
 };
 
+// Select an archived feedback
+const selectArchivedFeedback = (feedback) => {
+  selectedArchivedFeedback.value = feedback;
+};
+
 // Close side panel
 const closeActiveView = () => {
   activeView.value = null;
   selectedFeedback.value = null;
+  selectedArchivedFeedback.value = null;
   newReply.value = '';
 };
 
@@ -374,6 +453,14 @@ const closeActiveView = () => {
 const setActiveView = (view) => {
   activeView.value = view;
   selectedFeedback.value = null;
+  selectedArchivedFeedback.value = null;
+  if (view === 'archives') {
+    loading.value.archives = true;
+    // Simulating a delay for loading archived feedbacks
+    setTimeout(() => {
+      loading.value.archives = false;
+    }, 1000);
+  }
 };
 
 // Pagination controls
@@ -584,13 +671,38 @@ textarea {
   font-size: 1.25rem;
 }
 
-.archived-feedback {
-  border-bottom: 1px solid #e0e0e0;
-  padding: 1rem 0;
+.archived-feedbacks-list {
+  max-height: 400px;
+  overflow-y: auto;
 }
 
-.archived-feedback:last-child {
-  border-bottom: none;
+.archived-feedback {
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.archived-feedback:hover {
+  background-color: #e9ecef;
+}
+
+.archived-feedback.selected {
+  background-color: #e3f2fd;
+}
+
+.archived-feedback h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.archived-feedback p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
 }
 
 .report-table {
@@ -618,5 +730,42 @@ textarea {
   right: 1rem;
   display: flex;
   gap: 0.5rem;
+}
+
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  font-size: 14px;
+  color: #666;
+}
+
+.loader {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.loader.small {
+  width: 12px;
+  height: 12px;
+  border-width: 2px;
+  margin-right: 5px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>
