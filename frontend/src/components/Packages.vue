@@ -1,8 +1,7 @@
 <template>
   <div class="packages-page">
     <HeaderComponent />
-
-    <!-- Banner Section -->
+     <!-- Banner Section -->
     <div class="banner">
       <h1>Travel Packages</h1>
       <p>Explore our exclusive travel packages for an unforgettable adventure. Your journey to paradise starts here!</p>
@@ -278,19 +277,7 @@ const closePackageModal = () => {
     min-height: 100vh;
 }
 
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2px 15px;
-    background-color: white;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+
 
 .banner {
     width: 100%;

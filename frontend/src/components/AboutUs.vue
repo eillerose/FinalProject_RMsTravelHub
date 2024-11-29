@@ -58,19 +58,7 @@
           </div>
         </div>
 
-        <div class="team-card">
-          <div class="card-background teal"></div>
-          <div class="card-content">
-            <div class="profile-image-container">
-              <img src="/src/img/tg1.jpg" alt="Arielle Copper" class="profile-image">
-            </div>
-            <h3>Arielle Copper</h3>
-            <p class="position">position</p>
-            <p class="description">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            </p>
-          </div>
-        </div>
+        
       </div>
     </section>
 
@@ -102,9 +90,6 @@
         </div>
       </div>
     </section>
-
-   
-
     <FooterComponent />
   </div>
 </template>

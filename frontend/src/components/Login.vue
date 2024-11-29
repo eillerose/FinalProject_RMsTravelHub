@@ -1,6 +1,6 @@
 <template>
   <div class="login-page">
-    <span class="back-icon material-icons" @click="goBack">arrow_back</span> <!-- Moved to the top left -->
+    <span class="back-icon material-icons" @click="goBack">arrow_back</span>
     <div class="login-wrapper">
       <div class="login-container">
         <div class="logo-title">
@@ -17,12 +17,28 @@
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" v-model="password" placeholder="Enter password" id="password" />
+            <div class="password-container">
+              <input
+                :type="showPassword ? 'text' : 'password'"
+                v-model="password"
+                placeholder="Enter password"
+                id="password"
+              />
+              <span
+                class="material-icons view-icon"
+                @click="togglePasswordVisibility"
+              >
+                {{ showPassword ? 'visibility_off' : 'visibility' }}
+              </span>
+            </div>
           </div>
           <button type="submit">Log In</button>
         </form>
+        <p class="forgot-password-link">
+          <a @click="resetPassword">Forgot Password?</a>
+        </p>
         <p class="signup-link">
-          Don't have an account? 
+          Don't have an account?
           <router-link to="/signup">Sign Up</router-link>
         </p>
       </div>
@@ -37,14 +53,15 @@
 <script>
 import { ref } from 'vue';
 import { auth, db } from '../firebaseConfig';
-import { signInWithEmailAndPassword, reload } from 'firebase/auth'; 
+import { signInWithEmailAndPassword, sendPasswordResetEmail, reload } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'vue-router';
-import { doc, updateDoc } from 'firebase/firestore';
 
 export default {
   setup() {
-    const email = ref(''); 
+    const email = ref('');
     const password = ref('');
+    const showPassword = ref(false);
     const router = useRouter();
 
     const handleLogin = async () => {
@@ -55,14 +72,26 @@ export default {
         await reload(user);
 
         if (user.emailVerified) {
-          console.log('User logged in:', user);
+          // Fetch user role from Firestore
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const userRole = userData.role;
 
-          const userDocRef = doc(db, 'users', user.uid);
-          await updateDoc(userDocRef, {
-            verified: true
-          });
-
-          router.push('/home');
+            console.log('User logged in:', user);
+            
+            // Redirect based on user role
+            if (userRole === 'admin') {
+              router.push('/admin');
+            } else {
+              router.push('/home');
+            }
+          } else {
+            console.error('User document not found');
+            alert('User data not found. Please contact support.');
+            await auth.signOut();
+          }
         } else {
           alert('Please verify your email before logging in.');
           await auth.signOut();
@@ -73,15 +102,37 @@ export default {
       }
     };
 
+    const resetPassword = async () => {
+      if (!email.value) {
+        alert('Please enter your email address to reset your password.');
+        return;
+      }
+
+      try {
+        await sendPasswordResetEmail(auth, email.value);
+        alert('Password reset email sent! Please check your inbox.');
+      } catch (error) {
+        console.error('Error sending reset email:', error.message);
+        alert('Failed to send reset email. Please check if the email is correct.');
+      }
+    };
+
     const goBack = () => {
       router.back();
+    };
+
+    const togglePasswordVisibility = () => {
+      showPassword.value = !showPassword.value;
     };
 
     return {
       email,
       password,
+      showPassword,
       handleLogin,
+      resetPassword,
       goBack,
+      togglePasswordVisibility,
     };
   },
 };
@@ -97,22 +148,22 @@ export default {
   justify-content: center;
   align-items: center;
   min-height: 91vh;
-  background-color: #f2f2f2; 
-  background-size: cover; 
-  background-position: center; 
-  background-repeat: no-repeat; 
+  background-color: #f2f2f2;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   padding: 2rem;
-  position: relative; 
+  position: relative;
 }
 
 .back-icon {
   position: absolute;
-  top: 40px; 
-  left: 40px; 
+  top: 40px;
+  left: 40px;
   font-size: 24px;
   color: black;
   cursor: pointer;
-  z-index: 10; /* Ensures it stays on top of other elements */
+  z-index: 10;
 }
 
 .login-wrapper {
@@ -121,19 +172,19 @@ export default {
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  max-width: 900px; /* Adjusted container width */
+  max-width: 900px;
   width: 100%;
-  margin: auto; /* Centers the container */
+  margin: auto;
 }
 
 .login-container {
   flex: 1;
-  padding: 2rem; /* Reduced padding for a more compact look */
-  max-width: 60%; /* Adjusted container width */
+  padding: 2rem;
+  max-width: 60%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin: 1rem 0; /* Adds balanced top and bottom margins */
+  margin: 1rem 0;
 }
 
 .logo-title {
@@ -143,7 +194,7 @@ export default {
 }
 
 .logo {
-  width: 35px; /* Adjusted logo size */
+  width: 35px;
 }
 
 h2 {
@@ -155,14 +206,14 @@ h1 {
   color: black;
   font-size: 2rem;
   font-weight: bold;
-  margin: 0; 
+  margin: 0;
   margin-top: 10%;
 }
 
 .subtitle {
   color: #6c757d;
   font-size: .9rem;
-  margin: 1rem 0; 
+  margin: 1rem 0;
   margin-top: 2%;
 }
 
@@ -177,7 +228,7 @@ h1 {
 }
 
 label {
-  font-size: .9rem; /* Reduced label font size */
+  font-size: .9rem;
   font-weight: bold;
   display: block;
   color: #495057;
@@ -187,12 +238,25 @@ label {
 
 input {
   font-size: .9rem;
-  width: 95%; /* Full width of the form container */
+  width: 95%;
   padding: 0.75rem;
   border: 1px solid #ced4da;
   border-radius: 4px;
   background-color: #ffffff;
   font-family: 'Poppins', sans-serif;
+}
+
+.password-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.view-icon {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: #6c757d;
 }
 
 input::placeholder {
@@ -203,7 +267,7 @@ button {
   font-size: 1rem;
   padding: 0.5rem;
   margin-left: 6rem;
-  width: 50%; 
+  width: 50%;
   background-color: #1AA0B6;
   color: #ffffff;
   border: none;
@@ -219,7 +283,7 @@ button:hover {
 }
 
 .signup-link {
-  margin-top: 1rem; /* Consistent spacing */
+  margin-top: 1rem;
   text-align: center;
   font-size: 0.9rem;
   color: #495057;
@@ -233,7 +297,7 @@ button:hover {
 
 .login-image {
   flex: 1;
-  max-width: 55%; /* Adjusted image container width */
+  max-width: 55%;
   overflow: hidden;
 }
 
@@ -243,4 +307,34 @@ button:hover {
   object-fit: cover;
 }
 
+.forgot-password-link {
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.forgot-password-link a {
+  color: #1AA0B6;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  width: 90%; /* Adjusted width for the password input */
+  padding-right: 40px; /* Add padding for the icon */
+}
+
+.password-wrapper .material-icons {
+  position: absolute;
+  right: 10px; /* Position the icon within the input */
+  top: 50%; /* Center the icon vertically */
+  transform: translateY(-50%); /* Centering adjustment */
+  cursor: pointer; /* Pointer cursor for the icon */
+  color: #6c757d; /* Icon color */
+  font-size: 1rem; /* Icon size */
+}
 </style>
