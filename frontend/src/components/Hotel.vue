@@ -4,16 +4,18 @@
 
     <div class="hero">
       <h1>Our Featured Hotels</h1>
-      <p>Explore a curated selection of luxurious, comfortable, and affordable accommodations, offering everything you need for an unforgettable stay in Puerto Galera.</p>
+      <p>
+        Explore a curated selection of luxurious, comfortable, and affordable accommodations, offering everything you need for an unforgettable stay in Puerto Galera.
+      </p>
     </div>
 
     <main class="main-content">
       <h2>Choose your hotel</h2>
-      
+
       <div class="content-wrapper" :class="{ 'show-details': selectedHotel }">
         <div class="hotels-container">
           <transition-group name="hotel-list" tag="div" class="hotels-grid">
-            <div v-for="hotel in sortedHotels" :key="hotel.id" class="hotel-card">
+            <div v-if="hotels.length > 0" v-for="hotel in sortedHotels" :key="hotel.id" class="hotel-card">
               <img :src="hotel.image" :alt="hotel.name" class="hotel-image" />
               <div class="hotel-info">
                 <h3>{{ hotel.name }}</h3>
@@ -27,6 +29,9 @@
                 </button>
               </div>
             </div>
+            <div v-else>
+              <p>No hotels found. Please check back later!</p>
+            </div>
           </transition-group>
         </div>
 
@@ -38,7 +43,7 @@
             <div class="details-content">
               <h3>{{ selectedHotel.name }}</h3>
               <p class="description">{{ selectedHotel.fullDescription }}</p>
-              
+
               <div class="gallery">
                 <h4>Gallery</h4>
                 <div class="gallery-grid">
@@ -53,7 +58,7 @@
                 <h4>Contact Information</h4>
                 <p><span class="material-icons">phone</span>{{ selectedHotel.phone }}</p>
                 <p><span class="material-icons">email</span>{{ selectedHotel.email }}</p>
-                <p><span class="material-icons">language</span>{{ selectedHotel.socialMedia.handle }}</p>
+                <p><span class="material-icons">language</span>{{ selectedHotel.socialMedia?.handle || 'N/A' }}</p>
               </div>
 
               <div class="info-section">
@@ -77,6 +82,7 @@
         </transition>
       </div>
     </main>
+
     <FooterComponent />
   </div>
 </template>
@@ -84,89 +90,55 @@
 <script setup>
 import HeaderComponent from './Header.vue';
 import FooterComponent from './Footer.vue';
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { firebaseApp } from '../firebaseConfig';
 
-const hotels = ref([
-  {
-    id: 'agbing',
-    name: 'Agbing Seaside View Resort',
-    image: '/src/img/Agbing Seaside View Resort.jpg',
-    description: 'Escape to paradise at Agbing Seaside View Resort',
-    location: 'White Beach, Puerto Galera, Philippines',
-    fullDescription: 'Escape to paradise at Agbing Seaside View Resort. Discover the beauty of crystal-clear waters and white sandy beaches while enjoying top-notch accommodations and exceptional hospitality.',
-    phone: '0917 795 3899',
-    email: 'Agbingseaside@gmail.com',
-    socialMedia: {
-      handle: 'web.facebook.com/Agbingseasideview'
-    },
-    amenities: [
-      'Free WiFi',
-      'Beachfront Access',
-      'Swimming Pool',
-      'Cable TV',
-      'RestoBar',
-      'Airconditioned'
-    ],
-    rooms: [
-      'Standard room (2 pax)',
-      'Deluxe room (4 pax)',
-      'Super deluxe room (5 pax)',
-      'Barkada room (10 pax)',
-      'Family room (6 pax)',
-      'Family room with kitchen (6 pax)',
-      'Barkada/Family room with kitchen (14 pax)'
-    ],
-    gallery: [
-      '/src/img/AgbingFront.jpg',
-      '/src/img/AgbingRoom1.jpg',
-      '/src/img/AgbingRoom2.jpg'
-    ]
-  },
-  {
-    id: 'luckeh',
-    name: 'Luckeh 5J Beach Resort',
-    image: '/src/img/Luckeh 5J Beach Resort.jpg',
-    description: 'Discover the serenity of White Beach',
-    location: 'White Beach, Puerto Galera, Philippines',
-    fullDescription: 'Located at White Beach, Puerto Galera, Luckeh 5J Beach Resort offers a perfect getaway with beautiful surroundings, water sports, and comfortable rooms.',
-    phone: '0917 898 7323',
-    email: 'luckeh5j@gmail.com',
-    socialMedia: {
-      handle: 'luckeh5j.com'
-    },
-    amenities: [
-      'Beachfront',
-      'Water Sports',
-      'Bar',
-      'Restaurant',
-      'Room Service'
-    ],
-    gallery: [
-      '/src/img/LuckehFront.jpg',
-      '/src/img/LuckehRoom1.jpg',
-      '/src/img/LuckehRoom2.jpg'
-    ]
-  }
-])
+// Firebase setup
+const db = getFirestore(firebaseApp);
 
-const selectedHotel = ref(null)
+// Reactive variables
+const hotels = ref([]);
+const selectedHotel = ref(null);
+const loading = ref(true); // Track loading state
+const error = ref(null); // Track errors
 
+// Computed property for sorting hotels
 const sortedHotels = computed(() => {
-  if (!selectedHotel.value) return hotels.value
+  if (!selectedHotel.value) return hotels.value;
   return [
     selectedHotel.value,
     ...hotels.value.filter(hotel => hotel.id !== selectedHotel.value.id)
-  ]
-})
+  ];
+});
 
+// Fetch data from Firestore
+const fetchHotels = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'hotels'));
+    hotels.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    loading.value = false; // Set loading to false after data fetch
+  } catch (err) {
+    error.value = "Failed to load hotels. Please try again later.";
+    console.error("Error fetching hotels:", err);
+    loading.value = false;
+  }
+};
+
+// Toggle hotel details
 const toggleDetails = (hotel) => {
-  selectedHotel.value = selectedHotel.value?.id === hotel.id ? null : hotel
-}
+  selectedHotel.value = selectedHotel.value?.id === hotel.id ? null : hotel;
+};
 
+// Close details panel
 const closeDetails = () => {
-  selectedHotel.value = null
-}
+  selectedHotel.value = null;
+};
+
+// Fetch hotels on component mount
+onMounted(fetchHotels);
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');

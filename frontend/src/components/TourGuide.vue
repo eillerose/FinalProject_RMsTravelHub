@@ -1,195 +1,131 @@
 <template>
-    <div class="tour-guides-page">
-      <header-component />
-      <div class="banner">
-        <h1>Our Tour Guides</h1>
-        <p>Discover the Philippines with our expert local guides</p>
-      </div>
-  
-      <main class="main-content">
-        <div class="guides-header">
-          <h2>Guides for you!</h2>
-          <button @click="toggleShowAllGuides" class="toggle-button">
-            {{ showAllGuides ? 'Show Less' : 'See All Guides' }}
-          </button>
-        </div>
-  
-        <div class="guides-container">
-          <div class="guides-grid">
-            <div v-for="guide in displayedGuides" :key="guide.id" class="guide-card">
-              <div class="guide-image-container">
-                <img :src="guide.image" :alt="guide.name" class="guide-image">
-              </div>
-              <h3 class="guide-name">{{ guide.name }}</h3>
-              <button @click="openGuideModal(guide)" class="view-profile-button">
-                View Profile
-              </button>
-            </div>
-          </div>
-        </div>
-      </main>
-  
-      <!-- Updated Modal Design -->
-      <div v-if="selectedGuide" class="modal-overlay" @click="closeGuideModal">
-        <div class="modal-content" @click.stop>
-          <button @click="closeGuideModal" class="close-button">×</button>
-          <div class="modal-layout">
-            <div class="modal-image-container">
-              <img :src="selectedGuide.image" :alt="selectedGuide.name" class="modal-guide-image">
-            </div>
-            <div class="modal-info">
-              <h2 class="modal-name">{{ selectedGuide.name }}</h2>
-              <div class="info-item">
-                <span class="material-icons">language</span>
-                <span>Languages : {{ selectedGuide.languages.join("/") }}</span>
-              </div>
-              <div class="info-item">
-                <span class="material-icons">star</span>
-                <span>Experience : {{ selectedGuide.experience }} years</span>
-              </div>
-              <!-- <button class="book-guide-button">Book This Guide</button> -->
-            </div>
-          </div>
-        </div>
-      </div>
-      <footer-component />
+  <div class="tour-guides-page">
+    <HeaderComponent/>
+    <div class="banner">
+      <h1>Our Tour Guides</h1>
+      <p>Discover the Philippines with our expert local guides</p>
     </div>
-  </template>
-  
-  <script>
-  import HeaderComponent from './Header.vue';
-  import FooterComponent from './Footer.vue';
-  
-  export default {
-    components: {
-      HeaderComponent,
-      FooterComponent,
-    },
-    data() {
-      return {
-        showAllGuides: false,
-        selectedGuide: null,
-        tourGuides: [
-          {
-            id: 1,
-            name: "Alan Marasigan",
-            image: "/src/img/tg1.jpg",
-            languages: ["English", "Filipino"],
-            experience: 5
-          },
-          {
-            id: 2,
-            name: "Angel Mhay Manzano",
-            image: "/src/img/tg2.jpg",
-            languages: ["English", "Cebuano"],
-            experience: 4
-          },
-          {
-            id: 3,
-            name: "Arcmay Manzano",
-            image: "/src/img/tg1.jpg",
-            languages: ["English", "Filipino"],
-            experience: 6
-          },
-          {
-            id: 4,
-            name: "Jerry Evangelista Tupas",
-            image: "/src/img/tg2.jpg",
-            languages: ["English", "Visayan"],
-            experience: 7
-          },
-          {
-            id: 5,
-            name: "Jhedca Peñas",
-            image: "/src/img/tg1.jpg",
-            languages: ["English", "Filipino"],
-            experience: 3
-          },
-          {
-            id: 6,
-            name: "Jocelyn Tupas",
-            image: "/src/img/tg2.jpg",
-            languages: ["English", "Hiligaynon"],
-            experience: 6
-          },
-          {
-            id: 7,
-            name: "Jojo Pollo",
-            image: "/src/img/tg1.jpg",
-            languages: ["English", "Cebuano"],
-            experience: 5
-          },
-          {
-            id: 8,
-            name: "Joshu Cataquis",
-            image: "/src/img/tg2.jpg",
-            languages: ["English", "Filipino"],
-            experience: 4
-          },
-          {
-            id: 9,
-            name: "Madilyn Atienza Sonco",
-            image: "/src/img/tg1.jpg",
-            languages: ["English", "Ilocano"],
-            experience: 8
-          },
-          {
-            id: 10,
-            name: "Marvin Atienza",
-            image: "/src/img/tg2.jpg",
-            languages: ["English", "Tagalog"],
-            experience: 6
-          },
-          {
-            id: 11,
-            name: "Nhichie Caguete",
-            image: "/src/img/tg1.jpg",
-            languages: ["English", "Ilocano"],
-            experience: 5
-          },
-          {
-            id: 12,
-            name: "Rizalie Lope Tupas",
-            image: "/src/img/tg2.jpg",
-            languages: ["English", "Filipino"],
-            experience: 7
-          },
-          {
-            id: 13,
-            name: "Ronnil Saren",
-            image: "/src/img/tg1.jpg",
-            languages: ["English", "Cebuano"],
-            experience: 5
-          },
-          {
-            id: 14,
-            name: "Ryan Evangelista Magbuhos",
-            image: "/src/img/tg2.jpg",
-            languages: ["English", "Cebuano"],
-            experience: 6
-          }
-        ]
-      };
-    },
-    computed: {
-      displayedGuides() {
-        return this.showAllGuides ? this.tourGuides : this.tourGuides.slice(0, 4);
+
+    <main class="main-content">
+      <div class="guides-header">
+        <h2>Guides for you!</h2>
+        <button @click="toggleShowAllGuides" class="toggle-button">
+          {{ showAllGuides ? 'Show Less' : 'See All Guides' }}
+        </button>
+      </div>
+
+      <div class="guides-container">
+        <div v-if="loading" class="loading-message">Loading tour guides...</div>
+        <div v-if="error" class="error-message">{{ error }}</div>
+        <div v-else class="guides-grid">
+          <div v-for="guide in displayedGuides" :key="guide.id" class="guide-card">
+            <div class="guide-image-container">
+              <img :src="guide.image" :alt="guide.name" class="guide-image">
+            </div>
+            <h3 class="guide-name">{{ guide.name }}</h3>
+            <button @click="openGuideModal(guide)" class="view-profile-button">
+              View Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div v-if="selectedGuide" class="modal-overlay" @click="closeGuideModal">
+      <div class="modal-content" @click.stop>
+        <button @click="closeGuideModal" class="close-button">×</button>
+        <div class="modal-layout">
+          <div class="modal-image-container">
+            <img :src="selectedGuide.image" :alt="selectedGuide.name" class="modal-guide-image">
+          </div>
+          <div class="modal-info">
+            <h2 class="modal-name">{{ selectedGuide.name }}</h2>
+            <div class="info-item">
+              <span class="material-icons">language</span>
+              <span>Languages: {{ selectedGuide.languages.join(", ") }}</span>
+            </div>
+            <div class="info-item">
+              <span class="material-icons">star</span>
+              <span>Experience: {{ selectedGuide.experience }} years</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <FooterComponent />
+  </div>
+</template>
+
+<script>
+import HeaderComponent from './Header.vue';
+import FooterComponent from './Footer.vue';
+import { ref, computed, onMounted } from 'vue';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { firebaseApp } from '../firebaseConfig';
+
+export default {
+  components: {
+    HeaderComponent,
+    FooterComponent,
+  },
+  setup() {
+    const db = getFirestore(firebaseApp);
+    const tourGuides = ref([]);
+    const showAllGuides = ref(false);
+    const selectedGuide = ref(null);
+    const loading = ref(true);
+    const error = ref(null);
+
+    // Fetch tour guides from Firestore
+    const fetchTourGuides = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'tourGuides'));
+        tourGuides.value = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        loading.value = false;
+      } catch (err) {
+        error.value = 'Failed to load tour guides. Please try again later.';
+        console.error('Error fetching tour guides:', err);
+        loading.value = false;
       }
-    },
-    methods: {
-      toggleShowAllGuides() {
-        this.showAllGuides = !this.showAllGuides;
-      },
-      openGuideModal(guide) {
-        this.selectedGuide = guide;
-      },
-      closeGuideModal() {
-        this.selectedGuide = null;
-      }
-    }
-  };
-  </script>
-  
+    };
+
+    const displayedGuides = computed(() =>
+      showAllGuides.value ? tourGuides.value : tourGuides.value.slice(0, 4)
+    );
+
+    const toggleShowAllGuides = () => {
+      showAllGuides.value = !showAllGuides.value;
+    };
+
+    const openGuideModal = (guide) => {
+      selectedGuide.value = guide;
+    };
+
+    const closeGuideModal = () => {
+      selectedGuide.value = null;
+    };
+
+    // Fetch tour guides on component mount
+    onMounted(fetchTourGuides);
+
+    return {
+      tourGuides,
+      showAllGuides,
+      displayedGuides,
+      selectedGuide,
+      toggleShowAllGuides,
+      openGuideModal,
+      closeGuideModal,
+      loading,
+      error,
+    };
+  },
+};
+</script>
+
   <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
   @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
