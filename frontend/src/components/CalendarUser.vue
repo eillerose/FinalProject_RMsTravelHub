@@ -182,6 +182,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  background-color: pink;
 }
 
 .nav-arrow {
