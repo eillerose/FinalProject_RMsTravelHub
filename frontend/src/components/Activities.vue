@@ -1,8 +1,6 @@
 <template>
     <div class="activities-page">
       <HeaderComponent />
-
-      
       <div class="container">
         <h1 class="title">RM's Travel and Tour</h1>
         <h2 class="subtitle">Activities</h2>
@@ -27,19 +25,17 @@
             </div>
           </div>
         </div>
-      </div>
-      <FooterComponent />
-    </div>
+      </div>    </div>
   </template>
   
   <script>
   import HeaderComponent from './Header.vue';
-  import FooterComponent from './Footer.vue';
+
   
   export default {
     components: {
       HeaderComponent,
-      FooterComponent,
+ 
     },
     data() {
       return {
@@ -49,22 +45,22 @@
         activeCategory: 'All',
         activities: [
           // Water Sport Activities
-          { name: 'Jetski', category: 'Water Sport', image: '/src/img/tg1.jpg', description: 'Experience the thrill of speed as you cruise over crystal-clear waters on a powerful jet ski.' },
-          { name: 'Parasailing', category: 'Water Sport', image: '/placeholder.svg?height=200&width=300', description: 'Soar high above the ocean for breathtaking views of the coastline.' },
-          { name: 'Banana Boat', category: 'Water Sport', image: '/placeholder.svg?height=200&width=300', description: 'Enjoy a fun-filled ride on an inflatable banana-shaped boat.' },
-          { name: 'Crazy UFO', category: 'Water Sport', image: '/placeholder.svg?height=200&width=300', description: 'Experience an exhilarating ride on a UFO-shaped inflatable pulled by a speedboat.' },
-          { name: 'Flying Fish', category: 'Water Sport', image: '/placeholder.svg?height=200&width=300', description: 'Glide over the water on an inflatable raft towed by a speedboat, feeling like you\'re flying.' },
+          { name: 'Jetski', category: 'Water Sport', image: '/src/img/jetski.jpg', description: 'Experience the thrill of speed as you cruise over crystal-clear waters on a powerful jet ski.' },
+          { name: 'Parasailing', category: 'Water Sport', image: '/src/img/parasailing.jpg', description: 'Soar high above the ocean for breathtaking views of the coastline.' },
+          { name: 'Banana Boat', category: 'Water Sport', image: '/src/img/bananaBoat.jpg', description: 'Enjoy a fun-filled ride on an inflatable banana-shaped boat.' },
+          { name: 'Crazy UFO', category: 'Water Sport', image: '/src/img/crazyUFO.jpg', description: 'Experience an exhilarating ride on a UFO-shaped inflatable pulled by a speedboat.' },
+          { name: 'Flying Fish', category: 'Water Sport', image: '/src/img/flyingFish.jpg', description: 'Glide over the water on an inflatable raft towed by a speedboat, feeling like you\'re flying.' },
   
           // Extreme Sport Philippines
-          { name: 'Bubble Ball', category: 'Extreme Sport', image: '/placeholder.svg?height=200&width=300', description: 'Play soccer while encased in a giant inflatable bubble for hilarious fun.' },
-          { name: 'Archery Tag', category: 'Extreme Sport', image: '/placeholder.svg?height=200&width=300', description: 'Combine archery skills with the excitement of dodgeball in this unique sport.' },
-          { name: 'Paint Ball', category: 'Extreme Sport', image: '/placeholder.svg?height=200&width=300', description: 'Engage in strategic team battles with colorful paintball markers.' },
-          { name: 'Mudkart', category: 'Extreme Sport', image: '/placeholder.svg?height=200&width=300', description: 'Race through muddy tracks in specially designed karts for a thrilling, messy adventure.' },
-          { name: 'Gokart', category: 'Extreme Sport', image: '/placeholder.svg?height=200&width=300', description: 'Test your racing skills on a professional go-kart track.' },
-          { name: 'ATV', category: 'Extreme Sport', image: '/placeholder.svg?height=200&width=300', description: 'Navigate rugged terrains on an All-Terrain Vehicle for an adrenaline-pumping experience.' },
-          { name: 'Airgun', category: 'Extreme Sport', image: '/placeholder.svg?height=200&width=300', description: 'Practice your marksmanship skills with various airguns in a controlled environment.' },
-          { name: 'Crossbow', category: 'Extreme Sport', image: '/placeholder.svg?height=200&width=300', description: 'Channel your inner archer with modern crossbows at our specialized range.' },
-          { name: 'Nerf Games', category: 'Extreme Sport', image: '/placeholder.svg?height=200&width=300', description: 'Engage in fun, safe combat games using Nerf blasters in our custom arena.' },
+          { name: 'Bubble Ball', category: 'Extreme Sport', image: '/src/img/bubbleBall.jpg', description: 'Play soccer while encased in a giant inflatable bubble for hilarious fun.' },
+          { name: 'Archery Tag', category: 'Extreme Sport', image: '/src/img/archeryTag.jpg', description: 'Combine archery skills with the excitement of dodgeball in this unique sport.' },
+          { name: 'Paint Ball', category: 'Extreme Sport', image: '/src/img/paintBall.webp', description: 'Engage in strategic team battles with colorful paintball markers.' },
+          { name: 'Mudkart', category: 'Extreme Sport', image: '/src/img/mudkart.jpg', description: 'Race through muddy tracks in specially designed karts for a thrilling, messy adventure.' },
+          { name: 'Gokart', category: 'Extreme Sport', image: '/src/img/gokart.jpg', description: 'Test your racing skills on a professional go-kart track.' },
+          { name: 'ATV', category: 'Extreme Sport', image: '/src/img/atv.jpg', description: 'Navigate rugged terrains on an All-Terrain Vehicle for an adrenaline-pumping experience.' },
+          { name: 'Airgun', category: 'Extreme Sport', image: '/src/img/airgun.jpg', description: 'Practice your marksmanship skills with various airguns in a controlled environment.' },
+          { name: 'Crossbow', category: 'Extreme Sport', image: '/src/img/crossbow.webp', description: 'Channel your inner archer with modern crossbows at our specialized range.' },
+          { name: 'Nerf Games', category: 'Extreme Sport', image: '/src/img/nerfGames.jpg', description: 'Engage in fun, safe combat games using Nerf blasters in our custom arena.' },
   
           // Inland Tour
           { name: 'Muelle Cultural Heritage Park', category: 'Inland Tour', image: '/placeholder.svg?height=200&width=300', description: 'Explore the rich history and culture of the region at this heritage park.' },

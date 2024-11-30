@@ -100,61 +100,61 @@ export default {
       Beaches: [
         {
           id: 1,
-          title: 'White Beach Getaway',
-          description: 'Relax on the soft, white sand, swim in the turquoise waters, and enjoy breathtaking sunsets in this tropical paradise',
-          image: '/src/img/White Beach.jpg'
+          title: 'Bayanan Beach',
+          description: 'A serene escape with crystal-clear waters and powdery white sands, perfect for relaxation.',
+          image: '/src/img/bayananBeach.jpg'
         },
         {
           id: 2,
-          title: 'Talipanan Beach Escape',
-          description: 'Experience the serenity of this less-crowded beach with its pristine shoreline and crystal-clear waters',
-          image: '/src/img/White Beach.jpg'
+          title: 'Haligi Beach',
+          description: 'A tranquil spot boasting pristine shores and breathtaking sunset views.',
+          image: '/src/img/haligiBeach.jpg'
         },
         {
           id: 3,
-          title: 'Sabang Beach Adventure',
-          description: 'Dive into excitement at this vibrant beach known for its water sports and lively atmosphere',
-          image: '/src/img/White Beach.jpg'
+          title: 'Bulabod Beach',
+          description: 'A hidden gem featuring unspoiled beauty and calm waters ideal for swimming.',
+          image: '/src/img/bulabodBeach.jpg'
         }
       ],
       Activities: [
         {
           id: 4,
-          title: 'Scuba Diving Experience',
-          description: 'Explore the vibrant underwater world with professional diving instructors',
-          image: '/src/img/White Beach.jpg'
+          title: 'Underwater Cave',
+          description: 'Explore a mystical underwater wonder with fascinating rock formations and marine life.',
+          image: '/src/img/underwaterCave.jpg'
         },
         {
           id: 5,
-          title: 'Island Hopping Tour',
-          description: 'Visit multiple scenic islands and hidden coves in one exciting day',
-          image: '/src/img/White Beach.jpg'
+          title: 'Parasailing',
+          description: 'Experience the thrill of flying over the sea, taking in panoramic island views.',
+          image: '/src/img/parasailing.jpg'
         },
         {
           id: 6,
-          title: 'Sunset Sailing',
-          description: 'Enjoy a peaceful evening sail while watching the stunning sunset',
-          image: '/src/img/White Beach.jpg'
+          title: 'Flying Fish',
+          description: 'Experience an adrenaline-pumping ride as you glide and bounce across the waves.',
+          image: '/src/img/flyingFish.jpg'
         }
       ],
       'Tourist Spots': [
         {
           id: 7,
           title: 'Tamaraw Falls',
-          description: 'Visit the majestic waterfall and enjoy the natural swimming pools',
-          image: '/src/img/White Beach.jpg'
+          description: 'A majestic cascading waterfall surrounded by lush greenery, perfect for nature lovers.',
+          image: '/src/img/tamarawFalls.jpg'
         },
         {
           id: 8,
-          title: 'Puerto Galera Church',
-          description: 'Explore the historic church and learn about local culture',
-          image: '/src/img/White Beach.jpg'
+          title: 'White Beach',
+          description: 'A lively destination known for its vibrant nightlife, fine sands, and water sports.',
+          image: '/src/img/whiteBeach.jpg'
         },
         {
           id: 9,
-          title: 'Mangyan Village',
-          description: 'Experience the indigenous culture and traditional crafts',
-          image: '/src/img/White Beach.jpg'
+          title: 'Mangrove Walkway',
+          description: 'A peaceful stroll through a mangrove forest teeming with wildlife and scenic beauty.',
+          image: '/src/img/mangroveWalkway.jpg'
         }
       ]
     };
