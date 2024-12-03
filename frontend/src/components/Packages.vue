@@ -277,6 +277,8 @@ const closePackageModal = () => {
     min-height: 100vh;
 }
 
+
+
 .banner {
     width: 100%;
     background-image: url('/src/img/heroBg.jpg');

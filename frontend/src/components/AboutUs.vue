@@ -6,17 +6,21 @@
       <p>Your Gateway to Unforgettable Adventures in Puerto Galera</p>
     </div>
 
-    <!-- New Team Section -->
-    <section class="team-section">
+     <!-- New Team Section -->
+     <section class="team-section">
       <h2 class="team-title">OUR TEAM</h2>
       <div class="title-underline"></div>
+      <p class="team-description">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+        labore et dolore magna aliqua. Ut enim ad minim veniam
+      </p>
 
       <div class="team-grid">
         <div class="team-card">
           <div class="card-background blue"></div>
           <div class="card-content">
             <div class="profile-image-container">
-              <img src="/src/img/team1.jpg" alt="Lena Pearce" class="profile-image">
+              <img src="/src/img/tg1.jpg" alt="Lena Pearce" class="profile-image">
             </div>
             <h3>Lena Pearce</h3>
             <p class="position">position</p>
@@ -30,7 +34,7 @@
           <div class="card-background green"></div>
           <div class="card-content">
             <div class="profile-image-container">
-              <img src="/src/img/team2.jpg" alt="Sophia Bach" class="profile-image">
+              <img src="/src/img/tg1.jpg" alt="Sophia Bach" class="profile-image">
             </div>
             <h3>Sophia Bach</h3>
             <p class="position">position</p>
@@ -44,7 +48,7 @@
           <div class="card-background teal"></div>
           <div class="card-content">
             <div class="profile-image-container">
-              <img src="/src/img/team3.jpg" alt="Arielle Copper" class="profile-image">
+              <img src="/src/img/tg1.jpg" alt="Arielle Copper" class="profile-image">
             </div>
             <h3>Arielle Copper</h3>
             <p class="position">position</p>
@@ -54,20 +58,7 @@
           </div>
         </div>
 
-        <!-- New team card -->
-        <div class="team-card">
-          <div class="card-background orange"></div>
-          <div class="card-content">
-            <div class="profile-image-container">
-              <img src="/src/img/team4.jpg" alt="Alex Johnson" class="profile-image">
-            </div>
-            <h3>Alex Johnson</h3>
-            <p class="position">position</p>
-            <p class="description">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            </p>
-          </div>
-        </div>
+        
       </div>
     </section>
 
@@ -317,14 +308,14 @@ const reasons = ref([
 
 .team-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 3rem;
   padding: 0 20px;
 }
 
 .team-card {
   position: relative;
-  height: 300px;
+  height: 400px;
   perspective: 1000px;
 }
 
@@ -349,10 +340,6 @@ const reasons = ref([
 
 .card-background.teal {
   background-color: #009688;
-}
-
-.card-background.orange {
-  background-color: #FF9800;
 }
 
 .card-content {
@@ -402,11 +389,6 @@ const reasons = ref([
   font-size: 0.9rem;
 }
 
-@media (max-width: 1200px) {
-  .team-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
 @media (max-width: 768px) {
   .about-section {

@@ -182,6 +182,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  background-color: pink;
 }
 
 .nav-arrow {
@@ -218,7 +219,7 @@ export default {
 
 .day {
   cursor: pointer;
-  border-radius: 20%;
+  border-radius: 50%;
   transition: background-color 0.2s, color 0.2s;
 }
 
@@ -265,10 +266,9 @@ export default {
 }
 
 .time-slot {
-  font-family: 'Poppins', sans-serif;
   padding: 10px;
   border: 1px solid #e0e0e0;
-  border-radius: 10px;
+  border-radius: 20px;
   background: white;
   color: #333;
   font-size: 14px;

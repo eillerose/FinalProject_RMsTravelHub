@@ -98,11 +98,16 @@
                 </div>
                 <div class="input-group">
                   <label for="guests">Number of Guests</label>
-                  <select id="guests" v-model="booking.guests" required>
-                    <option v-for="n in (booking.hotelAndRoom ? booking.hotelAndRoom.room.capacity : 10)" :key="n" :value="n">
-                      {{ n }}
-                    </option>
-                  </select>
+                  <div class="input-with-icon">
+                    <UsersIcon class="input-icon" />
+                    <input 
+                      type="number" 
+                      id="guests" 
+                      v-model="booking.guests" 
+                      min="1" 
+                      required
+                    >
+                  </div>
                 </div>
               </div>
             </div>
@@ -223,7 +228,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, XIcon, UserIcon, MailIcon, PhoneIcon } from 'lucide-vue-next';
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, XIcon, UserIcon, MailIcon, PhoneIcon, UsersIcon } from 'lucide-vue-next';
 import HeaderComponent from './Header.vue';
 import Calendar from './CalendarUser.vue';
 
@@ -667,10 +672,9 @@ const handleRecurring = (event) => {
 }
 
 .hotel-name {
-  margin-top: -1rem;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #10b981;
+  color:#10b981;
   margin-bottom: 0.75rem;
 }
 
@@ -682,9 +686,8 @@ const handleRecurring = (event) => {
 }
 
 .view-details-btn {
-  font-family: 'Poppins', sans-serif;
-  color: white;
   background-color: #10b981;
+  color: white;
   border: none;
   padding: 0.75rem 2rem;
   border-radius: 0.5rem;
@@ -694,6 +697,7 @@ const handleRecurring = (event) => {
 }
 
 .view-details-btn:hover {
+  background-color: #10b981;
   transform: translateY(-2px);
 }
 
@@ -703,18 +707,15 @@ const handleRecurring = (event) => {
 }
 
 .form-container {
-  font-family: 'Poppins', sans-serif;
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
-  padding: 1rem;
+  padding: 2rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   max-width: 500px;
   margin: 0 auto;
-  margin-top: -1rem;
 }
 
 .input-group {
-  font-family: 'Poppins', sans-serif;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -744,7 +745,6 @@ const handleRecurring = (event) => {
 
 .input-group input,
 .input-group select {
-  font-family: 'Poppins', sans-serif;
   width: 90%;
   padding: 0.75rem 0.75rem 0.75rem 2.5rem;
   border: 1px solid #d1d5db;
@@ -761,17 +761,17 @@ const handleRecurring = (event) => {
 .form-navigation {
   display: flex;
   justify-content: space-between;
-  padding-top: 1rem;
+  padding-top: 1.5rem;
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   background: white;
-  padding: 1rem 1rem;
+  padding: 1rem 2rem;
+  
 }
 
 .nav-button {
-  font-family: 'Poppins', sans-serif;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -846,8 +846,7 @@ const handleRecurring = (event) => {
 }
 
 .hotel-header {
-  background-color: #059669;
-  color: white;
+  background-color: #10b981;
   padding: 2rem;
   display: flex;
   align-items: center;
@@ -898,12 +897,12 @@ const handleRecurring = (event) => {
 }
 
 .room-option:hover {
-  border-color: #059669;
+  border-color: #10b981;
   transform: translateY(-2px);
 }
 
 .room-option.selected {
-  border-color:#059669;
+  border-color: #10b981;
   background-color: #E0F7FA;
 }
 
@@ -919,8 +918,8 @@ const handleRecurring = (event) => {
 }
 
 .room-radio:checked {
-  border-color: #059669;
-  background-color: #059669;
+  border-color: #10b981;
+  background-color: #10b981;
 }
 
 .room-radio:checked::after {
@@ -956,9 +955,8 @@ const handleRecurring = (event) => {
 }
 
 .room-price {
-  color: #059669;
-  font-weight: bold;
-  
+  color: #10b981;
+  font-weight: 500;
 }
 
 .booking-summary-modal {
