@@ -127,51 +127,13 @@
       </section>
     </main>
 
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h3>About Us</h3>
-          <p>RM's Travel and Tours is your gateway to unforgettable adventures in Puerto Galera and beyond.</p>
-        </div>
-        <div class="footer-section">
-          <h3>Quick Links</h3>
-          <ul>
-            <li><a href="#hero">Home</a></li>
-            <li><a href="#about-us">About Us</a></li>
-            <li><a href="#explore">Explore</a></li>
-            <li><a href="#content-gallery">Gallery</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h3>Contact Info</h3>
-          <p>info@rmstravelandtours.com</p>
-          <p>+63 123 456 7890</p>
-          <p>Puerto Galera, Oriental Mindoro, Philippines</p>
-        </div>
-        <div class="footer-section">
-          <h3>Follow Us</h3>
-          <div class="social-icons">
-            <a href="#" class="social-icon" aria-label="Facebook">
-              <Facebook />
-            </a>
-            <a href="#" class="social-icon" aria-label="Instagram">
-              <Instagram />
-            </a>
-            <a href="#" class="social-icon" aria-label="Twitter">
-              <Twitter />
-            </a>
-          </div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        © {{ new Date().getFullYear() }} RM's Travel and Tours. All rights reserved.
-      </div>
-    </footer>
+    <FooterComponent />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import FooterComponent from './Footer.vue';
 import { Compass, Users, Calendar, Heart, Facebook, Instagram, Twitter } from 'lucide-vue-next'
 
 const showDropdown = ref(false)
@@ -774,68 +736,7 @@ const setActiveTab = (index) => {
   line-height: 1.5;
 }
 
-/* Footer */
-.footer {
-  background-color: #1a202c;
-  color: #e2e8f0;
-  padding: 4rem 1rem 2rem;
-}
 
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-}
-
-.footer-section h3 {
-  color: #fff;
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-}
-
-.footer-section ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.footer-section ul li {
-  margin-bottom: 0.5rem;
-}
-
-.footer-section a {
-  color: #e2e8f0;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.footer-section a:hover {
-  color: #fff;
-}
-
-.social-icons {
-  display: flex;
-  gap: 1rem;
-}
-
-.social-icon {
-  color: #e2e8f0;
-  transition: color 0.2s ease;
-}
-
-.social-icon:hover {
-  color: #fff;
-}
-
-.footer-bottom {
-  text-align: center;
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #2d3748;
-  font-size: 0.875rem;
-  color: #a0aec0;
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {
