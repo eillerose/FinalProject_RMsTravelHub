@@ -1,111 +1,137 @@
 <template>
-  <div class="container">
-    <div class="bookings-card">
-      <h1>Booking Management</h1>
-      
-      <div v-if="loading" class="loading">
-        <div class="loader"></div>
-        <p>Loading bookings...</p>
+  <div class="booking-management">
+    <h1 class="title">Booking Management</h1>
+    
+    <div v-if="loading" class="loading">
+      <div class="loader"></div>
+      <p>Loading bookings...</p>
+    </div>
+    
+    <div v-if="error" class="error">
+      <p>{{ error }}</p>
+      <button @click="retryFetch" class="btn btn-retry">Retry</button>
+    </div>
+    
+    <div v-else class="content">
+      <div class="tabs">
+        <button 
+          v-for="tab in ['All', 'Pending', 'Approved', 'Cancelled']"
+          :key="tab"
+          @click="activeTab = tab.toLowerCase()" 
+          :class="['tab-btn', { active: activeTab === tab.toLowerCase() }]"
+        >
+          {{ tab }} Bookings
+        </button>
       </div>
       
-      <div v-if="error" class="error">
-        <p>{{ error }}</p>
-        <button @click="retryFetch" class="retry-btn">Retry</button>
+      <div class="table-container">
+        <table class="bookings-table">
+          <thead>
+            <tr>
+              <th>Guest Name</th>
+              <th>Hotel</th>
+              <th>Room Type</th>
+              <th>Package</th>
+              <th>Check-in</th>
+              <th>Guests</th>
+              <th>Total Price</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="booking in paginatedBookings" :key="booking.id">
+              <td>
+                <div class="guest-info">
+                  <div>{{ booking.guestName }}</div>
+                  <div class="guest-contact">{{ booking.email }}</div>
+                  <div class="guest-contact">{{ booking.phone }}</div>
+                </div>
+              </td>
+              <td>{{ booking.hotel?.name }}</td>
+              <td>{{ booking.room?.type }}</td>
+              <td>{{ booking.package?.name }}</td>
+              <td>
+                <div>{{ formatDate(booking.checkInDate) }}</div>
+                <div class="check-in-time">{{ booking.checkInTime }}</div>
+              </td>
+              <td>{{ booking.guests }} pax</td>
+              <td>₱{{ booking.totalPrice?.toLocaleString() }}</td>
+              <td>
+                <span :class="['status-badge', booking.status?.toLowerCase()]">
+                  {{ booking.status || 'Pending' }}
+                </span>
+              </td>
+              <td class="actions">
+                <button @click="openEditModal(booking)" class="btn btn-edit">Edit</button>
+                <button v-if="booking.status !== 'Cancelled'" 
+                        @click="cancelBooking(booking.id)" 
+                        class="btn btn-cancel">
+                  Cancel
+                </button>
+                <button v-if="booking.status === 'Pending' || !booking.tourGuide" 
+                        @click="openAssignModal(booking)" 
+                        class="btn btn-assign">
+                  {{ booking.tourGuide ? 'Change Guide' : 'Assign Guide' }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       
-      <div v-else class="tabs-container">
-        <div class="tabs">
-          <button 
-            @click="activeTab = 'pending'" 
-            :class="{ active: activeTab === 'pending' }"
-            class="tab-btn"
-          >
-            Pending Bookings
-          </button>
-          <button 
-            @click="activeTab = 'assigned'" 
-            :class="{ active: activeTab === 'assigned' }"
-            class="tab-btn"
-          >
-            Assigned Bookings
-          </button>
-        </div>
-        
-        <div v-if="activeTab === 'pending'" class="tab-content">
-          <div v-if="paginatedPendingBookings.length" class="bookings-list">
-            <div v-for="booking in paginatedPendingBookings" :key="booking.id" class="booking-item">
-              <div class="booking-details">
-                <h3>{{ booking.hotelAndRoom?.hotel?.name }}</h3>
-                <div class="booking-info">
-                  <p><strong>Guest:</strong> {{ booking.guestName }}</p>
-                  <p><strong>Email:</strong> {{ booking.email }}</p>
-                  <p><strong>Phone:</strong> {{ booking.phone }}</p>
-                  <p><strong>Check-in:</strong> {{ formatDate(booking.checkInDate) }} at {{ booking.checkInTime }}</p>
-                  <p><strong>Guests:</strong> {{ booking.guests }}</p>
-                  <p><strong>Room:</strong> {{ booking.hotelAndRoom?.room?.name }}</p>
-                  <p><strong>Package:</strong> {{ booking.package?.name }}</p>
-                  <p><strong>Total Price:</strong> ₱{{ booking.totalPrice?.toLocaleString() }}</p>
-                </div>
-              </div>
-              <div class="assign-guide">
-                <button 
-                  @click="openAssignModal(booking)"
-                  class="assign-btn"
-                >
-                  Assign Guide
-                </button>
-              </div>
-            </div>
+      <div v-if="filteredBookings.length === 0" class="no-bookings">
+        No bookings found for the selected status.
+      </div>
+      
+      <div v-if="filteredBookings.length > 0" class="pagination">
+        <button @click="changePage(-1)" :disabled="currentPage === 1" class="btn btn-page">Previous</button>
+        <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button @click="changePage(1)" :disabled="currentPage === totalPages" class="btn btn-page">Next</button>
+      </div>
+    </div>
+
+    <!-- Edit Booking Modal -->
+    <div v-if="showEditModal" class="modal-overlay" @click="closeEditModal">
+      <div class="modal edit-modal" @click.stop>
+        <h2>Edit Booking</h2>
+        <form @submit.prevent="saveEditedBooking">
+          <div class="form-group">
+            <label for="edit-guest-name">Guest Name</label>
+            <input id="edit-guest-name" v-model="editingBooking.guestName" type="text" required>
           </div>
-          <p v-else class="no-bookings">No pending bookings at the moment.</p>
-          <div class="pagination">
-            <button @click="changePage('pending', -1)" :disabled="pendingCurrentPage === 1" class="pagination-btn">Previous</button>
-            <span>Page {{ pendingCurrentPage }} of {{ pendingTotalPages }}</span>
-            <button @click="changePage('pending', 1)" :disabled="pendingCurrentPage === pendingTotalPages" class="pagination-btn">Next</button>
+          <div class="form-group">
+            <label for="edit-email">Email</label>
+            <input id="edit-email" v-model="editingBooking.email" type="email" required>
           </div>
-        </div>
-        
-        <div v-if="activeTab === 'assigned'" class="tab-content">
-          <div v-if="paginatedAssignedBookings.length" class="bookings-list">
-            <div v-for="booking in paginatedAssignedBookings" :key="booking.id" class="booking-item">
-              <div class="booking-details">
-                <h3>{{ booking.hotelAndRoom?.hotel?.name }}</h3>
-                <div class="booking-info">
-                  <p><strong>Guest:</strong> {{ booking.guestName }}</p>
-                  <p><strong>Email:</strong> {{ booking.email }}</p>
-                  <p><strong>Phone:</strong> {{ booking.phone }}</p>
-                  <p><strong>Check-in:</strong> {{ formatDate(booking.checkInDate) }} at {{ booking.checkInTime }}</p>
-                  <p><strong>Guests:</strong> {{ booking.guests }}</p>
-                  <p><strong>Room:</strong> {{ booking.hotelAndRoom?.room?.name }}</p>
-                  <p><strong>Package:</strong> {{ booking.package?.name }}</p>
-                  <p><strong>Total Price:</strong> ₱{{ booking.totalPrice?.toLocaleString() }}</p>
-                  <p><strong>Assigned Guide:</strong> {{ booking.tourGuide.name }}</p>
-                </div>
-              </div>
-              <div class="manage-guide">
-                <button 
-                  @click="openAssignModal(booking)"
-                  class="change-guide-btn"
-                >
-                  Change Guide
-                </button>
-              </div>
-            </div>
+          <div class="form-group">
+            <label for="edit-phone">Phone</label>
+            <input id="edit-phone" v-model="editingBooking.phone" type="tel" required>
           </div>
-          <p v-else class="no-bookings">No assigned bookings at the moment.</p>
-          <div class="pagination">
-            <button @click="changePage('assigned', -1)" :disabled="assignedCurrentPage === 1" class="pagination-btn">Previous</button>
-            <span>Page {{ assignedCurrentPage }} of {{ assignedTotalPages }}</span>
-            <button @click="changePage('assigned', 1)" :disabled="assignedCurrentPage === assignedTotalPages" class="pagination-btn">Next</button>
+          <div class="form-group">
+            <label for="edit-check-in-date">Check-in Date</label>
+            <input id="edit-check-in-date" v-model="editingBooking.checkInDate" type="date" required>
           </div>
-        </div>
+          <div class="form-group">
+            <label for="edit-check-in-time">Check-in Time</label>
+            <input id="edit-check-in-time" v-model="editingBooking.checkInTime" type="time" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-guests">Number of Guests</label>
+            <input id="edit-guests" v-model.number="editingBooking.guests" type="number" required min="1">
+          </div>
+          <div class="modal-actions">
+            <button type="button" @click="closeEditModal" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
       </div>
     </div>
 
     <!-- Guide Assignment Modal -->
     <div v-if="showAssignModal" class="modal-overlay" @click="closeAssignModal">
       <div class="modal guide-modal" @click.stop>
-        <h3>{{ currentBooking.tourGuide ? 'Change' : 'Assign' }} Tour Guide</h3>
+        <h2>{{ currentBooking?.tourGuide ? 'Change' : 'Assign' }} Tour Guide</h2>
         <div class="guide-search">
           <input 
             v-model="guideSearch" 
@@ -119,25 +145,25 @@
             v-for="guide in filteredGuides" 
             :key="guide.id"
             class="guide-item"
-            :class="{ 'selected': selectedGuide?.id === guide.id }"
+            :class="{ selected: selectedGuide?.id === guide.id }"
             @click="selectGuide(guide)"
           >
-            <img :src="guide.profilePhoto" :alt="guide.firstName" class="guide-photo">
+            <img :src="guide.profilePhoto || '/placeholder.svg?height=50&width=50'" :alt="guide.firstName" class="guide-photo">
             <div class="guide-info">
-              <h4>{{ guide.firstName }} {{ guide.lastName }}</h4>
+              <h3>{{ guide.firstName }} {{ guide.lastName }}</h3>
               <p class="specialization">{{ guide.specialization }}</p>
-              <p class="languages">Languages: {{ guide.languagesSpoken.join(', ') }}</p>
+              <p class="languages">Languages: {{ guide.languagesSpoken?.join(', ') }}</p>
             </div>
           </div>
         </div>
         <div class="modal-actions">
-          <button @click="closeAssignModal" class="cancel-btn">Cancel</button>
+          <button @click="closeAssignModal" class="btn btn-secondary">Cancel</button>
           <button 
             @click="confirmAssignGuide" 
-            class="assign-btn"
+            class="btn btn-primary"
             :disabled="!selectedGuide"
           >
-            {{ currentBooking.tourGuide ? 'Change' : 'Assign' }} Selected Guide
+            {{ currentBooking?.tourGuide ? 'Change' : 'Assign' }} Selected Guide
           </button>
         </div>
       </div>
@@ -146,46 +172,47 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { collection, query, where, getDocs, updateDoc, doc, onSnapshot } from 'firebase/firestore'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { collection, query, getDocs, updateDoc, doc, onSnapshot, Timestamp, getDoc } from 'firebase/firestore'
 import { db } from '../firebaseConfig'
 
-const pendingBookings = ref([])
-const assignedBookings = ref([])
+const bookings = ref([])
 const loading = ref(true)
 const error = ref(null)
 const guides = ref([])
 const showAssignModal = ref(false)
+const showEditModal = ref(false)
 const selectedGuide = ref(null)
 const currentBooking = ref(null)
+const editingBooking = ref(null)
 const guideSearch = ref('')
-const activeTab = ref('pending')
+const activeTab = ref('all')
 
 // Pagination
-const itemsPerPage = 5
-const pendingCurrentPage = ref(1)
-const assignedCurrentPage = ref(1)
+const itemsPerPage = 10
+const currentPage = ref(1)
 
-const paginatedPendingBookings = computed(() => {
-  const start = (pendingCurrentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return pendingBookings.value.slice(start, end)
+const filteredBookings = computed(() => {
+  if (activeTab.value === 'all') {
+    return bookings.value
+  }
+  return bookings.value.filter(booking => 
+    (booking.status || 'Pending').toLowerCase() === activeTab.value
+  )
 })
 
-const paginatedAssignedBookings = computed(() => {
-  const start = (assignedCurrentPage.value - 1) * itemsPerPage
+const paginatedBookings = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
   const end = start + itemsPerPage
-  return assignedBookings.value.slice(start, end)
+  return filteredBookings.value.slice(start, end)
 })
 
-const pendingTotalPages = computed(() => Math.ceil(pendingBookings.value.length / itemsPerPage))
-const assignedTotalPages = computed(() => Math.ceil(assignedBookings.value.length / itemsPerPage))
+const totalPages = computed(() => Math.ceil(filteredBookings.value.length / itemsPerPage))
 
-const changePage = (type, direction) => {
-  if (type === 'pending') {
-    pendingCurrentPage.value = Math.max(1, Math.min(pendingCurrentPage.value + direction, pendingTotalPages.value))
-  } else {
-    assignedCurrentPage.value = Math.max(1, Math.min(assignedCurrentPage.value + direction, assignedTotalPages.value))
+const changePage = (direction) => {
+  const newPage = currentPage.value + direction
+  if (newPage >= 1 && newPage <= totalPages.value) {
+    currentPage.value = newPage
   }
 }
 
@@ -197,22 +224,11 @@ const fetchBookings = async () => {
     error.value = null
     loading.value = true
     
-    const pendingQuery = query(bookingsCollection, where("status", "==", "Pending"))
-    const assignedQuery = query(bookingsCollection, where("status", "==", "Assigned"))
-    
-    const [pendingSnapshot, assignedSnapshot] = await Promise.all([
-      getDocs(pendingQuery),
-      getDocs(assignedQuery)
-    ])
-    
-    pendingBookings.value = pendingSnapshot.docs.map(doc => ({
+    const querySnapshot = await getDocs(bookingsCollection)
+    bookings.value = querySnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data()
-    }))
-    
-    assignedBookings.value = assignedSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
+      ...doc.data(),
+      status: doc.data().status || 'Pending'
     }))
   } catch (err) {
     console.error('Error fetching bookings:', err)
@@ -224,12 +240,10 @@ const fetchBookings = async () => {
 
 const fetchGuides = async () => {
   try {
-    const q = query(staffCollection, where("role", "==", "guides"))
-    const querySnapshot = await getDocs(q)
-    guides.value = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
+    const querySnapshot = await getDocs(staffCollection)
+    guides.value = querySnapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(staff => staff.role === 'guides')
   } catch (err) {
     console.error('Error fetching guides:', err)
     error.value = `Failed to load guides: ${err.message}`
@@ -239,9 +253,9 @@ const fetchGuides = async () => {
 const filteredGuides = computed(() => {
   const search = guideSearch.value.toLowerCase()
   return guides.value.filter(guide => 
-    guide.firstName.toLowerCase().includes(search) ||
-    guide.lastName.toLowerCase().includes(search) ||
-    guide.specialization.toLowerCase().includes(search)
+    guide.firstName?.toLowerCase().includes(search) ||
+    guide.lastName?.toLowerCase().includes(search) ||
+    guide.specialization?.toLowerCase().includes(search)
   )
 })
 
@@ -274,7 +288,8 @@ const confirmAssignGuide = async () => {
         name: `${selectedGuide.value.firstName} ${selectedGuide.value.lastName}`,
         specialization: selectedGuide.value.specialization
       },
-      status: 'Assigned'
+      status: 'Approved',
+      updatedAt: Timestamp.now()
     })
     
     closeAssignModal()
@@ -285,10 +300,69 @@ const confirmAssignGuide = async () => {
   }
 }
 
+const openEditModal = (booking) => {
+  editingBooking.value = { ...booking }
+  showEditModal.value = true
+}
+
+const closeEditModal = () => {
+  showEditModal.value = false
+  editingBooking.value = null
+}
+
+const saveEditedBooking = async () => {
+  if (!editingBooking.value) return
+
+  try {
+    const bookingRef = doc(db, 'bookings', editingBooking.value.id)
+    await updateDoc(bookingRef, {
+      guestName: editingBooking.value.guestName,
+      email: editingBooking.value.email,
+      phone: editingBooking.value.phone,
+      checkInDate: editingBooking.value.checkInDate,
+      checkInTime: editingBooking.value.checkInTime,
+      guests: editingBooking.value.guests,
+      updatedAt: Timestamp.now()
+    })
+    
+    closeEditModal()
+    await fetchBookings()
+  } catch (err) {
+    console.error('Error updating booking:', err)
+    error.value = `Failed to update booking: ${err.message}`
+  }
+}
+
+const cancelBooking = async (bookingId) => {
+  if (!confirm('Are you sure you want to cancel this booking?')) return
+
+  try {
+    const bookingRef = doc(db, 'bookings', bookingId)
+    const bookingSnapshot = await getDoc(bookingRef)
+    const bookingData = bookingSnapshot.data()
+
+    if (bookingData.status === 'Approved') {
+      if (!confirm('This booking is approved. Cancelling it may incur fees. Are you sure you want to proceed?')) return
+    }
+
+    await updateDoc(bookingRef, {
+      status: 'Cancelled',
+      updatedAt: Timestamp.now(),
+      cancellationDate: Timestamp.now(),
+      ...(bookingData.tourGuide && { tourGuide: null })
+    })
+    
+    await fetchBookings()
+  } catch (err) {
+    console.error('Error cancelling booking:', err)
+    error.value = `Failed to cancel booking: ${err.message}`
+  }
+}
+
 const formatDate = (timestamp) => {
   if (!timestamp) return ''
   try {
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
+    const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp)
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
@@ -304,120 +378,58 @@ const retryFetch = () => {
   fetchBookings()
 }
 
-let unsubscribePending
-let unsubscribeAssigned
+let unsubscribe
 
 onMounted(() => {
   fetchBookings()
   
-  // Set up real-time listener for both pending and assigned bookings
-  try {
-    const pendingQuery = query(bookingsCollection, where("status", "==", "Pending"))
-    const assignedQuery = query(bookingsCollection, where("status", "==", "Assigned"))
-    
-    unsubscribePending = onSnapshot(pendingQuery, (snapshot) => {
-      pendingBookings.value = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }))
-    }, (err) => {
-      console.error('Snapshot listener error:', err)
-      error.value = `Real-time updates failed: ${err.message}`
-    })
-    
-    unsubscribeAssigned = onSnapshot(assignedQuery, (snapshot) => {
-      assignedBookings.value = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }))
-    }, (err) => {
-      console.error('Snapshot listener error:', err)
-      error.value = `Real-time updates failed: ${err.message}`
-    })
-  } catch (err) {
-    console.error('Error setting up snapshot listener:', err)
-    error.value = `Failed to set up real-time updates: ${err.message}`
-  }
+  // Set up real-time listener for bookings
+  unsubscribe = onSnapshot(bookingsCollection, (snapshot) => {
+    bookings.value = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      status: doc.data().status || 'Pending'
+    }))
+  }, (err) => {
+    console.error('Snapshot listener error:', err)
+    error.value = `Real-time updates failed: ${err.message}`
+  })
 })
 
 onUnmounted(() => {
-  if (unsubscribePending) {
-    unsubscribePending()
-  }
-  if (unsubscribeAssigned) {
-    unsubscribeAssigned()
+  if (unsubscribe) {
+    unsubscribe()
   }
 })
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
-.container {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+.booking-management {
   padding: 2rem;
-  font-family: 'Poppins', sans-serif;
-}
-
-.bookings-card {
-  background-color: white;
-  border-radius: 1rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  width: 100%;
   max-width: 1200px;
-  transition: all 0.3s ease;
-  margin-bottom: 2rem;
+  margin: 0 auto;
 }
 
-.bookings-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-}
-
-h1, h2, h3 {
-  color: #2c3e50;
-  text-align: center;
-  letter-spacing: 0.5px;
-}
-
-h1 {
+.title {
   font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #333;
 }
 
-h2 {
-  font-size: 1.5rem;
-  font-weight: 500;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
-
-h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #34495e;
-  margin-bottom: 1rem;
-  text-align: left;
-}
-
-.loading {
+.loading, .error {
   text-align: center;
-  color: #7f8c8d;
+  padding: 2rem;
 }
 
 .loader {
-  border: 4px solid #ecf0f1;
+  border: 4px solid #f3f3f3;
   border-top: 4px solid #3498db;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   animation: spin 1s linear infinite;
-  margin: 20px auto;
+  margin: 0 auto 1rem;
 }
 
 @keyframes spin {
@@ -425,25 +437,20 @@ h3 {
   100% { transform: rotate(360deg); }
 }
 
-.tabs-container {
-  margin-top: 2rem;
-}
-
 .tabs {
   display: flex;
   justify-content: center;
+  margin-bottom: 1.5rem;
 }
 
 .tab-btn {
-  background-color: #ecf0f1;
-  color: #34495e;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
+  margin: 0 0.25rem;
   border: none;
-  border-radius: 0.5rem;
+  background-color: #f0f0f0;
   cursor: pointer;
+  border-radius: 4px;
   transition: background-color 0.3s ease;
-  margin: 0 0.5rem;
 }
 
 .tab-btn.active {
@@ -451,151 +458,113 @@ h3 {
   color: white;
 }
 
-.tab-btn:hover:not(.active) {
-  background-color: #bdc3c7;
+.table-container {
+  overflow-x: auto;
 }
 
-.tab-content {
-  background-color: #ffffff;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+.bookings-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
 }
 
-.bookings-list {
-  display: grid;
-  gap: 2rem;
+.bookings-table th,
+.bookings-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.booking-item {
-  background-color: #f8f9fa;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
+.bookings-table th {
+  background-color: #f8f8f8;
+  font-weight: bold;
+}
+
+.guest-info {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  transition: all 0.3s ease;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
-.booking-item:hover {
-  background-color: #ffffff;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  transform: translateY(-3px);
+.guest-contact {
+  font-size: 0.85rem;
+  color: #666;
 }
 
-.booking-details {
-  flex: 1;
-  min-width: 250px;
+.check-in-time {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.25rem;
 }
 
-.booking-info {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0.75rem;
-}
-
-.booking-info p {
-  margin: 0;
-  color: #5d6d7e;
-  font-size: 0.95rem;
-}
-
-.booking-info strong {
-  color: #2c3e50;
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
   font-weight: 500;
 }
 
-.assign-guide, .manage-guide {
+.status-badge.pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.approved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-width: 200px;
-  margin-top: 1rem;
+  gap: 0.5rem;
 }
 
-.guide-modal {
-  max-width: 600px !important;
-}
-
-.guide-search {
-  margin-bottom: 1rem;
-}
-
-.guide-search-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #bdc3c7;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.guide-search-input:focus {
-  outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-}
-
-.guides-list {
-  max-height: 400px;
-  overflow-y: auto;
-  margin-bottom: 1rem;
-  border: 1px solid #ecf0f1;
-  border-radius: 0.5rem;
-}
-
-.guide-item {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  border-bottom: 1px solid #ecf0f1;
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  font-size: 0.875rem;
+  transition: background-color 0.3s ease;
 }
 
-.guide-item:last-child {
-  border-bottom: none;
+.btn-edit {
+  background-color: #3498db;
+  color: white;
 }
 
-.guide-item:hover {
-  background-color: #f5f7fa;
+.btn-cancel {
+  background-color: #e74c3c;
+  color: white;
 }
 
-.guide-item.selected {
-  background-color: #e1f0fa;
+.btn-assign {
+  background-color: #2ecc71;
+  color: white;
 }
 
-.guide-photo {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 1rem;
-  border: 2px solid #3498db;
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
 }
 
-.guide-info {
-  flex: 1;
+.btn-page {
+  background-color: #f0f0f0;
+  color: #333;
+  margin: 0 0.5rem;
 }
 
-.guide-info h4 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0 0 0.25rem 0;
-  color: #2c3e50;
-}
-
-.specialization {
-  font-size: 0.9rem;
-  color: #34495e;
-  margin: 0 0 0.25rem 0;
-}
-
-.languages {
-  font-size: 0.85rem;
-  color: #7f8c8d;
-  margin: 0;
+.page-info {
+  font-size: 0.875rem;
+  color: #666;
 }
 
 .modal-overlay {
@@ -608,153 +577,102 @@ h3 {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 50;
+  z-index: 1000;
 }
 
 .modal {
-  background: white;
+  background-color: white;
   padding: 2rem;
-  border-radius: 1rem;
-  width: 90%;
+  border-radius: 8px;
   max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 100%;
 }
 
-.modal h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: #2c3e50;
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
-.assign-btn, .retry-btn, .change-guide-btn {
-  background-color: #3498db;
-  color: white;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 0.5rem;
+.guide-search {
+  margin-bottom: 1rem;
+}
+
+.guide-search-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.guides-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.guide-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-.assign-btn:hover:not(:disabled),
-.retry-btn:hover,
-.change-guide-btn:hover {
-  background-color: #2980b9;
+.guide-item:hover {
+  background-color: #f0f0f0;
 }
 
-.assign-btn:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
+.guide-item.selected {
+  background-color: #e8f0fe;
+  border-color: #3498db;
 }
 
-.cancel-btn {
-  background-color: #ecf0f1;
-  color: #34495e;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+.guide-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 1rem;
 }
 
-.cancel-btn:hover {
-  background-color: #bdc3c7;
+.guide-info h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.guide-info p {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: #666;
 }
 
 .no-bookings {
   text-align: center;
-  color: #7f8c8d;
-  font-size: 1.1rem;
-  margin-top: 2rem;
-}
-
-.error {
-  color: #e74c3c;
-  text-align: center;
-  margin: 2rem 0;
-  padding: 1rem;
-  background-color: #fadbd8;
-  border-radius: 0.5rem;
-  font-weight: 500;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 2rem;
-}
-
-.pagination-btn {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  margin: 0 0.5rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background-color: #2980b9;
-}
-
-.pagination-btn:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-  }
-
-  .bookings-card {
-    padding: 1.5rem;
-  }
-
-  .booking-item {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .assign-guide, .manage-guide {
-    margin-top: 1rem;
-  }
-
-  .guide-modal {
-    margin: 1rem;
-    max-width: calc(100% - 2rem) !important;
-  }
-
-  .guide-item {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .guide-photo {
-    margin: 0 0 0.75rem 0;
-  }
-
-  .modal-actions {
-    flex-direction: column-reverse;
-  }
-
-  .assign-btn, .cancel-btn, .change-guide-btn {
-    width: 100%;
-  }
+  padding: 2rem;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  color: #666;
 }
 </style>
+

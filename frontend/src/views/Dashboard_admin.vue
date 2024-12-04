@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard">
-    <h1>Travel Agency Dashboard</h1>
+    <h1>RM's Travel and Tours Dashboard</h1>
     
     <!-- Key Metrics -->
     <div class="metrics">
@@ -17,33 +17,7 @@
     <!-- Booking Trends Chart -->
     <div class="chart-container">
       <h2>Booking Trends</h2>
-      <svg class="chart" viewBox="0 0 300 100">
-        <polyline
-          class="chart-line"
-          fill="none"
-          stroke="#0ea5e9"
-          stroke-width="2"
-          points="0,100 50,70 100,80 150,40 200,50 250,20 300,40"
-        />
-        <g>
-          <circle class="chart-dot" cx="0" cy="100" r="3" fill="#0ea5e9" />
-          <circle class="chart-dot" cx="50" cy="70" r="3" fill="#0ea5e9" />
-          <circle class="chart-dot" cx="100" cy="80" r="3" fill="#0ea5e9" />
-          <circle class="chart-dot" cx="150" cy="40" r="3" fill="#0ea5e9" />
-          <circle class="chart-dot" cx="200" cy="50" r="3" fill="#0ea5e9" />
-          <circle class="chart-dot" cx="250" cy="20" r="3" fill="#0ea5e9" />
-          <circle class="chart-dot" cx="300" cy="40" r="3" fill="#0ea5e9" />
-        </g>
-        <g class="chart-labels">
-          <text x="0" y="115" text-anchor="middle">Jan</text>
-          <text x="50" y="115" text-anchor="middle">Feb</text>
-          <text x="100" y="115" text-anchor="middle">Mar</text>
-          <text x="150" y="115" text-anchor="middle">Apr</text>
-          <text x="200" y="115" text-anchor="middle">May</text>
-          <text x="250" y="115" text-anchor="middle">Jun</text>
-          <text x="300" y="115" text-anchor="middle">Jul</text>
-        </g>
-      </svg>
+      <BookingTrendsChart :chartData="bookingTrendsData" />
     </div>
     
     <div class="info-grid">
@@ -54,7 +28,7 @@
           <li v-for="tour in upcomingTours" :key="tour.id" class="tour-item">
             <div>
               <p class="tour-destination">{{ tour.destination }}</p>
-              <p class="tour-date">{{ tour.date }}</p>
+              <p class="tour-date">{{ formatDate(tour.checkInDate) }}</p>
             </div>
             <span :class="['tour-status', tour.status.toLowerCase()]">
               {{ tour.status }}
@@ -73,7 +47,7 @@
             </div>
             <div class="activity-details">
               <p class="activity-description">{{ activity.description }}</p>
-              <p class="activity-timestamp">{{ activity.timestamp }}</p>
+              <p class="activity-timestamp">{{ formatTimestamp(activity.timestamp) }}</p>
             </div>
           </li>
         </ul>
@@ -83,29 +57,224 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { UserIcon, CalendarIcon, DollarSignIcon, GlobeIcon } from 'lucide-vue-next'
+import { collection, query, orderBy, limit, getDocs, where, Timestamp } from 'firebase/firestore'
+import { db } from '../firebaseConfig'
 
 const metrics = ref([
-  { title: 'Total Bookings', value: '1,234', class: 'blue', trend: 'up', change: 5 },
-  { title: 'Revenue', value: '$56,789', class: 'green', trend: 'up', change: 12 },
-  { title: 'Active Tours', value: '23', class: 'yellow', trend: 'up', change: 3 },
-  { title: 'Customer Satisfaction', value: '4.8/5', class: 'purple', trend: 'down', change: 1 },
+  { title: 'Total Bookings', value: '0', class: 'blue', trend: 'up', change: 0 },
+  { title: 'Revenue', value: '₱0', class: 'green', trend: 'up', change: 0 },
+  { title: 'Active Tours', value: '0', class: 'yellow', trend: 'up', change: 0 },
+  { title: 'Customer Satisfaction', value: '0/5', class: 'purple', trend: 'up', change: 0 },
 ])
 
-const upcomingTours = ref([
-  { id: 1, destination: 'Paris, France', date: 'June 15, 2024', status: 'Confirmed' },
-  { id: 2, destination: 'Tokyo, Japan', date: 'July 1, 2024', status: 'Pending' },
-  { id: 3, destination: 'New York, USA', date: 'July 10, 2024', status: 'Confirmed' },
-  { id: 4, destination: 'Sydney, Australia', date: 'August 5, 2024', status: 'Pending' },
-])
+const upcomingTours = ref([])
+const recentActivities = ref([])
+const bookingTrendsData = ref([])
 
-const recentActivities = ref([
-  { id: 1, description: 'New booking: Rome Tour', timestamp: '2 hours ago', icon: CalendarIcon, iconColor: 'green' },
-  { id: 2, description: 'Customer feedback received', timestamp: '5 hours ago', icon: UserIcon, iconColor: 'blue' },
-  { id: 3, description: 'Payment processed: $1,299', timestamp: '1 day ago', icon: DollarSignIcon, iconColor: 'yellow' },
-  { id: 4, description: 'New tour added: Barcelona', timestamp: '2 days ago', icon: GlobeIcon, iconColor: 'purple' },
-])
+const fetchMetrics = async () => {
+  const bookingsRef = collection(db, 'bookings')
+  const bookingsSnapshot = await getDocs(bookingsRef)
+  const totalBookings = bookingsSnapshot.size
+
+  let totalRevenue = 0
+  let activeTours = 0
+  bookingsSnapshot.forEach((doc) => {
+    const booking = doc.data()
+    if (booking.status === 'Approved' || booking.status === 'Pending') {
+      totalRevenue += booking.totalPrice
+      activeTours++
+    }
+  })
+
+  // TODO: Implement customer satisfaction calculation
+  const customerSatisfaction = 4.5 // Placeholder value
+
+  metrics.value = [
+    { title: 'Total Bookings', value: totalBookings.toString(), class: 'blue', trend: 'up', change: 5 },
+    { title: 'Revenue', value: `₱${totalRevenue.toLocaleString()}`, class: 'green', trend: 'up', change: 12 },
+    { title: 'Active Tours', value: activeTours.toString(), class: 'yellow', trend: 'up', change: 3 },
+    { title: 'Customer Satisfaction', value: `${customerSatisfaction.toFixed(1)}/5`, class: 'purple', trend: 'up', change: 1 },
+  ]
+}
+
+const fetchUpcomingTours = async () => {
+  const now = Timestamp.now()
+  const bookingsRef = collection(db, 'bookings')
+  const q = query(
+    bookingsRef,
+    where('checkInDate', '>', now),
+    where('status', 'in', ['Pending', 'Approved']),
+    orderBy('checkInDate'),
+    limit(5)
+  )
+  const querySnapshot = await getDocs(q)
+  upcomingTours.value = querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+    destination: `${doc.data().hotel.name}, ${doc.data().hotel.location}`,
+  }))
+}
+
+const fetchRecentActivities = async () => {
+  const bookingsRef = collection(db, 'bookings')
+  const q = query(bookingsRef, orderBy('createdAt', 'desc'), limit(5))
+  const querySnapshot = await getDocs(q)
+  recentActivities.value = querySnapshot.docs.map(doc => {
+    const booking = doc.data()
+    return {
+      id: doc.id,
+      description: `New booking: ${booking.hotel.name}`,
+      timestamp: booking.createdAt,
+      icon: CalendarIcon,
+      iconColor: 'green'
+    }
+  })
+}
+
+const fetchBookingTrends = async () => {
+  const bookingsRef = collection(db, 'bookings')
+  const sixMonthsAgo = new Date()
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
+  const q = query(
+    bookingsRef,
+    where('createdAt', '>', Timestamp.fromDate(sixMonthsAgo)),
+    orderBy('createdAt')
+  )
+  const querySnapshot = await getDocs(q)
+  
+  const monthlyBookings = {}
+  querySnapshot.forEach(doc => {
+    const booking = doc.data()
+    const month = booking.createdAt.toDate().toLocaleString('default', { month: 'short' })
+    monthlyBookings[month] = (monthlyBookings[month] || 0) + 1
+  })
+
+  bookingTrendsData.value = Object.entries(monthlyBookings).map(([month, count]) => ({ month, count }))
+}
+
+const formatDate = (timestamp) => {
+  if (!timestamp) return 'N/A'
+  return timestamp.toDate().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const formatTimestamp = (timestamp) => {
+  if (!timestamp) return 'N/A'
+  const now = new Date()
+  const date = timestamp.toDate()
+  const diffTime = Math.abs(now - date)
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
+  return formatDate(timestamp)
+}
+
+onMounted(async () => {
+  await Promise.all([
+    fetchMetrics(),
+    fetchUpcomingTours(),
+    fetchRecentActivities(),
+    fetchBookingTrends()
+  ])
+})
+
+// Add this component definition
+const BookingTrendsChart = {
+  props: {
+    chartData: {
+      type: Array,
+      required: true
+    }
+  },
+  setup(props) {
+    const width = 500;
+    const height = 300;
+    const padding = 40;
+
+    const maxCount = computed(() => Math.max(...props.chartData.map(d => d.count)));
+
+    const yAxisTicks = computed(() => {
+      const tickCount = 5;
+      const step = Math.ceil(maxCount.value / (tickCount - 1));
+      return Array.from({ length: tickCount }, (_, i) => i * step);
+    });
+
+    const getX = (index) => padding + (index * ((width - 2 * padding) / (props.chartData.length - 1)));
+    const getY = (count) => height - padding - ((count / maxCount.value) * (height - 2 * padding));
+
+    const points = computed(() => {
+      return props.chartData
+        .map((point, index) => `${getX(index)},${getY(point.count)}`)
+        .join(' ');
+    });
+
+    return {
+      width,
+      height,
+      padding,
+      yAxisTicks,
+      getX,
+      getY,
+      points
+    };
+  },
+  template: `
+    <div class="chart-wrapper">
+      <svg class="chart" :viewBox="'0 0 ' + width + ' ' + height">
+        <g class="x-axis">
+          <line :x1="padding" :y1="height - padding" :x2="width - padding" :y2="height - padding" />
+          <text 
+            v-for="(point, index) in chartData" 
+            :key="index"
+            :x="getX(index)"
+            :y="height - padding + 20"
+            text-anchor="middle"
+          >
+            {{ point.month }}
+          </text>
+        </g>
+        <g class="y-axis">
+          <line :x1="padding" :y1="padding" :x2="padding" :y2="height - padding" />
+          <text 
+            v-for="tick in yAxisTicks" 
+            :key="tick"
+            :x="padding - 10"
+            :y="getY(tick)"
+            text-anchor="end"
+            alignment-baseline="middle"
+          >
+            {{ tick }}
+          </text>
+        </g>
+        <polyline
+          class="chart-line"
+          fill="none"
+          stroke="#0ea5e9"
+          stroke-width="2"
+          :points="points"
+        />
+        <g>
+          <circle 
+            v-for="(point, index) in chartData" 
+            :key="index"
+            class="chart-dot" 
+            :cx="getX(index)" 
+            :cy="getY(point.count)" 
+            r="3" 
+            fill="#0ea5e9" 
+          />
+        </g>
+      </svg>
+    </div>
+  `
+};
 </script>
 
 <style scoped>
@@ -176,27 +345,6 @@ h2 {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.chart {
-  width: 100%;
-  height: 200px;
-}
-
-.chart-line {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: drawLine 2s ease-out forwards;
-}
-
-.chart-dot {
-  opacity: 0;
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-.chart-labels {
-  font-size: 12px;
-  fill: #6b7280;
-}
-
 .info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -231,7 +379,7 @@ h2 {
   border-radius: 9999px;
 }
 
-.tour-status.confirmed {
+.tour-status.approved {
   background-color: #d1fae5;
   color: #065f46;
 }
@@ -271,6 +419,43 @@ h2 {
   color: #6b7280;
 }
 
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-wrapper {
+  width: 100%;
+  height: 300px;
+}
+
+.chart {
+  width: 100%;
+  height: 100%;
+}
+
+.chart-line {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawLine 2s ease-out forwards;
+}
+
+.chart-dot {
+  opacity: 0;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.x-axis line, .y-axis line {
+  stroke: #e5e7eb;
+  stroke-width: 1;
+}
+
+.x-axis text, .y-axis text {
+  font-size: 12px;
+  fill: #6b7280;
+}
+
 @keyframes drawLine {
   to {
     stroke-dashoffset: 0;
@@ -282,10 +467,5 @@ h2 {
     opacity: 1;
   }
 }
-
-@media (max-width: 768px) {
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-}
 </style>
+
