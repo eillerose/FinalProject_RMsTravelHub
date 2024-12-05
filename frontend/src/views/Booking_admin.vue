@@ -64,16 +64,24 @@
               </td>
               <td class="actions">
                 <button @click="openEditModal(booking)" class="btn btn-edit">Edit</button>
-                <button v-if="booking.status !== 'Cancelled'" 
-                        @click="cancelBooking(booking.id)" 
-                        class="btn btn-cancel">
-                  Cancel
-                </button>
-                <button v-if="booking.status === 'Pending' || !booking.tourGuide" 
-                        @click="openAssignModal(booking)" 
-                        class="btn btn-assign">
-                  {{ booking.tourGuide ? 'Change Guide' : 'Assign Guide' }}
-                </button>
+                <template v-if="booking.status !== 'Cancelled'">
+                  <button @click="cancelBooking(booking.id)" class="btn btn-cancel">
+                    Cancel
+                  </button>
+                  <button v-if="booking.status === 'Pending' || !booking.tourGuide" 
+                          @click="openAssignModal(booking)" 
+                          class="btn btn-assign">
+                    {{ booking.tourGuide ? 'Change Guide' : 'Assign Guide' }}
+                  </button>
+                </template>
+                <template v-else>
+                  <button @click="restoreBooking(booking.id)" class="btn btn-restore">
+                    Restore
+                  </button>
+                  <button @click="deleteBooking(booking.id)" class="btn btn-delete">
+                    Delete
+                  </button>
+                </template>
               </td>
             </tr>
           </tbody>
@@ -173,7 +181,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { collection, query, getDocs, updateDoc, doc, onSnapshot, Timestamp, getDoc } from 'firebase/firestore'
+import { collection, query, getDocs, updateDoc, doc, onSnapshot, Timestamp, getDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../firebaseConfig'
 
 const bookings = ref([])
@@ -359,8 +367,39 @@ const cancelBooking = async (bookingId) => {
   }
 }
 
-const formatDate = (timestamp) => {
-  if (!timestamp) return ''
+const restoreBooking = async (bookingId) => {
+  if (!confirm('Are you sure you want to restore this booking?')) return
+
+  try {
+    const bookingRef = doc(db, 'bookings', bookingId)
+    await updateDoc(bookingRef, {
+      status: 'Pending',
+      updatedAt: Timestamp.now(),
+      cancellationDate: null
+    })
+    
+    await fetchBookings()
+  } catch (err) {
+    console.error('Error restoring booking:', err)
+    error.value = `Failed to restore booking: ${err.message}`
+  }
+}
+
+const deleteBooking = async (bookingId) => {
+  if (!confirm('Are you sure you want to permanently delete this booking? This action cannot be undone.')) return
+
+  try {
+    const bookingRef = doc(db, 'bookings', bookingId)
+    await deleteDoc(bookingRef)
+    
+    await fetchBookings()
+  } catch (err) {
+    console.error('Error deleting booking:', err)
+    error.value = `Failed to delete booking: ${err.message}`
+  }
+}
+
+const formatDate = (timestamp) => {if (!timestamp) return ''
   try {
     const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp)
     return date.toLocaleDateString('en-US', { 
@@ -546,6 +585,16 @@ onUnmounted(() => {
 
 .btn-assign {
   background-color: #2ecc71;
+  color: white;
+}
+
+.btn-restore {
+  background-color: #f39c12;
+  color: white;
+}
+
+.btn-delete {
+  background-color: #c0392b;
   color: white;
 }
 

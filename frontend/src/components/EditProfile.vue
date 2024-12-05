@@ -107,18 +107,25 @@
                   View Details
                 </button>
                 <button 
-                  v-if="canEditBooking(booking) && booking.status !== 'Cancelled'" 
+                  v-if="canEditBooking(booking) && booking.status !== 'Cancelled' && booking.status !== 'Completed'" 
                   @click="openEditBookingModal(booking)" 
                   class="edit-booking-btn"
                 >
                   Edit
                 </button>
                 <button 
-                  v-if="booking.status === 'Approved' || (canCancelBooking(booking) && booking.status !== 'Cancelled')" 
+                  v-if="booking.status === 'Approved' || (canCancelBooking(booking) && booking.status !== 'Cancelled' && booking.status !== 'Completed')" 
                   @click="cancelBooking(booking)" 
                   class="cancel-booking-btn"
                 >
                   Cancel
+                </button>
+                <button 
+                  v-if="booking.status === 'Completed'"
+                  @click="showReceipt(booking.receiptId)"
+                  class="show-receipt-btn"
+                >
+                  Show Receipt
                 </button>
               </td>
             </tr>
@@ -461,348 +468,427 @@
       </div>
     </div>
 
+    <!-- Receipt Modal -->
+    <div v-if="selectedReceipt" class="modal">
+      <div class="modal-content receipt-details">
+        <span class="close" @click="selectedReceipt = null">&times;</span>
+        <h2>Booking Receipt</h2>
+        <div class="receipt-content">
+          <div class="detail-row">
+            <span class="detail-label">Receipt ID:</span>
+            <span class="detail-value">{{ selectedReceipt.id }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Booking ID:</span>
+            <span class="detail-value">{{ selectedReceipt.bookingId }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Guest Name:</span>
+            <span class="detail-value">{{ selectedReceipt.guestName }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Check-in Date:</span>
+            <span class="detail-value">{{ formatDate(selectedReceipt.checkInDate) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Check-in Time:</span>
+            <span class="detail-value">{{ selectedReceipt.checkInTime }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Hotel:</span>
+            <span class="detail-value">{{ selectedReceipt.hotelName }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Room Type:</span>
+            <span class="detail-value">{{ selectedReceipt.roomType }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Package:</span>
+            <span class="detail-value">{{ selectedReceipt.packageName }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Tour Guide:</span>
+            <span class="detail-value">{{ selectedReceipt.tourGuideName }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Total Amount:</span>
+            <span class="detail-value">{{ formatCurrency(selectedReceipt.totalAmount) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Remit Amount:</span>
+            <span class="detail-value">{{ formatCurrency(selectedReceipt.remitAmount) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Generated At:</span>
+            <span class="detail-value">{{ formatDate(selectedReceipt.generatedAt) }}</span>
+          </div>
+        </div>
+        <div class="receipt-actions">
+          <button @click="generatePDF(selectedReceipt)" class="download-receipt-btn">
+            Download PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
     <FooterComponent />
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc, updateDoc, collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { jsPDF } from 'jspdf';
 import HeaderComponent from './Header.vue';
 import FooterComponent from './Footer.vue';
 
-export default {
-  name: 'UserProfile',
-  components: {
-    HeaderComponent,
-    FooterComponent,
-  },
-  setup() {
-    const activeTab = ref('profile');
-    const firstName = ref('');
-    const lastName = ref('');
-    const email = ref('');
-    const phoneNumber = ref('');
-    const address = ref('');
-    const bio = ref('');
-    const profileImageUrl = ref('');
-    const isModalOpen = ref(false);
-    const bookings = ref([]);
-    const archivedBookings = ref([]);
-    const currentPage = ref(1);
-    const archiveCurrentPage = ref(1);
-    const entriesPerPage = ref(5);
-    const searchQuery = ref('');
-    const selectedBooking = ref(null);
-    const editingBooking = ref(null);
-    const restoringBooking = ref(null);
+const activeTab = ref('profile');
+const firstName = ref('');
+const lastName = ref('');
+const email = ref('');
+const phoneNumber = ref('');
+const address = ref('');
+const bio = ref('');
+const profileImageUrl = ref('');
+const isModalOpen = ref(false);
+const bookings = ref([]);
+const archivedBookings = ref([]);
+const currentPage = ref(1);
+const archiveCurrentPage = ref(1);
+const entriesPerPage = ref(5);
+const searchQuery = ref('');
+const selectedBooking = ref(null);
+const editingBooking = ref(null);
+const restoringBooking = ref(null);
+const selectedReceipt = ref(null);
 
-    const filteredBookings = computed(() => {
-      if (!searchQuery.value) return bookings.value;
-      
-      const query = searchQuery.value.toLowerCase();
-      return bookings.value.filter(booking => 
-        (booking.guestName && booking.guestName.toLowerCase().includes(query)) ||
-        (booking.email && booking.email.toLowerCase().includes(query)) ||
-        (booking.status && booking.status.toLowerCase().includes(query)) ||
-        formatDateTime(booking.checkInDate).toLowerCase().includes(query)
-      );
+const filteredBookings = computed(() => {
+  if (!searchQuery.value) return bookings.value;
+  
+  const query = searchQuery.value.toLowerCase();
+  return bookings.value.filter(booking => 
+    (booking.guestName && booking.guestName.toLowerCase().includes(query)) ||
+    (booking.email && booking.email.toLowerCase().includes(query)) ||
+    (booking.status && booking.status.toLowerCase().includes(query)) ||
+    formatDateTime(booking.checkInDate).toLowerCase().includes(query)
+  );
+});
+
+const filteredArchivedBookings = computed(() => {
+  if (!searchQuery.value) return archivedBookings.value;
+  
+  const query = searchQuery.value.toLowerCase();
+  return archivedBookings.value.filter(booking => 
+    (booking.guestName && booking.guestName.toLowerCase().includes(query)) ||
+    (booking.email && booking.email.toLowerCase().includes(query)) ||
+    formatDateTime(booking.checkInDate).toLowerCase().includes(query) ||
+    formatDateTime(booking.cancellationDate).toLowerCase().includes(query)
+  );
+});
+
+const paginatedBookings = computed(() => {
+  const start = (currentPage.value - 1) * entriesPerPage.value;
+  const end = start + entriesPerPage.value;
+  return filteredBookings.value.slice(start, end);
+});
+
+const paginatedArchivedBookings = computed(() => {
+  const start = (archiveCurrentPage.value - 1) * entriesPerPage.value;
+  const end = start + entriesPerPage.value;
+  return filteredArchivedBookings.value.slice(start, end);
+});
+
+const totalPages = computed(() => Math.ceil(filteredBookings.value.length / entriesPerPage.value));
+const archiveTotalPages = computed(() => Math.ceil(filteredArchivedBookings.value.length / entriesPerPage.value));
+
+const paginationStart = computed(() => (currentPage.value - 1) * entriesPerPage.value);
+const paginationEnd = computed(() => Math.min(paginationStart.value + entriesPerPage.value, filteredBookings.value.length));
+
+const archivePaginationStart = computed(() => (archiveCurrentPage.value - 1) * entriesPerPage.value);
+const archivePaginationEnd = computed(() => Math.min(archivePaginationStart.value + entriesPerPage.value, filteredArchivedBookings.value.length));
+
+const formatDateTime = (timestamp) => {
+  if (!timestamp) return 'N/A';
+  const date = timestamp instanceof Date ? timestamp : timestamp.toDate();
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+const formatDate = (timestamp) => {
+  if (!timestamp) return 'N/A';
+  const date = timestamp instanceof Date ? timestamp : new Date(timestamp.seconds * 1000);
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+const formatCurrency = (amount) => {
+  if (isNaN(amount)) return 'N/A';
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'PHP' }).format(amount);
+};
+
+const canEditBooking = (booking) => {
+  const now = new Date();
+  const checkInDate = booking.checkInDate instanceof Date ? booking.checkInDate : booking.checkInDate.toDate();
+  const twoDaysBeforeCheckIn = new Date(checkInDate.getTime() - 2 * 24 * 60 * 60 * 1000);
+  return now <= twoDaysBeforeCheckIn;
+};
+
+const canCancelBooking = (booking) => {
+  const now = new Date();
+  const checkInDate = booking.checkInDate instanceof Date ? booking.checkInDate : booking.checkInDate.toDate();
+  const checkInTime = booking.checkInTime.split(':');
+  checkInDate.setHours(parseInt(checkInTime[0]), parseInt(checkInTime[1]));
+  const twelveHoursBeforeCheckIn = new Date(checkInDate.getTime() - 12 * 60 * 60 * 1000);
+  return now <= twelveHoursBeforeCheckIn;
+};
+
+const openModal = () => {
+  isModalOpen.value = true;
+};
+
+const closeModal = () => {
+  isModalOpen.value = false;
+};
+
+const saveProfile = async () => {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("User not authenticated");
+    return;
+  }
+
+  try {
+    await updateDoc(doc(db, 'users', user.uid), {
+      firstName: firstName.value,
+      lastName: lastName.value,
+      email: email.value,
+      phoneNumber: phoneNumber.value,
+      address: address.value,
+      bio: bio.value,
     });
 
-    const filteredArchivedBookings = computed(() => {
-      if (!searchQuery.value) return archivedBookings.value;
-      
-      const query = searchQuery.value.toLowerCase();
-      return archivedBookings.value.filter(booking => 
-        (booking.guestName && booking.guestName.toLowerCase().includes(query)) ||
-        (booking.email && booking.email.toLowerCase().includes(query)) ||
-        formatDateTime(booking.checkInDate).toLowerCase().includes(query) ||
-        formatDateTime(booking.cancellationDate).toLowerCase().includes(query)
-      );
-    });
-
-    const paginatedBookings = computed(() => {
-      const start = (currentPage.value - 1) * entriesPerPage.value;
-      const end = start + entriesPerPage.value;
-      return filteredBookings.value.slice(start, end);
-    });
-
-    const paginatedArchivedBookings = computed(() => {
-      const start = (archiveCurrentPage.value - 1) * entriesPerPage.value;
-      const end = start + entriesPerPage.value;
-      return filteredArchivedBookings.value.slice(start, end);
-    });
-
-    const totalPages = computed(() => Math.ceil(filteredBookings.value.length / entriesPerPage.value));
-    const archiveTotalPages = computed(() => Math.ceil(filteredArchivedBookings.value.length / entriesPerPage.value));
-
-    const paginationStart = computed(() => (currentPage.value - 1) * entriesPerPage.value);
-    const paginationEnd = computed(() => Math.min(paginationStart.value + entriesPerPage.value, filteredBookings.value.length));
-
-    const archivePaginationStart = computed(() => (archiveCurrentPage.value - 1) * entriesPerPage.value);
-    const archivePaginationEnd = computed(() => Math.min(archivePaginationStart.value + entriesPerPage.value, filteredArchivedBookings.value.length));
-
-    const formatDateTime = (timestamp) => {
-      if (!timestamp) return 'N/A';
-      const date = timestamp instanceof Date ? timestamp : timestamp.toDate();
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    };
-
-    const canEditBooking = (booking) => {
-      const now = new Date();
-      const checkInDate = booking.checkInDate instanceof Date ? booking.checkInDate : booking.checkInDate.toDate();
-      const twoDaysBeforeCheckIn = new Date(checkInDate.getTime() - 2 * 24 * 60 * 60 * 1000);
-      return now <= twoDaysBeforeCheckIn;
-    };
-
-    const canCancelBooking = (booking) => {
-      const now = new Date();
-      const checkInDate = booking.checkInDate instanceof Date ? booking.checkInDate : booking.checkInDate.toDate();
-      const checkInTime = booking.checkInTime.split(':');
-      checkInDate.setHours(parseInt(checkInTime[0]), parseInt(checkInTime[1]));
-      const twelveHoursBeforeCheckIn = new Date(checkInDate.getTime() - 12 * 60 * 60 * 1000);
-      return now <= twelveHoursBeforeCheckIn;
-    };
-
-    const openModal = () => {
-      isModalOpen.value = true;
-    };
-
-    const closeModal = () => {
-      isModalOpen.value = false;
-    };
-
-    const saveProfile = async () => {
-      const user = auth.currentUser;
-      if (!user) {
-        alert("User not authenticated");
-        return;
-      }
-
-      try {
-        await updateDoc(doc(db, 'users', user.uid), {
-          firstName: firstName.value,
-          lastName: lastName.value,
-          email: email.value,
-          phoneNumber: phoneNumber.value,
-          address: address.value,
-          bio: bio.value,
-        });
-
-        alert('Profile updated successfully!');
-        closeModal();
-      } catch (error) {
-        console.error('Error updating profile:', error);
-        alert(`Error: ${error.message}`);
-      }
-    };
-
-    const fetchBookingHistory = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const bookingsRef = collection(db, 'bookings');
-        const q = query(bookingsRef, where('userId', '==', user.uid));
-
-        const querySnapshot = await getDocs(q);
-        const allBookings = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        bookings.value = allBookings.filter(booking => booking.status !== 'Cancelled');
-        archivedBookings.value = allBookings.filter(booking => booking.status === 'Cancelled');
-      }
-    };
-
-    const viewBookingDetails = (booking) => {
-      selectedBooking.value = booking;
-    };
-
-    const openEditBookingModal = (booking) => {
-      editingBooking.value = { ...booking };
-    };
-
-    const closeEditBookingModal = () => {
-      editingBooking.value = null;
-    };
-
-    const saveEditedBooking = async () => {
-      if (!editingBooking.value) return;
-
-      try {
-        const bookingRef = doc(db, 'bookings', editingBooking.value.id);
-        await updateDoc(bookingRef, {
-          checkInDate: Timestamp.fromDate(new Date(editingBooking.value.checkInDate)),
-          checkInTime: editingBooking.value.checkInTime,
-          guests: editingBooking.value.guests,
-          updatedAt: Timestamp.now()
-        });
-        
-        alert('Booking updated successfully!');
-        closeEditBookingModal();
-        await fetchBookingHistory();
-      } catch (error) {
-        console.error('Error updating booking:', error);
-        alert(`Failed to update booking: ${error.message}`);
-      }
-    };
-
-    const cancelBooking = async (booking) => {
-      if (!canCancelBooking(booking) && booking.status !== 'Approved') {
-        alert("You can only cancel bookings up to 12 hours before the check-in date and time.");
-        return;
-      }
-      if (confirm("Are you sure you want to cancel this booking?")) {
-        try {
-          const bookingRef = doc(db, 'bookings', booking.id);
-          await updateDoc(bookingRef, {
-            status: 'Cancelled',
-            cancellationDate: Timestamp.now(),
-            updatedAt: Timestamp.now(),
-            assignedGuide: null // Remove the assigned guide
-          });
-          alert("Booking cancelled successfully.");
-          await fetchBookingHistory();
-        } catch (error) {
-          console.error("Error cancelling booking:", error);
-          alert("Failed to cancel booking. Please try again.");
-        }
-      }
-    };
-
-    const unassignGuide = async (bookingId) => {
-      try {
-        const bookingRef = doc(db, 'bookings', bookingId);
-        await updateDoc(bookingRef, {
-          assignedGuide: null,
-          updatedAt: Timestamp.now()
-        });
-        console.log("Guide unassigned successfully.");
-      } catch (error) {
-        console.error("Error unassigning guide:", error);
-        throw error;
-      }
-    };
-
-    const openRestoreBookingModal = (booking) => {
-      restoringBooking.value = { 
-        ...booking, 
-        newCheckInDate: '', 
-        newCheckInTime: '' 
-      };
-    };
-
-    const closeRestoreBookingModal = () => {
-      restoringBooking.value = null;
-    };
-
-    const restoreBooking = async () => {
-      if (!restoringBooking.value) return;
-
-      try {
-        const bookingRef = doc(db, 'bookings', restoringBooking.value.id);
-        await updateDoc(bookingRef, {
-          status: 'Pending',
-          checkInDate: Timestamp.fromDate(new Date(restoringBooking.value.newCheckInDate)),
-          checkInTime: restoringBooking.value.newCheckInTime,
-          updatedAt: Timestamp.now(),
-          assignedGuide: null // Ensure no guide is assigned when restoring
-        });
-        
-        alert('Booking restored successfully! It is now in pending status.');
-        closeRestoreBookingModal();
-        await fetchBookingHistory();
-      } catch (error) {
-        console.error('Error restoring booking:', error);
-        alert(`Failed to restore booking: ${error.message}`);
-      }
-    };
-
-    onMounted(async () => {
-      const user = auth.currentUser;
-      if (user) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            firstName.value = userData.firstName || '';
-            lastName.value = userData.lastName || '';
-            email.value = userData.email || '';
-            phoneNumber.value = userData.phoneNumber || '';
-            address.value = userData.address || '';
-            bio.value = userData.bio || '';
-            profileImageUrl.value = userData.profileImageUrl || '';
-          }
-          await fetchBookingHistory();
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      }
-    });
-
-    watch(activeTab, async (newTab) => {
-      if (newTab === 'history' || newTab === 'archive') {
-        await fetchBookingHistory();
-      }
-    });
-
-    return {
-      activeTab,
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      address,
-      bio,
-      profileImageUrl,
-      isModalOpen,
-      bookings,
-      archivedBookings,
-      currentPage,
-      archiveCurrentPage,
-      entriesPerPage,
-      searchQuery,
-      selectedBooking,
-      editingBooking,
-      restoringBooking,
-      filteredBookings,
-      filteredArchivedBookings,
-      paginatedBookings,
-      paginatedArchivedBookings,
-      totalPages,
-      archiveTotalPages,
-      paginationStart,
-      paginationEnd,
-      archivePaginationStart,
-      archivePaginationEnd,
-      formatDateTime,
-      canEditBooking,
-      canCancelBooking,
-      openModal,
-      closeModal,
-      saveProfile,
-      fetchBookingHistory,
-      viewBookingDetails,
-      openEditBookingModal,
-      closeEditBookingModal,
-      saveEditedBooking,
-      cancelBooking,
-      unassignGuide,
-      openRestoreBookingModal,
-      closeRestoreBookingModal,
-      restoreBooking
-    };
+    alert('Profile updated successfully!');
+    closeModal();
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    alert(`Error: ${error.message}`);
   }
 };
+
+const fetchBookingHistory = async () => {
+  const user = auth.currentUser;
+  if (user) {
+    const bookingsRef = collection(db, 'bookings');
+    const q = query(bookingsRef, where('userId', '==', user.uid));
+
+    const querySnapshot = await getDocs(q);
+    const allBookings = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    bookings.value = allBookings.filter(booking => booking.status !== 'Cancelled');
+    archivedBookings.value = allBookings.filter(booking => booking.status === 'Cancelled');
+  }
+};
+
+const viewBookingDetails = (booking) => {
+  selectedBooking.value = booking;
+};
+
+const openEditBookingModal = (booking) => {
+  editingBooking.value = { ...booking };
+};
+
+const closeEditBookingModal = () => {
+  editingBooking.value = null;
+};
+
+const saveEditedBooking = async () => {
+  if (!editingBooking.value) return;
+
+  try {
+    const bookingRef = doc(db, 'bookings', editingBooking.value.id);
+    await updateDoc(bookingRef, {
+      checkInDate: Timestamp.fromDate(new Date(editingBooking.value.checkInDate)),
+      checkInTime: editingBooking.value.checkInTime,
+      guests: editingBooking.value.guests,
+      updatedAt: Timestamp.now()
+    });
+    
+    alert('Booking updated successfully!');
+    closeEditBookingModal();
+    await fetchBookingHistory();
+  } catch (error) {
+    console.error('Error updating booking:', error);
+    alert(`Failed to update booking: ${error.message}`);
+  }
+};
+
+const cancelBooking = async (booking) => {
+  if (!canCancelBooking(booking) && booking.status !== 'Approved') {
+    alert("You can only cancel bookings up to 12 hours before the check-in date and time.");
+    return;
+  }
+  if (confirm("Are you sure you want to cancel this booking?")) {
+    try {
+      const bookingRef = doc(db, 'bookings', booking.id);
+      await updateDoc(bookingRef, {
+        status: 'Cancelled',
+        cancellationDate: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        assignedGuide: null // Remove the assigned guide
+      });
+      alert("Booking cancelled successfully.");
+      await fetchBookingHistory();
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      alert("Failed to cancel booking. Please try again.");
+    }
+  }
+};
+
+const unassignGuide = async (bookingId) => {
+  try {
+    const bookingRef = doc(db, 'bookings', bookingId);
+    await updateDoc(bookingRef, {
+      assignedGuide: null,
+      updatedAt: Timestamp.now()
+    });
+    console.log("Guide unassigned successfully.");
+  } catch (error) {
+    console.error("Error unassigning guide:", error);
+    throw error;
+  }
+};
+
+const openRestoreBookingModal = (booking) => {
+  restoringBooking.value = { 
+    ...booking, 
+    newCheckInDate: '', 
+    newCheckInTime: '' 
+  };
+};
+
+const closeRestoreBookingModal = () => {
+  restoringBooking.value = null;
+};
+
+const restoreBooking = async () => {
+  if (!restoringBooking.value) return;
+
+  try {
+    const bookingRef = doc(db, 'bookings', restoringBooking.value.id);
+    await updateDoc(bookingRef, {
+      status: 'Pending',
+      checkInDate: Timestamp.fromDate(new Date(restoringBooking.value.newCheckInDate)),
+      checkInTime: restoringBooking.value.newCheckInTime,
+      updatedAt: Timestamp.now(),
+      assignedGuide: null // Ensure no guide is assigned when restoring
+    });
+    
+    alert('Booking restored successfully! It is now in pending status.');
+    closeRestoreBookingModal();
+    await fetchBookingHistory();
+  } catch (error) {
+    console.error('Error restoring booking:', error);
+    alert(`Failed to restore booking: ${error.message}`);
+  }
+};
+
+const fetchReceipt = async (receiptId) => {
+  try {
+    const receiptRef = doc(db, 'receipts', receiptId);
+    const receiptDoc = await getDoc(receiptRef);
+    
+    if (receiptDoc.exists()) {
+      return { id: receiptDoc.id, ...receiptDoc.data() };
+    } else {
+      throw new Error('Receipt not found');
+    }
+  } catch (error) {
+    console.error('Error fetching receipt:', error);
+    throw error;
+  }
+};
+
+const showReceipt = async (receiptId) => {
+  try {
+    const receiptData = await fetchReceipt(receiptId);
+    selectedReceipt.value = receiptData;
+  } catch (error) {
+    console.error('Error showing receipt:', error);
+    alert('Failed to fetch receipt. Please try again.');
+  }
+};
+
+const generatePDF = (receiptData) => {
+  const doc = new jsPDF();
+  
+  doc.setFontSize(20);
+  doc.text('Booking Receipt', 105, 20, { align: 'center' });
+  
+  doc.setFontSize(12);
+  let yPos = 40;
+  const lineHeight = 10;
+
+  const addLine = (label, value) => {
+    doc.text(`${label}: ${value}`, 20, yPos);
+    yPos += lineHeight;
+  };
+
+  addLine('Receipt ID', receiptData.id);
+  addLine('Booking ID', receiptData.bookingId);
+  addLine('Guest Name', receiptData.guestName);
+  addLine('Check-in Date', formatDate(receiptData.checkInDate));
+  addLine('Check-in Time', receiptData.checkInTime);
+  addLine('Hotel', receiptData.hotelName);
+  addLine('Room Type', receiptData.roomType);
+  addLine('Package', receiptData.packageName);
+  addLine('Tour Guide', receiptData.tourGuideName);
+  addLine('Total Amount', formatCurrency(receiptData.totalAmount));
+  addLine('Remit Amount', formatCurrency(receiptData.remitAmount));
+  addLine('Generated At', formatDate(receiptData.generatedAt));
+  
+  doc.setFontSize(10);
+  doc.text('Thank you for choosing our service!', 105, yPos + 20, { align: 'center' });
+  
+  doc.save(`receipt-${receiptData.id}.pdf`);
+};
+
+onMounted(async () => {
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        firstName.value = userData.firstName || '';
+        lastName.value = userData.lastName || '';
+        email.value = userData.email || '';
+        phoneNumber.value = userData.phoneNumber || '';
+        address.value = userData.address || '';
+        bio.value = userData.bio || '';
+        profileImageUrl.value = userData.profileImageUrl || '';
+      }
+      await fetchBookingHistory();
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  }
+});
+
+watch(activeTab, async (newTab) => {
+  if (newTab === 'history' || newTab === 'archive') {
+    await fetchBookingHistory();
+  }
+});
 </script>
 
 <style scoped>
-/* Styles remain unchanged from the previous version */
 .user-profile {
   font-family: 'Poppins', sans-serif;
   max-width: 2000px;
@@ -1248,10 +1334,16 @@ textarea {
   color: #721c24;
 }
 
+.status-badge.completed {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
 .view-details-btn,
 .edit-booking-btn,
 .cancel-booking-btn,
-.restore-booking-btn {
+.restore-booking-btn,
+.show-receipt-btn {
   padding: 6px 12px;
   color: white;
   border: none;
@@ -1293,6 +1385,14 @@ textarea {
   background-color: #218838;
 }
 
+.show-receipt-btn {
+  background-color: #17a2b8;
+}
+
+.show-receipt-btn:hover {
+  background-color: #138496;
+}
+
 .pagination {
   display: flex;
   justify-content: space-between;
@@ -1326,11 +1426,13 @@ textarea {
   cursor: not-allowed;
 }
 
-.booking-details {
+.booking-details,
+.receipt-details {
   max-width: 600px;
 }
 
-.booking-details-content {
+.booking-details-content,
+.receipt-content {
   margin-top: 20px;
 }
 
@@ -1348,6 +1450,26 @@ textarea {
 
 .detail-value {
   flex: 1;
+}
+
+.receipt-actions {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.download-receipt-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.download-receipt-btn:hover {
+  background-color: #218838;
 }
 
 @media (max-width: 768px) {
@@ -1376,6 +1498,31 @@ textarea {
     gap: 15px;
     text-align: center;
   }
+
+  .profile-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-left,
+  .profile-right {
+    margin: 0;
+    width: 100%;
+    max-width: none;
+  }
+
+  .form-container {
+    padding: 1rem;
+  }
+
+  .name-row {
+    flex-direction: column;
+  }
+
+  .first-name-input,
+  .last-name-input {
+    width: 100%;
+    max-width: none;
+  }
 }
 </style>
-
