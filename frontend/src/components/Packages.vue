@@ -281,7 +281,7 @@ const closePackageModal = () => {
 
 .banner {
     width: 100%;
-    background-image: url('/src/img/heroBg.jpg');
+    background-color: #013240;
     background-size: cover;
     background-position: center;
     text-align: center;
@@ -303,7 +303,7 @@ const closePackageModal = () => {
 
 .banner p {
     font-size: 18px;
-    margin-top: 0;
+    margin-top: -2rem;
     margin-bottom: 1rem;
     color: white;
 }

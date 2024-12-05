@@ -151,14 +151,8 @@
         <div class="footer-section">
           <h3>Follow Us</h3>
           <div class="social-icons">
-            <a href="#" class="social-icon" aria-label="Facebook">
+            <a href="https://www.facebook.com/rmtravelandtour" class="social-icon" aria-label="Facebook">
               <Facebook />
-            </a>
-            <a href="#" class="social-icon" aria-label="Instagram">
-              <Instagram />
-            </a>
-            <a href="#" class="social-icon" aria-label="Twitter">
-              <Twitter />
             </a>
           </div>
         </div>
@@ -394,7 +388,7 @@ const setActiveTab = (index) => {
 
 .center-nav ul li a:hover,
 .center-nav ul li a.active {
-  color: #059669;
+  color: #058883;
 }
 
 .auth-buttons {
@@ -412,11 +406,11 @@ const setActiveTab = (index) => {
 }
 
 .sign-in:hover {
-  color: #059669;
+  color: #058883;
 }
 
 .sign-up {
-  background-color: #059669;
+  background-color: #0a8d88;
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
@@ -427,7 +421,8 @@ const setActiveTab = (index) => {
 }
 
 .sign-up:hover {
-  background-color: #047857;
+  background-color: #f0f7f4;
+  color: #4B5563;
 }
 
 /* Hero Section */
@@ -457,6 +452,7 @@ const setActiveTab = (index) => {
 
 /* Search Bar */
 .search-bar {
+  font-family: 'Poppins', sans-serif;
   position: relative;
   display: flex;
   max-width: 500px;
@@ -464,6 +460,7 @@ const setActiveTab = (index) => {
 }
 
 .search-bar input {
+  font-family: 'Poppins', sans-serif;
   flex-grow: 1;
   padding: 0.75rem 1rem;
   font-size: 1rem;
@@ -474,9 +471,10 @@ const setActiveTab = (index) => {
 }
 
 .search-bar button {
+  font-family: 'Poppins', sans-serif;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  background-color: #059669;
+  background-color: #0a8d88;
   color: white;
   border: none;
   border-radius: 0 0.25rem 0.25rem 0;
@@ -612,8 +610,8 @@ const setActiveTab = (index) => {
 }
 
 .tabs span.active {
-  color: #059669;
-  border-bottom: 2px solid #059669;
+  color: #0a8d88;
+  border-bottom: 2px solid #0a8d88;
 }
 
 .content-gallery h2 {
@@ -759,7 +757,7 @@ const setActiveTab = (index) => {
 .feature-icon :deep(svg) {
   width: 1.5rem;
   height: 1.5rem;
-  color: #3182ce;
+  color: #0a8d88;
 }
 
 .feature-card h3 {
@@ -790,7 +788,7 @@ const setActiveTab = (index) => {
 }
 
 .footer-section h3 {
-  color: #fff;
+  color:  #058883;
   font-size: 1.25rem;
   margin-bottom: 1rem;
 }
@@ -811,7 +809,7 @@ const setActiveTab = (index) => {
 }
 
 .footer-section a:hover {
-  color: #fff;
+  color: #0a8d88;
 }
 
 .social-icons {

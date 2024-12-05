@@ -58,17 +58,28 @@
       <section id="about-us" class="about-us">
         <div class="container">
           <h2 class="section-title">Little words about us</h2>
-          <div class="content">
-            <p>
-              At RM's Travel and Tours, we grant each and every adventurer a personalized experience like no other.
-              We are aficionados coming from every part of Puerto Galera, passionate about guiding you through this
-              pocket of paradise we call home.
-            </p>
-            <p>
-              We hold strong the value of being factual. Our tour operators are with you every step through your
-              booking process, we are there to scratch every inch of curiosity and enquiry that you may have.
-              We simply want to get you going on a trip of a lifetime!
-            </p>
+          <div class="testimonial-wrapper">
+            <div class="testimonial-image-wrapper">
+              <img src="/src/img/logoforRMs.png" alt="RM's Travel and Tours Team" class="testimonial-image">
+            </div>
+            <div class="quote-content">
+              <div class="quote-marks-top">"</div>
+              <div class="quote-text">
+                <p>
+                  At RM's Travel and Tours, we grant each and every adventurer a personalized experience like no other.
+                  We are aficionados coming from every part of Puerto Galera, passionate about guiding you through this
+                  pocket of paradise we call home.
+                </p>
+                <p>
+                  We hold strong the value of being factual. Our tour operators are with you every step through your
+                  booking process, we are there to scratch every inch of curiosity and enquiry that you may have.
+                  We simply want to get you going on a trip of a lifetime!
+                </p>
+              </div>
+              <div class="quote-marks-bottom">"</div>
+              <div class="company-name">RM's Travel and Tours</div>
+              <div class="company-subtitle">Your Gateway to Paradise</div>
+            </div>
           </div>
         </div>
       </section>
@@ -259,7 +270,7 @@ export default {
   padding: 15px 25px;
   font-size: 1.1rem;
   color: #fff;
-  background-color: #2ec4b6;
+  background-color: #058883;
   border: 2px solid white;
   border-radius: 10px;
   cursor: pointer;
@@ -312,7 +323,7 @@ export default {
 }
 
 .category-btn.active {
-  background-color: #048dad;
+  background-color: #058883;
   color: white;
 }
 
@@ -335,10 +346,9 @@ export default {
 .deal-card {
   flex: 0 0 calc(33.333% - 2rem);
   margin: 0 1rem;
-  background-color: white;
+  background-color: #f0f7f4;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .deal-card img {
@@ -399,32 +409,166 @@ export default {
 }
 
 .about-us {
-  padding: 4rem 2rem;
-  background-color: #f8f9fa;
+  padding: 6rem 2rem;
+  background-color: #f0f7f4;
   text-align: center;
 }
 
+.about-us h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 3rem;
+  color: #333;
+  margin-top: -2rem;
+  margin-bottom: 0.5rem;
+}
+
 .about-us .container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-.about-us .section-title {
+.section-title {
   font-family: 'Poppins', sans-serif;
   font-size: 2.5rem;
   color: #333;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+}
+
+.testimonial-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.testimonial-image-wrapper {
+  flex-shrink: 0;
+  width: 250px;
+  height: auto;
+}
+
+.testimonial-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.quote-content {
+  flex-grow: 1;
+  text-align: left;
+  position: relative;
+  padding: 2rem 0;
+}
+
+.quote-marks-top,
+.quote-marks-bottom {
+  font-family: 'Georgia', serif;
+  font-size: 6rem;
+  line-height: 1;
+  color: #e0e0e0;
+  position: absolute;
+  height: 40px;
+}
+
+.quote-marks-top {
+  top: -20px;
+  left: -40px;
+}
+
+.quote-marks-bottom {
+  bottom: 40px;
+  right: -40px;
+  transform: rotate(180deg);
+}
+
+.quote-text {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #666;
   margin-bottom: 2rem;
 }
 
-.about-us .content {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1rem;
-  color: #666;
-  line-height: 1.6;
+.quote-text p {
+  margin-bottom: 1rem;
 }
 
-.about-us .content p {
-  margin-bottom: 1rem;
+.company-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-top: 1rem;
+}
+
+.company-subtitle {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  color: #058883;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 968px) {
+  .testimonial-wrapper {
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1rem;
+  }
+
+  .testimonial-image-wrapper {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .quote-marks-top,
+  .quote-marks-bottom {
+    font-size: 4rem;
+  }
+
+  .quote-marks-top {
+    top: -10px;
+    left: -20px;
+  }
+
+  .quote-marks-bottom {
+    bottom: 30px;
+    right: -20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .testimonial-image-wrapper {
+    max-width: 250px;
+  }
+
+  .quote-text {
+    font-size: 0.9rem;
+  }
+
+  .company-name {
+    font-size: 1.2rem;
+  }
+
+  .company-subtitle {
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 768px) {

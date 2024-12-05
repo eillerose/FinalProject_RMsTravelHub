@@ -236,7 +236,7 @@ button {
   padding: 0.5rem;
   margin-left: 8rem;
   width: 50%; 
-  background-color: #1AA0B6;
+  background-color:  #058883;
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -247,7 +247,8 @@ button {
 }
 
 button:hover {
-  background-color: #0b5ed7;
+  background-color: #f0f7f4;
+  color: #4B5563;
 }
 
 .login-link {
@@ -258,7 +259,7 @@ button:hover {
 }
 
 .login-link a {
-  color: #1AA0B6;
+  color:  #058883;
   text-decoration: underline;
 }
 

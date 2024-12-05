@@ -153,9 +153,9 @@ export default {
 }
 
 .banner p {
-    font-size: 18px;
-    margin-top: -2rem;
-    margin-bottom: 0;
+  font-size: 18px;
+  margin-top: -2rem;
+  margin-bottom: 1rem;
 }
 
 .main-contact-container {
