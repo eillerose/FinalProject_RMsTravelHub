@@ -10,20 +10,27 @@
     <main class="main-content">
       <h2>Choose your hotel</h2>
       
-      <div class="content-wrapper" :class="{ 'show-details': selectedHotel }">
+      <div v-if="loading" class="loading">
+        <p>Loading hotels...</p>
+      </div>
+
+      <div v-else-if="error" class="error">
+        <p>{{ error }}</p>
+      </div>
+
+      <div v-else class="content-wrapper" :class="{ 'show-details': selectedHotel }">
         <div class="hotels-container">
           <transition-group name="hotel-list" tag="div" class="hotels-grid">
             <div v-for="hotel in sortedHotels" :key="hotel.id" class="hotel-card">
-              <img :src="hotel.image" :alt="hotel.name" class="hotel-image" />
+              <img :src="hotel.profilePicture" :alt="hotel.name" class="hotel-image" />
               <div class="hotel-info">
                 <h3>{{ hotel.name }}</h3>
-                <p>{{ hotel.description }}</p>
                 <div class="location">
                   <span class="material-icons">location_on</span>
                   <span>{{ hotel.location }}</span>
                 </div>
                 <button @click="toggleDetails(hotel)" class="details-button">
-                  <span class="material-icons">arrow_forward</span>
+                  View Details
                 </button>
               </div>
             </div>
@@ -37,12 +44,13 @@
             </button>
             <div class="details-content">
               <h3>{{ selectedHotel.name }}</h3>
-              <p class="description">{{ selectedHotel.fullDescription }}</p>
+              <p class="description">{{ selectedHotel.description }}</p>
+              <p class="full-description">{{ selectedHotel.fullDescription }}</p>
               
               <div class="gallery">
                 <h4>Gallery</h4>
                 <div class="gallery-grid">
-                  <img v-for="(image, index) in selectedHotel.gallery" 
+                  <img v-for="(image, index) in selectedHotel.images" 
                        :key="index" 
                        :src="image" 
                        :alt="`${selectedHotel.name} - Image ${index + 1}`" />
@@ -53,12 +61,17 @@
                 <h4>Contact Information</h4>
                 <p><span class="material-icons">phone</span>{{ selectedHotel.phone }}</p>
                 <p><span class="material-icons">email</span>{{ selectedHotel.email }}</p>
-                <p><span class="material-icons">language</span>{{ selectedHotel.socialMedia.handle }}</p>
+                <p><span class="material-icons">language</span>{{ selectedHotel.website }}</p>
+              </div>
+
+              <div class="info-section">
+                <h4>Location</h4>
+                <p><span class="material-icons">place</span>{{ selectedHotel.location }}</p>
               </div>
 
               <div class="info-section">
                 <h4>Amenities</h4>
-                <ul>
+                <ul class="amenities-list">
                   <li v-for="amenity in selectedHotel.amenities" :key="amenity">
                     <span class="material-icons">check</span>
                     {{ amenity }}
@@ -67,10 +80,12 @@
               </div>
 
               <div class="info-section">
-                <h4>Available Rooms</h4>
-                <ul>
-                  <li v-for="room in selectedHotel.rooms" :key="room">{{ room }}</li>
-                </ul>
+                <h4 class="rooms-title">Available Rooms</h4>
+                <div class="rooms-list">
+                  <div v-for="room in selectedHotel.rooms" :key="room.name">
+                    {{ room.type }} ({{ room.capacity }})
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -82,90 +97,67 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue';
+import { collection, getDocs } from 'firebase/firestore';
+import { getStorage, ref as storageRef, getDownloadURL } from 'firebase/storage';
+import { db } from '../firebaseConfig';
 import HeaderComponent from './Header.vue';
 import FooterComponent from './Footer.vue';
-import { ref, computed } from 'vue'
 
-const hotels = ref([
-  {
-    id: 'agbing',
-    name: 'Agbing Seaside View Resort',
-    image: '/src/img/Agbing Seaside View Resort.jpg',
-    description: 'Escape to paradise at Agbing Seaside View Resort',
-    location: 'White Beach, Puerto Galera, Philippines',
-    fullDescription: 'Escape to paradise at Agbing Seaside View Resort. Discover the beauty of crystal-clear waters and white sandy beaches while enjoying top-notch accommodations and exceptional hospitality.',
-    phone: '0917 795 3899',
-    email: 'Agbingseaside@gmail.com',
-    socialMedia: {
-      handle: 'web.facebook.com/Agbingseasideview'
-    },
-    amenities: [
-      'Free WiFi',
-      'Beachfront Access',
-      'Swimming Pool',
-      'Cable TV',
-      'RestoBar',
-      'Airconditioned'
-    ],
-    rooms: [
-      'Standard room (2 pax)',
-      'Deluxe room (4 pax)',
-      'Super deluxe room (5 pax)',
-      'Barkada room (10 pax)',
-      'Family room (6 pax)',
-      'Family room with kitchen (6 pax)',
-      'Barkada/Family room with kitchen (14 pax)'
-    ],
-    gallery: [
-      '/src/img/AgbingFront.jpg',
-      '/src/img/AgbingRoom1.jpg',
-      '/src/img/AgbingRoom2.jpg'
-    ]
-  },
-  {
-    id: 'luckeh',
-    name: 'Luckeh 5J Beach Resort',
-    image: '/src/img/Luckeh 5J Beach Resort.jpg',
-    description: 'Discover the serenity of White Beach',
-    location: 'White Beach, Puerto Galera, Philippines',
-    fullDescription: 'Located at White Beach, Puerto Galera, Luckeh 5J Beach Resort offers a perfect getaway with beautiful surroundings, water sports, and comfortable rooms.',
-    phone: '0917 898 7323',
-    email: 'luckeh5j@gmail.com',
-    socialMedia: {
-      handle: 'luckeh5j.com'
-    },
-    amenities: [
-      'Beachfront',
-      'Water Sports',
-      'Bar',
-      'Restaurant',
-      'Room Service'
-    ],
-    gallery: [
-      '/src/img/LuckehFront.jpg',
-      '/src/img/LuckehRoom1.jpg',
-      '/src/img/LuckehRoom2.jpg'
-    ]
+const hotels = ref([]);
+const selectedHotel = ref(null);
+const loading = ref(true);
+const error = ref(null);
+
+const fetchHotels = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'hotels'));
+    hotels.value = await Promise.all(querySnapshot.docs.map(async (doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        profilePicture: await getImageUrl(data.profilePicture),
+        images: await Promise.all(data.images.map(getImageUrl))
+      };
+    }));
+    loading.value = false;
+  } catch (err) {
+    console.error('Error fetching hotels:', err);
+    error.value = 'Failed to load hotels. Please try again later.';
+    loading.value = false;
   }
-])
+};
 
-const selectedHotel = ref(null)
+const getImageUrl = async (path) => {
+  if (!path) return '';
+  try {
+    const storage = getStorage();
+    const imageRef = storageRef(storage, path);
+    return await getDownloadURL(imageRef);
+  } catch (error) {
+    console.error("Error getting image URL:", error);
+    return '';
+  }
+};
 
 const sortedHotels = computed(() => {
-  if (!selectedHotel.value) return hotels.value
+  if (!selectedHotel.value) return hotels.value;
   return [
     selectedHotel.value,
     ...hotels.value.filter(hotel => hotel.id !== selectedHotel.value.id)
-  ]
-})
+  ];
+});
 
 const toggleDetails = (hotel) => {
-  selectedHotel.value = selectedHotel.value?.id === hotel.id ? null : hotel
-}
+  selectedHotel.value = selectedHotel.value?.id === hotel.id ? null : hotel;
+};
 
 const closeDetails = () => {
-  selectedHotel.value = null
-}
+  selectedHotel.value = null;
+};
+
+onMounted(fetchHotels);
 </script>
 
 <style scoped>
@@ -179,10 +171,12 @@ const closeDetails = () => {
 }
 
 .hero {
-  background-color: #1a1a1a;
+  margin-top: 2rem;
+  background-color: #013240;
   color: white;
   text-align: center;
   padding: 3rem 2rem;
+
 }
 
 .hero h1 {
@@ -198,6 +192,7 @@ const closeDetails = () => {
 
 .main-content {
   max-width: 1800px;
+  height: 1500px;
   margin: 0 auto;
   padding: 2rem;
   
@@ -337,7 +332,7 @@ const closeDetails = () => {
 
 .gallery-grid img {
   width: 100%;
-  height: 100px;
+  height: 200px;
   object-fit: cover;
   border-radius: 4px;
 }

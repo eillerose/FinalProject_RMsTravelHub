@@ -268,7 +268,7 @@ button {
   padding: 0.5rem;
   margin-left: 6rem;
   width: 50%;
-  background-color:  #058883;
+  background-color: #1AA0B6;
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -279,8 +279,7 @@ button {
 }
 
 button:hover {
-  background-color: #f0f7f4;
-  color: #4B5563;
+  background-color: #0b5ed7;
 }
 
 .signup-link {
@@ -291,7 +290,7 @@ button:hover {
 }
 
 .signup-link a {
-  color:  #058883;
+  color: #1AA0B6;
   text-decoration: underline;
   
 }

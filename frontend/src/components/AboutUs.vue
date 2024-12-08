@@ -8,7 +8,6 @@
 
 
     <section id="about-us" class="about-us">
-        <h2>About Us</h2>
         <p class="about-description">
           At RM's Travel and Tours, we grant each and every adventurer a personalized experience like no other. We are aficionados coming from every part of Puerto Galera, passionate about guiding you through this pocket of paradise we call home.
         </p>
@@ -47,9 +46,6 @@
             </div>
             <h3>Rizalie L. Tupas</h3>
             <p class="position">Owner</p>
-            <p class="description">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            </p>
           </div>
         </div>
 
@@ -61,9 +57,6 @@
             </div>
             <h3>Mark T. Manzano</h3>
             <p class="position">Owner</p>
-            <p class="description">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            </p>
           </div>
         </div>
 
@@ -75,9 +68,6 @@
             </div>
             <h3>Gene Juliet L. Tupas</h3>
             <p class="position">Staff</p>
-            <p class="description">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            </p>
           </div>
         </div>
 
@@ -89,9 +79,6 @@
             </div>
             <h3>Marcus Reid</h3>
             <p class="position">Staff</p>
-            <p class="description">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            </p>
           </div>
         </div>
       </div>
@@ -147,6 +134,7 @@ const reasons = ref([
 .about-us {
   font-family: 'Poppins', sans-serif;
   background-color: white;
+  max-width: 2000px;
   min-height: 100vh;
 }
 
@@ -232,7 +220,7 @@ const reasons = ref([
 
 .hover-card {
   padding: 1.25rem;
-  background-color: white;
+  background-color: #f0f7f4;
   border-radius: 0.5rem;
   transition: transform 0.3s, box-shadow 0.3s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -286,7 +274,7 @@ const reasons = ref([
 
 .team-card {
   position: relative;
-  height: 300px;
+  height: 200px;
   perspective: 1000px;
 }
 
@@ -336,7 +324,7 @@ const reasons = ref([
   border-radius: 50%;
   overflow: hidden;
   margin: -80px auto 20px;
-  border: 5px solid white;
+  border: 5px solid #0a8d88;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -365,7 +353,7 @@ const reasons = ref([
 }
 
 .why-choose-us {
-  background-color: #caf0f8;
+  background-color: #f0f7f4;
   padding: 60px;
   border-radius: 8px;
   text-align: center;
@@ -496,4 +484,3 @@ const reasons = ref([
   }
 }
 </style>
-

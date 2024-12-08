@@ -1,634 +1,549 @@
 <template>
   <div class="packages-page">
     <HeaderComponent />
-     <!-- Banner Section -->
     <div class="banner">
-      <h1>Travel Packages</h1>
-      <p>Explore our exclusive travel packages for an unforgettable adventure. Your journey to paradise starts here!</p>
-    </div>
-
-    <div class="packages-container">
-      <h1>Our Travel Packages</h1>
-      <div class="packages-grid">
-        <div class="package-card" v-for="(pkg, index) in packages" :key="index">
-          <img :src="pkg.cardImage" :alt="pkg.name" class="package-image" />
-          <h2>{{ pkg.name }}</h2>
-          <p>{{ pkg.description }}</p>
-          <button class="view-btn" @click="openModal(pkg)">View Details</button>
-        </div>
+      <div class="banner-content">
+        <h1>Travel Packages</h1>
+        <p>Explore our exclusive travel packages for an unforgettable adventure. Your journey to paradise starts here!</p>
       </div>
-
-  
-<!-- Modal for Package Details -->
-<div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-  <div :class="['modal-content', { 'large-modal': selectedPackage?.name === 'Package Diamond' || selectedPackage?.name === 'Package Ruby' }]">
-    <!-- Add the modified modal-image section here -->
-    <div class="modal-image" :style="{ backgroundImage: `url(${selectedPackage.modalImage})` }">
-      <!-- Conditional class for h2 and p -->
-      <h2 :class="{ 'large-text': selectedPackage?.name === 'Package Diamond' || selectedPackage?.name === 'Package Ruby' }">
-        {{ selectedPackage.name }}
-      </h2>
-      <p :class="{ 'large-description': selectedPackage?.name === 'Package Diamond' || selectedPackage?.name === 'Package Ruby' }">
-        {{ selectedPackage.description }}
-      </p>
     </div>
-
-    <div class="modal-details">
-      <div v-if="selectedPackage.name === 'Package Diamond' || selectedPackage.name === 'Package Ruby'">
-        <h3>Enjoy and have a memorable vacation with RM's Travel and Tours Here in Puerto Galera</h3>
-        <ul>
-          <li v-if="selectedPackage.name === 'Package Diamond'">Free simple SOUVENIRS from RM'S Family!</li>
-          <li>Assisted by licensed and DOT Accredited Tour Guide during tours</li>
-          <li>Transfer from Balatero Port to Accommodation Vice Versa</li>
-        </ul>
-              <h3>Accommodation:</h3>
-              <ul>
-                <li>Airconditioned room</li>
-                <li>Cable TV</li>
-                <li>With WiFi</li>
-                <li>With private bathroom</li>
-                <li>With towels and Toilet paper</li>
-                <li>With Generator in case of brown out</li>
-                <li>Using common kitchen (extra charge must be paid by the guest)</li>
-              </ul>
-              <div class="package-options">
-                <button @click="openPackageModal('Inland Tour')">Inland Tour</button>
-                <button @click="openPackageModal('Island Tour')">Island Tour</button>
-                <button @click="openPackageModal('Activities')">Activities</button>
-              </div>
-            </div>
-            <div v-else>
-              <h3>Optional Accommodation:</h3>
-              <ul>
-                <li>Beach Front: 1-2 minutes of walk</li>
-                <li>Hotel/Lodging Inn</li>
-              </ul>
-              <h3>Room Inclusions:</h3>
-              <ul>
-                <li>AC Room</li>
-                <li>Cabled TV</li>
-                <li>Private Bathroom</li>
-                <li>Free use of towels and tissue</li>
-                <li>Free WiFi</li>
-              </ul>
-              <h3>Tour Inclusions:</h3>
-              <ul>
-                <li v-for="item in selectedPackage.tourInclusions" :key="item">{{ item }}</li>
-              </ul>
-              <h3>Package Options:</h3>
-              <div class="package-options">
-                <button v-for="option in selectedPackage.options" :key="option" @click="openPackageModal(option)">{{ option }}</button>
-              </div>
-            </div>
-            <button class="close-btn" @click="closeModal">
-              <span class="material-symbols-outlined">close</span>
-            </button>
+    <div class="packages-container">
+      <h2>Our Travel Packages</h2>
+      <div v-if="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading packages...</p>
+      </div>
+      <div v-else-if="error" class="error">
+        <p>{{ error }}</p>
+      </div>
+      <div v-else class="packages-grid">
+        <div v-for="pkg in packages" :key="pkg.id" class="package-card">
+          <img :src="pkg.imageUrl" :alt="pkg.name" class="package-image" />
+          <div class="package-content">
+            <h3>{{ pkg.name }}</h3>
+            <p>{{ pkg.description }}</p>
+            <button class="view-btn" @click="openModal(pkg)">View Details</button>
           </div>
         </div>
       </div>
-
-
-      <!-- Modal for Specific Package Details -->
-<div v-if="showPackageModal" class="modal-overlay" @click.self="closePackageModal">
-  <!-- Conditional classes for Inland Tour and Island Tour -->
-  <div :class="['modal-content', 'package-modal', { 'inland-tour-style': packageDetails?.title === 'Inland Tour', 'island-tour-style': packageDetails?.title === 'Island Tour' }]">
-    <!-- Close Button at Top-Right -->
-    <button class="back-icon" @click="closePackageModal">&times;</button>
-
-    <!-- Title and Description Section -->
-    <h2 class="package-title">{{ packageDetails.title }}</h2>
-    <p class="package-description">{{ packageDetails.description }}</p>
-
-    <!-- Conditional Price List Section -->
-    <div v-if="packageDetails.title !== 'Inland Tour' && packageDetails.title !== 'Island Tour' && packageDetails.title !== 'Activities'">
-      <h3 class="price-list-label">Price List</h3>
     </div>
-    <div class="price-list-container">
-      <ul class="price-list">
-        <li v-for="price in packageDetails.prices" :key="price">{{ price }}</li>
-      </ul>
+    
+    <!-- Package Details Modal -->
+    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div class="modal-content">
+        <button class="close-btn" @click="closeModal">×</button>
+        <div class="modal-grid">
+          <div class="modal-image-side" :style="{ backgroundImage: `url(${selectedPackage.imageUrl})` }">
+            <div class="package-title-overlay">
+              <h2>{{ selectedPackage.name }}</h2>
+            </div>
+          </div>
+          <div class="modal-details">
+            <div class="scrollable-content">
+              <div v-for="(components, type) in groupedComponents" :key="type" class="detail-section">
+                <h3>{{ type }}</h3>
+                <ul>
+                  <li v-for="component in components" :key="component.id">
+                    {{ component.name }}
+                  </li>
+                </ul>
+              </div>
+              <div v-if="selectedPackage.includePackageOptions" class="package-options">
+                <h3>Package Options</h3>
+                <div class="options-grid">
+                  <button 
+                    v-for="option in selectedPackage.selectedOptions" 
+                    :key="option.id"
+                    class="option-btn"
+                    @click="openOptionsModal(option)"
+                  >
+                    {{ option.name }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Book Now Button -->
-    <button class="book-now-btn">Book Now</button>
-  </div>
-</div>
-
-
+    <!-- Package Options Modal -->
+    <div v-if="showOptionsModal" class="modal-overlay" @click.self="closeOptionsModal">
+      <div class="modal-content options-modal">
+        <button class="close-btn" @click="closeOptionsModal">×</button>
+        <div class="modal-details">
+          <h2 class="options-title">{{ selectedOption.name }}</h2>
+          <div class="pricing-grid">
+            <div v-for="(price, index) in selectedOption.pricing" :key="index" class="pricing-card">
+              <div class="pax-info">
+                <h3>{{ price.pax }} PAX</h3>
+              </div>
+              <div class="price-info">
+                <p class="price">₱{{ price.price.toLocaleString() }}</p>
+                <p class="per-person">per person</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
     <FooterComponent />
   </div>
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 import HeaderComponent from './Header.vue';
 import FooterComponent from './Footer.vue';
-import { ref } from 'vue';
 
-const packages = ref([
-  {
-    name: "Package 1",
-    cardImage: new URL('/src/img/package1.jpg', import.meta.url).href,
-    modalImage: new URL('/src/img/login-signup.jpg', import.meta.url).href,
-    description: "Great accommodation and Island Hopping with snorkeling options.",
-    tourInclusions: [
-      "Island Hopping to 3 Beaches: Haligi Beach, Bayanan Beach, Heart Beach",
-      "Complete Gears: Big Boat (min. capacity of 6 pax), Mask, Life Vest, Goggles"
-    ],
-    options: ["2D1N Beach Front", "3D2N Beach Front", "2D1N 1-2 Mins Walk", "3D2N 1-2 Mins Walk"],
-  },
-  {
-    name: "Package 2",
-    cardImage: new URL('/src/img/package2.jpg', import.meta.url).href,
-    modalImage: new URL('/src/img/login-signup.jpg', import.meta.url).href,
-    description: "Experience underwater adventures with our snorkeling tour.",
-    tourInclusions: [
-      "Snorkeling at Coral Garden, Underwater Cave, Giant Clam Shell",
-      "Island Sightseeing",
-      "Complete Gears: Big Boat (min. capacity of 6 pax), Mask, Life Vest, Goggles"
-    ],
-    options: ["2D1N Beach Front", "3D2N Beach Front", "2D1N 1-2 Mins Walk", "3D2N 1-2 Mins Walk"],
-  },
-  {
-    name: "Package Diamond",
-    cardImage: new URL('/src/img/packageDiamond.jpg', import.meta.url).href,
-    modalImage: new URL('/src/img/login-signup.jpg', import.meta.url).href,
-    description: "Enjoy a memorable vacation with snorkeling, inland, and island tours.",
-    options: ["Inland Tour", "Island Tour", "Activities"]
-  },
-  {
-    name: "Package Ruby",
-    cardImage: new URL('/src/img/packageRuby.jpg', import.meta.url).href,
-    modalImage: new URL('/src/img/login-signup.jpg', import.meta.url).href,
-    description: "Experience underwater adventures with our snorkeling tour.",
-    options: ["Inland Tour", "Island Tour", "Activities"]
-  }
-]);
-
+const packages = ref([]);
+const loading = ref(true);
+const error = ref(null);
 const showModal = ref(false);
+const showOptionsModal = ref(false);
 const selectedPackage = ref(null);
-const showPackageModal = ref(false);
-const packageDetails = ref(null);
+const selectedOption = ref(null);
+
+const groupedComponents = computed(() => {
+  if (!selectedPackage.value?.components) return {};
+  return selectedPackage.value.components.reduce((acc, comp) => {
+    if (!acc[comp.type]) acc[comp.type] = [];
+    acc[comp.type].push(comp);
+    return acc;
+  }, {});
+});
+
+const fetchPackages = async () => {
+  try {
+    const packagesCollection = collection(db, 'packages');
+    const packagesSnapshot = await getDocs(packagesCollection);
+    packages.value = packagesSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        components: data.components || [],
+        selectedOptions: data.selectedOptions || []
+      };
+    });
+    loading.value = false;
+  } catch (err) {
+    console.error("Error fetching packages:", err);
+    error.value = "Failed to load packages. Please try again later.";
+    loading.value = false;
+  }
+};
 
 const openModal = (pkg) => {
   selectedPackage.value = pkg;
   showModal.value = true;
+  document.body.style.overflow = 'hidden';
 };
 
 const closeModal = () => {
   showModal.value = false;
   selectedPackage.value = null;
+  document.body.style.overflow = 'auto';
 };
 
-const packageOptions = {
-  '2D1N Beach Front': {
-    title: '2D1N Package (Beach Front Accommodation)',
-    description: 'Enjoy a 2-day, 1-night stay with beach front accommodation.',
-    prices: [
-      '1-2 pax – PHP 2150.00 per head',
-      '3-4 pax – PHP 1800.00 per head',
-      '5-6 pax – PHP 1500.00 per head',
-      '10 pax or GROUPS – PHP 1400.00 per head'
-    ]
-  },
-  '3D2N Beach Front': {
-    title: '3D2N Package (Beach Front Accommodation)',
-    description: 'Enjoy a 3-day, 2-night stay with beach front accommodation.',
-    prices: [
-      '1-2 pax – PHP 3150.00 per head',
-      '3-4 pax – PHP 2599.00 per head',
-      '5-6 pax – PHP 2050.00 per head',
-      '10 pax or GROUPS – PHP 1900.00 per head'
-    ]
-  },
-  '2D1N 1-2 Mins Walk': {
-    title: '2D1N Package (1-2 Minutes Walk Accommodation)',
-    description: 'Enjoy a 2-day, 1-night stay with 1-2 minutes walk accommodation.',
-    prices: [
-      '1-2 pax – PHP 1900.00 per head',
-      '3-4 pax – PHP 1500.00 per head',
-      '5-6 pax – PHP 1450.00 per head',
-      '10 pax or GROUPS – PHP 1300.00 per head'
-    ]
-  },
-  '3D2N 1-2 Mins Walk': {
-    title: '3D2N Package (1-2 Minutes Walk Accommodation)',
-    description: 'Enjoy a 3-day, 2-night stay with 1-2 minutes walk accommodation.',
-    prices: [
-      '1-2 pax – PHP 2650.00 per head',
-      '3-4 pax – PHP 1900.00 per head',
-      '5-6 pax – PHP 1800.00 per head',
-      '10 pax or GROUPS – PHP 1700.00 per head'
-    ]
-  },
-  'Inland Tour': {
-    title: 'Inland Tour',
-    description: 'Experience an inland adventure with multiple sightseeing spots.',
-    prices: [
-      'Mangyan Village',
-      'White Beach View Deck',
-      'Ponderosa Golf Course',
-      'Infinity Farm',
-      'Tamaraw Falls'
-    ]
-  },
-  'Island Tour': {
-    title: 'Island Tour',
-    description: 'Explore beaches and snorkeling spots.',
-    prices: [
-      'Beach Hopping: Heart Beach, Haligi Beach, Bayanan Beach',
-      'Snorkeling Locations: Underwater Cave, Giant Clam, Coral Garden',
-      'Includes all gears: Life Vest, Snorkel, Aqua Shoes, Entrance Fees'
-    ]
-  },
-  'Activities': {
-    title: 'Activities',
-    description: 'Multiple activities included in the package.',
-    prices: [
-      'Picture Taking',
-      'Sightseeing',
-      'Snorkeling',
-      'Swimming',
-      'Beach Combing',
-      'Trekking'
-    ]
-  }
+const openOptionsModal = (option) => {
+  selectedOption.value = option;
+  showOptionsModal.value = true;
 };
 
-const openPackageModal = (option) => {
-  packageDetails.value = packageOptions[option];
-  showPackageModal.value = true;
+const closeOptionsModal = () => {
+  showOptionsModal.value = false;
+  selectedOption.value = null;
 };
 
-const closePackageModal = () => {
-  showPackageModal.value = false;
-  packageDetails.value = null;
-};
+onMounted(fetchPackages);
 </script>
 
-
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
-@import url('https://fonts.googleapis.com/css2?family=Ephesis&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 .packages-page {
-    font-family: 'Poppins', sans-serif;
-    min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  background-color: #ffffff;
 }
 
-
-
 .banner {
-    width: 100%;
-    background-color: #013240;
-    background-size: cover;
-    background-position: center;
-    text-align: center;
-    color: #fff;
-    padding: 0 20px;
-    height: 25vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin-top: 2rem;
+  position: relative;
+  height: 400px;
+  background-image: url('/src/img/heroBg.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+}
+
+.banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.banner-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  padding: 0 20px;
 }
 
 .banner h1 {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .banner p {
-    font-size: 18px;
-    margin-top: -2rem;
-    margin-bottom: 1rem;
-    color: white;
+  font-size: 18px;
+  line-height: 1.6;
 }
 
 .packages-container {
-    padding: 20px;
-    max-width: 1500px;
-    margin: 0 auto;
-    min-height: 80vh;
+  max-width: 1200px;
+  margin: 60px auto;
+  padding: 0 20px;
 }
 
-h1 {
-    padding-top: 1rem;
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 60px;
+.packages-container h2 {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 600;
+  margin-bottom: 40px;
+  color: #333;
 }
 
 .packages-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 30px;
 }
 
 .package-card {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease-in-out;
-    display: flex;
-    flex-direction: column;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
 }
 
 .package-card:hover {
-    transform: translateY(-5px); 
+  transform: translateY(-5px);
 }
 
 .package-image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
 }
 
-h2 {
-    font-size: 1.5rem;
-    margin: 15px 0 10px;
-    padding: 0 15px;
+.package-content {
+  padding: 20px;
 }
 
-p {
-    font-size: 1rem;
-    color: #666;
-    padding: 0 15px;
-    flex-grow: 1;
+.package-content h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #333;
 }
 
-.view-btn, .package-options button {
-  font-family: 'Poppins', sans-serif;
-    background-color: #2ec4b6;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin: 10px;
-    border-radius: 5px;
+.package-content p {
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
-.view-btn:hover, .package-options button:hover {
-    background-color: #00d7d4;
+.view-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #2ec4b6;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.view-btn:hover {
+  background-color: #26a69a;
 }
 
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
 .modal-content {
-    position: relative;
-    display: flex;
-    background-color: white;
-    width: 100%;
-    max-width: 1000px;
-    height: 85vh;
-    border-radius: 10px;
-    overflow: hidden;
+  background: white;
+  width: 90%;
+  max-width: 1000px;
+  height: 90vh;
+  max-height: 700px;
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.modal-image {
-    flex: 1;
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    text-align: center;
-    padding: 20px;
-    height: 100%;
-    font-family: 'Poppins', sans-serif;
+.modal-grid {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
 }
 
-.modal-image h2 {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-top:18rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+.modal-image-side {
+  width: 50%;
+  background-size: cover;
+  background-position: center;
+  position: relative;
 }
 
-.modal-image p {
-    font-family: 'Ephesis', cursive;
-    color: white;
-    font-size: 2rem;
-    margin-top: 5px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+.package-title-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  padding: 20px;
+  color: white;
+}
+
+.package-title-overlay h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
 }
 
 .modal-details {
-    flex: 1;
-    padding: 30px;
-    overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+  background: white;
+  overflow: hidden;
 }
 
-.package-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
+.scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 15px;
 }
 
 .close-btn {
-    background: none;
-    border: none;
-    color: black;
-    cursor: pointer;
-    font-size: 1.5rem;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 8px;
-    transition: color 0.3s;
-}
-
-.large-modal {
-    max-width: 1200px; 
-    height: 63vh; 
-}
-
-.large-modal h2 {
-  margin-top: 14rem;
-  font-size: 3rem; 
-  font-weight: bold;
-}
-
-.large-modal p {
-  font-size: 1.5rem;
-  margin-top: 1rem; 
-}
-
-/* Styles specific to Inland Tour modal */
-.inland-tour-style {
-    max-width: 800px; /* Set unique width for Inland Tour modal */
-    height: 60vh; /* Unique height */
-    padding: 25px; /* Add padding specific to Inland Tour */
-}
-
-/* Styles specific to Island Tour modal */
-.island-tour-style {
-    max-width: 900px; /* Set unique width for Island Tour modal */
-    height: 50vh; /* Unique height */
-    padding: 20px; /* Add padding specific to Island Tour */
-}
-
-
-.package-modal {
-    display: block;
-    padding: 20px;
-    max-width: 650px; 
-    max-height: 650px;
-    width: 100%;
-    margin: 0 auto; /* Center the modal */
-}
-
-
-.back-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
   background: none;
-    border: none;
-    color: black;
-    cursor: pointer;
-    font-size: 1.5rem;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 8px;
-    transition: color 0.3s;
+  border: none;
+  font-size: 24px;
+  color: #fff;
+  cursor: pointer;
+  z-index: 2;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
 }
 
-.package-title {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-    text-align: center;
+.detail-section {
+  margin-bottom: 25px;
 }
 
-.package-description {
-    font-size: 1rem;
-    color: #555;
-    margin-bottom: 10px; /* Adjust this value */
-    text-align: center;
-    line-height: 1.4; /* Adjust as needed */
+.detail-section h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #000;
 }
 
-
-.price-list-label {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
-    margin-top: 50px;
-    margin-bottom: 0;
+.detail-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.price-list-container {
-    background-color: white;
-    border-radius: 5px;
-    padding: 20px;
-    width: 93%;
+.detail-section li {
+  padding: 5px 0;
+  padding-left: 25px;
+  position: relative;
+  color: #444;
 }
 
-.price-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.detail-section li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #000;
 }
 
-.price-list li {
-    font-size: 1rem;
-    color: #444;
-    padding: 15px;
-    margin-bottom: 10px;
-    background-color: #f0f0f0; /* Light gray background for each item */
-    border-radius: 5px;
-    text-align: center;
-    font-weight: 500;
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
 }
 
-.price-list li:last-child {
-    margin-bottom: 0; /* Remove the margin for the last item */
+.option-btn {
+  background-color: #2ec4b6;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-
-.book-now-btn {
-    font-family: 'Poppins', sans-serif;
-    background-color: #2ec4b6;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 5px;
-    width: 50%; /* Full-width button */
-    margin-left: 10rem;
-    margin-top: 2rem;
-    transition: background-color 0.3s;
+.option-btn:hover {
+  background-color: #26a69a;
 }
 
-.book-now-btn:hover {
-    background-color: #00d7d4;
+.package-options {
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
 }
 
+.options-modal {
+  max-width: 600px;
+  height: auto;
+  max-height: 80vh;
+  padding: 30px;
+}
 
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
+.options-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.pricing-card {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.pricing-card:hover {
+  transform: translateY(-5px);
+}
+
+.pax-info h3 {
+  font-size: 20px;
+  color: #2ec4b6;
+  margin-bottom: 15px;
+}
+
+.price-info .price {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.price-info .per-person {
+  font-size: 14px;
+  color: #666;
+}
+
+@media (max-width: 850px) {
+  .modal-content {
+    width: 95%;
+    height: 95vh;
+  }
+  
+  .modal-grid {
+    flex-direction: column;
+  }
+  
+  .modal-image-side {
     width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
+    height: 200px;
+  }
+
+  .modal-details {
+    max-height: calc(95vh - 200px);
+    overflow-y: auto;
+  }
 }
 
 @media (max-width: 768px) {
-    .modal-content {
-        flex-direction: column;
-        height: 90vh;
-    }
-
-    .modal-image, .modal-details {
-        flex: none;
-    }
-
-    .modal-image {
-        height: 40%;
-    }
-
-    .modal-details {
-        height: 60%;
-    }
-
-    .package-options {
-        flex-direction: column;
-    }
-
-    .package-modal {
-        max-width: 90%; /* Adjust for smaller screens */
-        padding: 15px;
-    }
-
-    .book-now-btn {
-        padding: 8px 12px; /* Slightly smaller padding for mobile */
-    }
+  .banner h1 {
+    font-size: 36px;
+  }
+  
+  .packages-container h2 {
+    font-size: 28px;
+  }
+  
+  .modal-content {
+    margin: 10px;
+  }
+  
+  .options-modal {
+    width: 90%;
+    margin: 20px;
+  }
+  
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
+.loading {
+  text-align: center;
+  padding: 40px;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #2ec4b6;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error {
+  text-align: center;
+  color: #dc3545;
+  padding: 40px;
+}
 </style>

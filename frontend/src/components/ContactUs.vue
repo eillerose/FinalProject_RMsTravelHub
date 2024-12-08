@@ -134,7 +134,7 @@ export default {
 .banner {
     font-family: 'Poppins', sans-serif;
     width: 100%;
-    background-color: #013240;
+   background-color: #013240;
     background-size: cover;
     background-position: center;
     text-align: center;
@@ -144,18 +144,17 @@ export default {
 }
 
 .banner h1 {
-    color: #ffffff;
     font-size: 4rem;
     margin-top: 4rem;
     margin-bottom: 1rem;
     font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Added text shadow for readability */
 }
 
 .banner p {
-  font-size: 18px;
-  margin-top: -2rem;
-  margin-bottom: 1rem;
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .main-contact-container {
@@ -205,7 +204,7 @@ export default {
 .info-item .material-symbols-outlined {
     margin-right: 15px;
     font-size: 35px; /* Larger icon size */
-    color: #048dad;
+    color: #003a79;
 }
 
 .info-item div {
@@ -270,7 +269,7 @@ textarea {
 
 button {
     font-family: 'Poppins', sans-serif;
-    background-color: #048dad;
+    background-color: #fdb812;
     color: #fff;
     padding: 10px 15px;
     margin-top: 2rem;
@@ -282,6 +281,9 @@ button {
     transition: background-color 0.3s; /* Smooth hover transition */
 }
 
+button:hover {
+    background-color: #F3C623;
+}
 
 .map-container {
     margin-top: 20px; /* Space between the form and the map */

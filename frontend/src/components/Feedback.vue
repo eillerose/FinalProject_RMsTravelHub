@@ -234,7 +234,7 @@ export default {
     padding: 10px;
     font-size: 1rem;
     color: #333;
-    background-color: #e6f7ff;
+    background-color: #f0f7f4;
     border-radius: 5px;
     margin: 20px 20px;
 }
@@ -244,7 +244,7 @@ export default {
 }
 
 .feedback-header {
-    background-color: #10375C;
+    background-color: #0a8d88;
     color: #fff;
     padding: 15px 20px;
     border-radius: 8px 8px 0 0;
@@ -282,7 +282,7 @@ export default {
     align-items: center;
     gap: 5px;
     cursor: pointer;
-    color: #004085;
+    color: #0a8d88;
     margin:20px;
 }
 
@@ -313,7 +313,7 @@ button {
 
 button .material-icons {
     font-size: 1.5rem;
-    color: #004085;
+    color: #0a8d88;
 }
 
 .submit-feedback-btn {
@@ -359,7 +359,7 @@ button .material-icons {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #10375C; /* Same color as the feedback header */
+    background-color: #0a8d88;
     color: #fff;
     padding: 15px 20px;
     border-radius: 8px 8px 0 0;
@@ -402,6 +402,7 @@ button .material-icons {
 
 .modal-reply-form button .material-icons {
     font-size: 1.5rem;
-    color: #004085;
+    color: #0a8d88
+    ;
 }
 </style>

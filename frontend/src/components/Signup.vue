@@ -28,16 +28,30 @@
             </div>
             <div class="form-group">
               <label for="username">Username</label>
-              <input v-model="username" type="text" placeholder="Enter your username" id="username" />
+              <input v-model="username" type="text" placeholder="Enter your username" id="username" required />
             </div>
           </div>
           <div class="form-group">
             <label for="email">Email</label>
-            <input v-model="email" type="email" placeholder="Enter your email" id="email" />
+            <input v-model="email" type="email" placeholder="Enter your email" id="email" required />
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input v-model="password" type="password" placeholder="Enter your password" id="password" />
+            <div class="password-field">
+              <input v-model="password" :type="showPassword ? 'text' : 'password'" placeholder="Enter your password" id="password" required />
+              <span class="material-icons view-icon" @click="togglePasswordVisibility">
+                {{ showPassword ? 'visibility_off' : 'visibility' }}
+              </span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="confirm-password">Confirm Password</label>
+            <div class="password-field">
+              <input v-model="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" placeholder="Confirm your password" id="confirm-password" />
+              <span class="material-icons view-icon" @click="toggleConfirmPasswordVisibility">
+                {{ showConfirmPassword ? 'visibility_off' : 'visibility' }}
+              </span>
+            </div>
           </div>
           <button type="submit">Sign Up</button>
         </form>
@@ -53,10 +67,6 @@
   </div>
 </template>
 
-
-
-
-
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -65,17 +75,33 @@ import { sendEmailVerification } from 'firebase/auth';
 
 const username = ref('');
 const password = ref('');
+const confirmPassword = ref(''); // New ref for confirm password
 const email = ref('');
 const firstName = ref('');
 const lastName = ref('');
 const phoneNumber = ref('');
+const showPassword = ref(false); // Toggle for password visibility
+const showConfirmPassword = ref(false); // Toggle for confirm password visibility
 const router = useRouter();
 
 const handleSignUp = async () => {
+  // Check if required fields are filled
+  if (!username.value || !email.value || !password.value) {
+    alert('Please fill in all required fields: username, email, and password.');
+    return;
+  }
+
+  // Check if passwords match
+  if (password.value !== confirmPassword.value) {
+    alert('Passwords do not match.');
+    return;
+  }
+
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
     const user = userCredential.user;
 
+    // Add user data to Firestore
     await setDoc(doc(db, 'users', user.uid), {
       username: username.value,
       firstName: firstName.value,
@@ -83,8 +109,10 @@ const handleSignUp = async () => {
       email: email.value,
       phoneNumber: phoneNumber.value,
       verified: false,
+      role: 'user',
     });
 
+    // Send verification email
     await sendEmailVerification(user);
     alert('User signed up successfully! A verification email has been sent to your email address.');
   } catch (error) {
@@ -93,12 +121,20 @@ const handleSignUp = async () => {
   }
 };
 
+// Toggle password visibility functions
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
+};
+
+const toggleConfirmPasswordVisibility = () => {
+  showConfirmPassword.value = !showConfirmPassword.value;
+};
+
 // Define the goBack function
 const goBack = () => {
   router.push('/'); // Navigate to the landing page
 };
 </script>
-
 
   
 <style scoped>
@@ -236,7 +272,7 @@ button {
   padding: 0.5rem;
   margin-left: 8rem;
   width: 50%; 
-  background-color:  #058883;
+  background-color: #1AA0B6;
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -247,8 +283,7 @@ button {
 }
 
 button:hover {
-  background-color: #f0f7f4;
-  color: #4B5563;
+  background-color: #0b5ed7;
 }
 
 .login-link {
@@ -259,7 +294,7 @@ button:hover {
 }
 
 .login-link a {
-  color:  #058883;
+  color: #1AA0B6;
   text-decoration: underline;
 }
 
@@ -275,5 +310,18 @@ button:hover {
   object-fit: cover;
 }
 
+/* Add styles for the password visibility icon */
+.password-field {
+  position: relative;
+}
+
+.view-icon {
+  position: absolute;
+  top: 50%;
+  right: 30px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #6c757d;
+}
 
 </style>

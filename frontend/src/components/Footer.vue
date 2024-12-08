@@ -31,9 +31,9 @@
       <div class="footer-section">
         <h3>Follow Us</h3>
         <div class="social-icons">
-          <a href="#" class="social-icon" aria-label="Facebook">Facebook</a>
-          <a href="#" class="social-icon" aria-label="Instagram">Instagram</a>
-          <a href="#" class="social-icon" aria-label="Twitter">Twitter</a>
+          <a href="https://www.facebook.com/rmtravelandtour" class="social-icon" aria-label="Facebook">
+          <i class="fab fa-facebook-f"></i>
+        </a>
         </div>
       </div>
     </div>
@@ -52,19 +52,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 @import url('https://fonts.googleapis.com/css2?family=Ephesis&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+
 
 .footer {
   font-family: 'Poppins', sans-serif;
   background-color: #013240;
   color: #ffffff;
   padding: 4rem 2rem 2rem;
+  z-index: 1000;
 }
 
 .footer-content {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
 }
 

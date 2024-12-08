@@ -1,3 +1,4 @@
+
 <template>
   <header class="header">
     <div class="container">
@@ -291,4 +292,3 @@ const logout = async () => {
   }
 }
 </style>
-

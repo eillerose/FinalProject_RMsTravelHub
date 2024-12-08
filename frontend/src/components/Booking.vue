@@ -58,9 +58,6 @@
             <h2 class="step-title">Select Hotel and Room</h2>
             <div class="hotel-cards">
               <div v-for="hotel in hotels" :key="hotel.id" class="hotel-card">
-                <div class="hotel-image-wrapper">
-                  <img :src="hotel.image" :alt="hotel.name" class="hotel-image">
-                </div>
                 <h3 class="hotel-name">{{ hotel.name }}</h3>
                 <p class="hotel-description">{{ hotel.description }}</p>
                 <button @click="showHotelDetails(hotel)" class="view-details-btn">
@@ -86,7 +83,7 @@
                   <label for="email">Email</label>
                   <div class="input-with-icon">
                     <MailIcon class="input-icon" />
-                    <input type="email" id="email" v-model="booking.email" required>
+                    <input type="email" id="email" v-model="booking.email" required readonly>
                   </div>
                 </div>
                 <div class="input-group">
@@ -210,7 +207,7 @@
             <p><strong>Package:</strong> {{ booking.package?.name }}</p>
             <p><strong>Check-in Date & Time:</strong> {{ formatDateTime(booking.checkInDate, booking.checkInTime) }}</p>
             <p><strong>Hotel:</strong> {{ booking.hotelAndRoom?.hotel.name }}</p>
-            <p><strong>Room Type:</strong> {{ booking.hotelAndRoom?.room.name }}</p>
+            <p><strong>Room Type:</strong> {{ booking.hotelAndRoom?.room.type }}</p>
           </div>
 
           <div class="summary-total">
@@ -227,16 +224,20 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, XIcon, UserIcon, MailIcon, PhoneIcon, UsersIcon } from 'lucide-vue-next';
 import HeaderComponent from './Header.vue';
 import Calendar from './CalendarUser.vue';
+import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { db, auth } from '../firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const currentStep = ref(0);
 const showHotelModal = ref(false);
 const showSummary = ref(false);
 const selectedHotel = ref(null);
 const steps = ['Package', 'Date & Time', 'Hotel & Room', 'Guest Info'];
+const currentUser = ref(null);
 
 const booking = reactive({
   package: null,
@@ -249,60 +250,49 @@ const booking = reactive({
   guests: 1
 });
 
-const packages = [
-  {
-    id: 'package1',
-    name: "Island Explorer",
-    description: "Great accommodation and Island Hopping with snorkeling options.",
-    price: 5000
-  },
-  {
-    id: 'package2',
-    name: "Underwater Adventure",
-    description: "Experience underwater adventures with our snorkeling tour.",
-    price: 6000
-  },
-  {
-    id: 'packageDiamond',
-    name: "Diamond Experience",
-    description: "Enjoy a memorable vacation with snorkeling, inland, and island tours.",
-    price: 8000
-  },
-  {
-    id: 'packageRuby',
-    name: "Ruby Getaway",
-    description: "Experience underwater adventures with our snorkeling tour.",
-    price: 7000
-  }
-];
+const packages = ref([]);
+const hotels = ref([]);
 
-const hotels = reactive([
-  {
-    id: 'agbing',
-    name: 'Agbing Seaside View Resort',
-    description: 'Beachfront resort with free Wi-Fi, air conditioning, cable TV, and RestoBar.',
-    image: '/src/img/Agbing Seaside View Resort.jpg',
-    rooms: [
-      { id: 'agbing-standard', name: 'Standard Room', capacity: 2, price: 2000 },
-      { id: 'agbing-deluxe', name: 'Deluxe Room', capacity: 4, price: 3000 },
-      { id: 'agbing-super-deluxe', name: 'Super Deluxe Room', capacity: 5, price: 3500 },
-      { id: 'agbing-barkada', name: 'Barkada Room', capacity: 10, price: 5000 },
-      { id: 'agbing-family', name: 'Family Room', capacity: 6, price: 4000 },
-      { id: 'agbing-family-kitchen', name: 'Family Room with Kitchen', capacity: 6, price: 4500 },
-      { id: 'agbing-barkada-kitchen', name: 'Barkada/Family Room with Kitchen', capacity: 14, price: 6000 }
-    ]
-  },
-  {
-    id: 'luckeh',
-    name: 'Luckeh 5J Beach Resort',
-    description: 'All rooms have air conditioning and Wi-Fi.',
-    image: '/src/img/Luckeh 5J Beach Resort.jpg',
-    rooms: [
-      { id: 'luckeh-super-deluxe', name: 'Super Deluxe Room', capacity: 6, price: 3500 },
-      { id: 'luckeh-deluxe', name: 'Deluxe Room', capacity: 4, price: 2500 }
-    ]
+onMounted(async () => {
+  await fetchPackages();
+  await fetchHotels();
+  
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser.value = user;
+      booking.email = user.email;
+      booking.guestName = user.displayName || '';
+    } else {
+      currentUser.value = null;
+    }
+  });
+});
+
+const fetchPackages = async () => {
+  try {
+    const packagesCollection = collection(db, 'packages');
+    const packagesSnapshot = await getDocs(packagesCollection);
+    packages.value = packagesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error("Error fetching packages:", error);
   }
-]);
+};
+
+const fetchHotels = async () => {
+  try {
+    const hotelsCollection = collection(db, 'hotels');
+    const hotelsSnapshot = await getDocs(hotelsCollection);
+    hotels.value = hotelsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error("Error fetching hotels:", error);
+  }
+};
 
 const selectPackage = (pkg) => {
   booking.package = pkg;
@@ -368,9 +358,28 @@ const calculateTotalPrice = () => {
 };
 
 const confirmBooking = async () => {
+  if (!currentUser.value) {
+    alert("Please log in to make a booking.");
+    return;
+  }
+
   try {
-    // Simulating API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const bookingsCollection = collection(db, 'bookings');
+    await addDoc(bookingsCollection, {
+      userId: currentUser.value.uid,
+      package: booking.package,
+      checkInDate: booking.checkInDate,
+      checkInTime: booking.checkInTime,
+      hotel: booking.hotelAndRoom.hotel,
+      room: booking.hotelAndRoom.room,
+      guestName: booking.guestName,
+      email: booking.email,
+      phone: booking.phone,
+      guests: booking.guests,
+      totalPrice: calculateTotalPrice(),
+      createdAt: new Date(),
+      status: 'pending'
+    });
     alert("Your booking has been confirmed! Thank you for choosing our hotel.");
     resetForm();
   } catch (error) {
@@ -387,8 +396,8 @@ const resetForm = () => {
     checkInDate: null,
     checkInTime: '',
     hotelAndRoom: null,
-    guestName: '',
-    email: '',
+    guestName: currentUser.value ? currentUser.value.displayName || '' : '',
+    email: currentUser.value ? currentUser.value.email : '',
     phone: '',
     guests: 1
   });
@@ -436,10 +445,11 @@ const handleRecurring = (event) => {
   background-color: white;
   padding: 2rem;
   font-family: 'Poppins', sans-serif;
+  max-width: 1800px;
 }
 
 .booking-form {
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
   background: white;
   border-radius: 1rem;
@@ -1112,4 +1122,3 @@ const handleRecurring = (event) => {
   }
 }
 </style>
-
