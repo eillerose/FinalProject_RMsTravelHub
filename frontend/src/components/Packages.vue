@@ -28,7 +28,7 @@
       </div>
     </div>
     
-    <!-- Modal for Package Details -->
+    <!-- Package Details Modal -->
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
       <div class="modal-content">
         <button class="close-btn" @click="closeModal">×</button>
@@ -50,12 +50,13 @@
               </div>
             </div>
             <div v-if="selectedPackage.includePackageOptions" class="package-options">
-              <h3>Package Option</h3>
+              <h3>Package Options</h3>
               <div class="options-grid">
                 <button 
                   v-for="option in selectedPackage.selectedOptions" 
                   :key="option.id"
                   class="option-btn"
+                  @click="openOptionsModal(option)"
                 >
                   {{ option.name }}
                 </button>
@@ -65,6 +66,28 @@
         </div>
       </div>
     </div>
+
+    <!-- Package Options Modal -->
+    <div v-if="showOptionsModal" class="modal-overlay" @click.self="closeOptionsModal">
+      <div class="modal-content options-modal">
+        <button class="close-btn" @click="closeOptionsModal">×</button>
+        <div class="modal-details">
+          <h2 class="options-title">{{ selectedOption.name }}</h2>
+          <div class="pricing-grid">
+            <div v-for="(price, index) in selectedOption.pricing" :key="index" class="pricing-card">
+              <div class="pax-info">
+                <h3>{{ price.pax }} PAX</h3>
+              </div>
+              <div class="price-info">
+                <p class="price">₱{{ price.price.toLocaleString() }}</p>
+                <p class="per-person">per person</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <FooterComponent />
   </div>
 </template>
@@ -80,7 +103,9 @@ const packages = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const showModal = ref(false);
+const showOptionsModal = ref(false);
 const selectedPackage = ref(null);
+const selectedOption = ref(null);
 
 const groupedComponents = computed(() => {
   if (!selectedPackage.value?.components) return {};
@@ -100,7 +125,8 @@ const fetchPackages = async () => {
       return {
         id: doc.id,
         ...data,
-        components: data.components || []
+        components: data.components || [],
+        selectedOptions: data.selectedOptions || []
       };
     });
     loading.value = false;
@@ -121,6 +147,16 @@ const closeModal = () => {
   showModal.value = false;
   selectedPackage.value = null;
   document.body.style.overflow = 'auto';
+};
+
+const openOptionsModal = (option) => {
+  selectedOption.value = option;
+  showOptionsModal.value = true;
+};
+
+const closeOptionsModal = () => {
+  showOptionsModal.value = false;
+  selectedOption.value = null;
 };
 
 onMounted(fetchPackages);
@@ -367,7 +403,7 @@ onMounted(fetchPackages);
 }
 
 .option-btn {
-  background-color: rgb(46, 196, 182);
+  background-color: #2ec4b6;
   color: white;
   border: none;
   padding: 10px 15px;
@@ -378,13 +414,65 @@ onMounted(fetchPackages);
 }
 
 .option-btn:hover {
-  background-color: rgb(41, 176, 163);
+  background-color: #26a69a;
 }
 
 .package-options {
   margin-top: 20px;
   border-top: 1px solid #eee;
   padding-top: 20px;
+}
+
+.options-modal {
+  max-width: 600px;
+  height: auto;
+  max-height: 80vh;
+  padding: 30px;
+}
+
+.options-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.pricing-card {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.pricing-card:hover {
+  transform: translateY(-5px);
+}
+
+.pax-info h3 {
+  font-size: 20px;
+  color: #2ec4b6;
+  margin-bottom: 15px;
+}
+
+.price-info .price {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.price-info .per-person {
+  font-size: 14px;
+  color: #666;
 }
 
 @media (max-width: 850px) {
@@ -423,6 +511,15 @@ onMounted(fetchPackages);
   .modal-content {
     margin: 10px;
   }
+  
+  .options-modal {
+    width: 90%;
+    margin: 20px;
+  }
+  
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .loading {
@@ -451,4 +548,3 @@ onMounted(fetchPackages);
   padding: 40px;
 }
 </style>
-
