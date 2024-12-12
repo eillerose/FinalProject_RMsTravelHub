@@ -1,32 +1,32 @@
 <template>
   <div class="admin-layout">
     <aside class="sidebar">
-      <div class="admin-profile">
-        <div class="admin-avatar">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-        </div>
-        <h2 class="admin-title">ADMIN</h2>
+      <div class="logo-section">
+        <img src="/src/img/logoforRMs.png" alt="RM Travel Logo" class="logo-icon" />
+        <h1 class="logo-text">TravelHub</h1>
       </div>
-      
+
       <nav class="nav-menu">
-        <router-link
-          v-for="item in menuItems"
-          :key="item.path"
-          :to="item.path"
-          class="nav-item"
-          :class="{ 'active': $route.path === item.path }"
-        >
-          {{ item.name }}
-        </router-link>
+        <!-- Sections -->
+        <div v-for="section in menuSections" :key="section.title" class="menu-section">
+          <div class="section-title">{{ section.title }}</div>
+          <router-link
+            v-for="item in section.items"
+            :key="item.path"
+            :to="item.path"
+            class="nav-item"
+            :class="{ 'active': $route.path === item.path }"
+          >
+            <component :is="item.icon" class="nav-icon" />
+            <span>{{ item.name }}</span>
+          </router-link>
+        </div>
+
       </nav>
     </aside>
 
     <div class="main-wrapper">
-      <header class="content-header">
-        <h1 class="page-title">{{ currentPageTitle }}</h1>
-      </header>
+      
       <main class="content-body">
         <router-view></router-view>
       </main>
@@ -37,24 +37,56 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import {
+  LayoutDashboard,
+  BookOpenCheck,
+  Package,
+  Activity,
+  Users,
+  Building2,
+  CalendarCheck,
+  UserCircle,
+  MessageSquare,
+  LogOut
+} from 'lucide-vue-next'
 
 const route = useRoute()
 const currentPageTitle = computed(() => route.meta.title || '')
 
-const menuItems = [
-  { name: 'Dashboard', path: '/admin/dashboard' },
-  { name: 'Logbook', path: '/admin/logbook' },
-  { name: 'Packages', path: '/admin/packages' },
-  { name: 'Staffs', path: '/admin/staffs' },
-  { name: 'Assign', path: '/admin/assign' },
-  { name: 'Guest', path: '/admin/guest' },
-  { name: 'Feedback', path: '/admin/feedback' },
-  
+const menuSections = [
+  {
+    title: 'MAIN',
+    items: [
+      { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard }
+    ]
+  },
+  {
+    title: 'MANAGEMENT',
+    items: [
+      { name: 'Logbook', path: '/admin/logbook', icon: BookOpenCheck },
+      { name: 'Packages', path: '/admin/packages', icon: Package },
+      { name: 'Activities', path: '/admin/activities', icon: Activity },
+      { name: 'Staffs', path: '/admin/staffs', icon: Users },
+      { name: 'Hotels', path: '/admin/hotels', icon: Building2 },
+      { name: 'Booking', path: '/admin/booking', icon: CalendarCheck },
+      { name: 'Guest', path: '/admin/guest', icon: UserCircle },
+      { name: 'Feedback', path: '/admin/feedback', icon: MessageSquare }
+    ]
+  },
+  {
+    title: 'OTHER',
+    items: [
+      { name: 'Logout', path: '/login', icon: LogOut }
+    ]
+  }
 ]
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 .admin-layout {
+  font-family: 'Poppins', sans-serif;
   display: flex;
   height: 100vh;
   width: 100vw;
@@ -62,96 +94,127 @@ const menuItems = [
   position: fixed;
   top: 0;
   left: 0;
+  background-color: #f8fafc;
 }
 
 .sidebar {
-  width: 210px;
-  background-color: #6182b5;
-  color: white;
-  padding: 1.25rem;
+  width: 282px;
+  background-color: #0a8d88;
+  margin: 1rem;
+  border-radius: 1rem;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   overflow-y: auto;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.admin-profile {
+.logo-section {
   display: flex;
   align-items: center;
-  margin-bottom: 2rem;
+  gap: 0.75rem;
+  padding: 0.5rem 0 2rem 0.75rem;
 }
 
-.admin-avatar {
-  width: 48px;
-  height: 48px;
-  background-color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 0.75rem;
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
-.admin-avatar svg {
-  color: #6b7f9e;
-}
-
-.admin-title {
-  font-size: 1.2rem;
-  font-weight: bold;
+.logo-text {
+  font-size: 2rem;
+  font-weight: 600;
+  color: white;
 }
 
 .nav-menu {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 2rem;
+  height: 100%;
+}
+
+.menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: white;
+  padding: 0.5rem 0.75rem;
+  letter-spacing: 0.05em;
 }
 
 .nav-item {
-  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
   color: white;
   text-decoration: none;
-  transition: background-color 0.2s ease;
-  border-radius: 0.25rem;
-  font-weight: 500;
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  margin: 0.125rem 0;
 }
 
-.nav-item:hover,
-.nav-item.active {
-  background-color: #5a6d8a;
+.nav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
 }
+
+.nav-item:hover {
+  background-color: #f1f5f9;
+  color: #545454;
+}
+
+.nav-item.active {
+  background-color: #e0f2fe;
+  color: #545454
+}
+
+
 
 .main-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  margin: 1rem 1rem 1rem 0;
 }
 
 .content-header {
   background-color: white;
   padding: 1.25rem 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .page-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #333;
+  color: #1e293b;
 }
 
 .content-body {
   flex: 1;
   overflow-y: auto;
-  padding: 2rem;
-  background-color: rgba(31, 61, 105, 0.26);
+  background-color: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* Custom scrollbar styling */
 .sidebar::-webkit-scrollbar,
 .content-body::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .sidebar::-webkit-scrollbar-track,
@@ -161,12 +224,8 @@ const menuItems = [
 
 .sidebar::-webkit-scrollbar-thumb,
 .content-body::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-}
-
-.content-body::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: #e2e8f0;
+  border-radius: 2px;
 }
 
 /* Ensure the layout takes up full viewport */

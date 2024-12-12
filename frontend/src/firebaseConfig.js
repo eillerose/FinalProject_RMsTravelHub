@@ -1,8 +1,7 @@
-// firebaseConfig.vue
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { getStorage } from 'firebase/storage'; // Add Firebase Storage
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -20,4 +19,4 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app); // Initialize Firebase Storage
 
-export { app as firebaseApp, auth, db, storage, createUserWithEmailAndPassword, sendEmailVerification, setDoc, doc };
+export { auth, db, storage, createUserWithEmailAndPassword, sendEmailVerification, setDoc, doc };

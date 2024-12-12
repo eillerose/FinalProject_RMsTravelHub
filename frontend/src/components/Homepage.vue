@@ -49,67 +49,45 @@
               </div>
             </div>
           </div>
-
           <button class="nav-btn next" @click="nextSlide">
             <span class="material-symbols-outlined">arrow_forward_ios</span>
           </button>
         </div>
       </section>
 
-
-      
       <section id="about-us" class="about-us">
-    <div class="container">
-      <h2 class="section-title">Little words about us</h2>
-      <div class="content">
-        <p>
-          At RM's Travel and Tours, we grant each and every adventurer a personalized experience like no other.
-          We are aficionados coming from every part of Puerto Galera, passionate about guiding you through this
-          pocket of paradise we call home.
-        </p>
-        <p>
-          We hold strong the value of being factual. Our tour operators are with you every step through your
-          booking process, we are there to scratch every inch of curiosity and enquiry that you may have.
-          We simply want to get you going on a trip of a lifetime.
-        </p>
-      </div>
-      <div class="features">
-        <div class="feature">
-          <div class="icon-wrapper blue">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <div class="container">
+          <h2 class="section-title">Little words about us</h2>
+          <div class="testimonial-wrapper">
+            <div class="testimonial-image-wrapper">
+              <img src="/src/img/logoforRMs.png" alt="RM's Travel and Tours Team" class="testimonial-image">
+            </div>
+            <div class="quote-content">
+              <div class="quote-marks-top">"</div>
+              <div class="quote-text">
+                <p>
+                  At RM's Travel and Tours, we grant each and every adventurer a personalized experience like no other.
+                  We are aficionados coming from every part of Puerto Galera, passionate about guiding you through this
+                  pocket of paradise we call home.
+                </p>
+                <p>
+                  We hold strong the value of being factual. Our tour operators are with you every step through your
+                  booking process, we are there to scratch every inch of curiosity and enquiry that you may have.
+                  We simply want to get you going on a trip of a lifetime!
+                </p>
+              </div>
+              <div class="quote-marks-bottom">"</div>
+              <div class="company-name">RM's Travel and Tours</div>
+              <div class="company-subtitle">Your Gateway to Paradise</div>
+            </div>
           </div>
-          <h3>Personalized</h3>
-          <p>Tailored experiences for every traveler</p>
         </div>
-        <div class="feature">
-          <div class="icon-wrapper green">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-            </svg>
-          </div>
-          <h3>Local Expertise</h3>
-          <p>Guides with deep local knowledge</p>
-        </div>
-        <div class="feature">
-          <div class="icon-wrapper yellow">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-            </svg>
-          </div>
-          <h3>Unforgettable</h3>
-          <p>Creating memories that last a lifetime</p>
-        </div>
-      </div>
-    </div>
-  </section>
+      </section>
 
     </main>
     <FooterComponent />
   </div>
 </template>
-
 
 <script>
 import { ref, computed } from 'vue';
@@ -133,61 +111,61 @@ export default {
       Beaches: [
         {
           id: 1,
-          title: 'White Beach Getaway',
-          description: 'Relax on the soft, white sand, swim in the turquoise waters, and enjoy breathtaking sunsets in this tropical paradise',
-          image: '/src/img/White Beach.jpg'
+          title: 'Bayanan Beach',
+          description: 'A serene escape with crystal-clear waters and powdery white sands, perfect for relaxation.',
+          image: '/src/img/bayananBeach.jpg'
         },
         {
           id: 2,
-          title: 'Talipanan Beach Escape',
-          description: 'Experience the serenity of this less-crowded beach with its pristine shoreline and crystal-clear waters',
-          image: '/src/img/White Beach.jpg'
+          title: 'Haligi Beach',
+          description: 'A tranquil spot boasting pristine shores and breathtaking sunset views.',
+          image: '/src/img/haligiBeach.jpg'
         },
         {
           id: 3,
-          title: 'Sabang Beach Adventure',
-          description: 'Dive into excitement at this vibrant beach known for its water sports and lively atmosphere',
-          image: '/src/img/White Beach.jpg'
+          title: 'Bulabod Beach',
+          description: 'A hidden gem featuring unspoiled beauty and calm waters ideal for swimming.',
+          image: '/src/img/bulabodBeach.jpg'
         }
       ],
       Activities: [
         {
           id: 4,
-          title: 'Scuba Diving Experience',
-          description: 'Explore the vibrant underwater world with professional diving instructors',
-          image: '/src/img/White Beach.jpg'
+          title: 'Underwater Cave',
+          description: 'Explore a mystical underwater wonder with fascinating rock formations and marine life.',
+          image: '/src/img/underwaterCave.jpg'
         },
         {
           id: 5,
-          title: 'Island Hopping Tour',
-          description: 'Visit multiple scenic islands and hidden coves in one exciting day',
-          image: '/src/img/White Beach.jpg'
+          title: 'Parasailing',
+          description: 'Experience the thrill of flying over the sea, taking in panoramic island views.',
+          image: '/src/img/parasailing.jpg'
         },
         {
           id: 6,
-          title: 'Sunset Sailing',
-          description: 'Enjoy a peaceful evening sail while watching the stunning sunset',
-          image: '/src/img/White Beach.jpg'
+          title: 'Flying Fish',
+          description: 'Experience an adrenaline-pumping ride as you glide and bounce across the waves.',
+          image: '/src/img/flyingFish.jpg'
         }
       ],
       'Tourist Spots': [
         {
           id: 7,
           title: 'Tamaraw Falls',
-          description: 'Visit the majestic waterfall and enjoy the natural swimming pools',
-          image: '/src/img/White Beach.jpg'
+          description: 'A majestic cascading waterfall surrounded by lush greenery, perfect for nature lovers.',
+          image: '/src/img/tamarawFalls.jpg'
         },
         {
           id: 8,
-          title: 'Puerto Galera Church',
-          description: 'Explore the historic church and learn about local culture',
-          image: '/src/img/White Beach.jpg'
+          title: 'White Beach',
+          description: 'A lively destination known for its vibrant nightlife, fine sands, and water sports.',
+          image: '/src/img/whiteBeach.jpg'
         },
         {
           id: 9,
-          title: 'Mangyan Village',
-          description: 'Experience the indigenous culture and traditional crafts',
-          image: '/src/img/White Beach.jpg'
+          title: 'Mangrove Walkway',
+          description: 'A peaceful stroll through a mangrove forest teeming with wildlife and scenic beauty.',
+          image: '/src/img/mangroveWalkway.jpg'
         }
       ]
     };
@@ -234,16 +212,20 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Ephesis&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0');
 
-/* Existing styles */
 .hero {
   position: relative;
-  height: 98vh;
+  height: 88vh;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
   color: white;
   overflow: hidden;
+  margin-left:1rem;
+  margin-right:1.5rem;
+  margin-top: 4.4rem;
+  margin-bottom: 2rem;
+  border-radius: 20px;
 }
 
 .hero-video {
@@ -288,17 +270,16 @@ export default {
   padding: 15px 25px;
   font-size: 1.1rem;
   color: #fff;
-  background-color: #2ec4b6;
+  background-color: #058883;
   border: 2px solid white;
   border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-/* Best Deals Section Styles */
 .best-deals {
   padding: 4rem 2rem;
-  background-color: #f5f5f5;
+  background-color: #ffffff;
   text-align: center;
   min-height: 70vh;
   display: flex;
@@ -310,13 +291,13 @@ export default {
   font-family: 'Poppins', sans-serif;
   font-size: 3rem;
   color: #333;
-  margin-top: -1rem;
+  margin-top: -10rem;
   margin-bottom: 0.5rem;
 }
 
 .deals-subtitle {
   font-family: 'Poppins', sans-serif;
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #666;
   margin-top: -0.5rem;
   margin-bottom: 2rem;
@@ -325,16 +306,16 @@ export default {
 .category-buttons {
   display: flex;
   justify-content: center;
-  gap: 6rem;
+  gap: 4rem;
   margin-bottom: 2rem;
 }
 
 .category-btn {
   font-family: 'Poppins', sans-serif;
-  font-size: 20px;
-  padding: 0.6rem 1.5rem;
+  font-size: 18px;
+  padding: 0.4rem 1.5rem;
   border: none;
-  border-radius: 5px;
+  border-radius: 7px;
   background: transparent;
   color: #666;
   cursor: pointer;
@@ -342,7 +323,7 @@ export default {
 }
 
 .category-btn.active {
-  background-color: #2ec4b6;
+  background-color: #058883;
   color: white;
 }
 
@@ -365,10 +346,9 @@ export default {
 .deal-card {
   flex: 0 0 calc(33.333% - 2rem);
   margin: 0 1rem;
-  background-color: white;
+  background-color: #f0f7f4;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .deal-card img {
@@ -429,103 +409,168 @@ export default {
 }
 
 .about-us {
-  background-color: #ffffff;
-  padding: 4rem 1rem;
-  font-family: 'Poppins', sans-serif;
+  padding: 6rem 2rem;
+  background-color: #f0f7f4;
+  text-align: center;
 }
 
-.container {
-  max-width: 64rem;
+.about-us h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 3rem;
+  color: #333;
+  margin-top: -2rem;
+  margin-bottom: 0.5rem;
+}
+
+.about-us .container {
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .section-title {
-  font-size: 3rem;
-  font-weight: bold;
-  color: #1f2937;
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
-.content {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.5rem;
+  color: #333;
   margin-bottom: 3rem;
-  max-width: 48rem;
-  margin-left: auto;
-  margin-right: auto;
+  position: relative;
 }
 
-.content p {
-  font-size: 1.125rem;
-  color: #4b5563;
-  line-height: 1.75;
-  margin-bottom: 1.5rem;
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
 }
 
-.features {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2rem;
-}
-
-.feature {
-  text-align: center;
-  flex: 1;
-  min-width: 200px;
-  max-width: 300px;
-}
-
-.icon-wrapper {
-  width: 4rem;
-  height: 4rem;
-  margin: 0 auto 1rem;
-  border-radius: 9999px;
+.testimonial-wrapper {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 4rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
-.icon {
-  width: 2rem;
-  height: 2rem;
+.testimonial-image-wrapper {
+  flex-shrink: 0;
+  width: 250px;
+  height: auto;
 }
 
-.blue {
-  background-color: #dbeafe;
+.testimonial-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
-.blue .icon {
-  color: #3b82f6;
+.quote-content {
+  flex-grow: 1;
+  text-align: left;
+  position: relative;
+  padding: 2rem 0;
 }
 
-.green {
-  background-color: #d1fae5;
+.quote-marks-top,
+.quote-marks-bottom {
+  font-family: 'Georgia', serif;
+  font-size: 6rem;
+  line-height: 1;
+  color: #e0e0e0;
+  position: absolute;
+  height: 40px;
 }
 
-.green .icon {
-  color: #10b981;
+.quote-marks-top {
+  top: -20px;
+  left: -40px;
 }
 
-.yellow {
-  background-color: #fef3c7;
+.quote-marks-bottom {
+  bottom: 40px;
+  right: -40px;
+  transform: rotate(180deg);
 }
 
-.yellow .icon {
-  color: #f59e0b;
+.quote-text {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #666;
+  margin-bottom: 2rem;
 }
 
-.feature h3 {
-  font-size: 1.25rem;
+.quote-text p {
+  margin-bottom: 1rem;
+}
+
+.company-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
   font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
+  color: #333;
+  margin-top: 1rem;
 }
 
-.feature p {
-  color: #4b5563;
+.company-subtitle {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  color: #058883;
+  margin-top: 0.5rem;
 }
 
-/* Media Queries */
+@media (max-width: 968px) {
+  .testimonial-wrapper {
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1rem;
+  }
+
+  .testimonial-image-wrapper {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .quote-marks-top,
+  .quote-marks-bottom {
+    font-size: 4rem;
+  }
+
+  .quote-marks-top {
+    top: -10px;
+    left: -20px;
+  }
+
+  .quote-marks-bottom {
+    bottom: 30px;
+    right: -20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .testimonial-image-wrapper {
+    max-width: 250px;
+  }
+
+  .quote-text {
+    font-size: 0.9rem;
+  }
+
+  .company-name {
+    font-size: 1.2rem;
+  }
+
+  .company-subtitle {
+    font-size: 0.9rem;
+  }
+}
+
 @media (max-width: 768px) {
   header {
     flex-direction: column;
@@ -556,15 +601,6 @@ export default {
 
   .nav-btn {
     display: none;
-  }
-
-  .features {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .feature {
-    max-width: 100%;
   }
 }
 

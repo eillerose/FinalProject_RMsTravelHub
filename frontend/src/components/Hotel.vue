@@ -4,33 +4,35 @@
 
     <div class="hero">
       <h1>Our Featured Hotels</h1>
-      <p>
-        Explore a curated selection of luxurious, comfortable, and affordable accommodations, offering everything you need for an unforgettable stay in Puerto Galera.
-      </p>
+      <p>Explore a curated selection of luxurious, comfortable, and affordable accommodations, offering everything you need for an unforgettable stay in Puerto Galera.</p>
     </div>
 
     <main class="main-content">
       <h2>Choose your hotel</h2>
+      
+      <div v-if="loading" class="loading">
+        <p>Loading hotels...</p>
+      </div>
 
-      <div class="content-wrapper" :class="{ 'show-details': selectedHotel }">
+      <div v-else-if="error" class="error">
+        <p>{{ error }}</p>
+      </div>
+
+      <div v-else class="content-wrapper" :class="{ 'show-details': selectedHotel }">
         <div class="hotels-container">
           <transition-group name="hotel-list" tag="div" class="hotels-grid">
-            <div v-if="hotels.length > 0" v-for="hotel in sortedHotels" :key="hotel.id" class="hotel-card">
-              <img :src="hotel.image" :alt="hotel.name" class="hotel-image" />
+            <div v-for="hotel in sortedHotels" :key="hotel.id" class="hotel-card">
+              <img :src="hotel.profilePicture" :alt="hotel.name" class="hotel-image" />
               <div class="hotel-info">
                 <h3>{{ hotel.name }}</h3>
-                <p>{{ hotel.description }}</p>
                 <div class="location">
                   <span class="material-icons">location_on</span>
                   <span>{{ hotel.location }}</span>
                 </div>
                 <button @click="toggleDetails(hotel)" class="details-button">
-                  <span class="material-icons">arrow_forward</span>
+                  View Details
                 </button>
               </div>
-            </div>
-            <div v-else>
-              <p>No hotels found. Please check back later!</p>
             </div>
           </transition-group>
         </div>
@@ -42,12 +44,13 @@
             </button>
             <div class="details-content">
               <h3>{{ selectedHotel.name }}</h3>
-              <p class="description">{{ selectedHotel.fullDescription }}</p>
-
+              <p class="description">{{ selectedHotel.description }}</p>
+              <p class="full-description">{{ selectedHotel.fullDescription }}</p>
+              
               <div class="gallery">
                 <h4>Gallery</h4>
                 <div class="gallery-grid">
-                  <img v-for="(image, index) in selectedHotel.gallery" 
+                  <img v-for="(image, index) in selectedHotel.images" 
                        :key="index" 
                        :src="image" 
                        :alt="`${selectedHotel.name} - Image ${index + 1}`" />
@@ -58,12 +61,17 @@
                 <h4>Contact Information</h4>
                 <p><span class="material-icons">phone</span>{{ selectedHotel.phone }}</p>
                 <p><span class="material-icons">email</span>{{ selectedHotel.email }}</p>
-                <p><span class="material-icons">language</span>{{ selectedHotel.socialMedia?.handle || 'N/A' }}</p>
+                <p><span class="material-icons">language</span>{{ selectedHotel.website }}</p>
+              </div>
+
+              <div class="info-section">
+                <h4>Location</h4>
+                <p><span class="material-icons">place</span>{{ selectedHotel.location }}</p>
               </div>
 
               <div class="info-section">
                 <h4>Amenities</h4>
-                <ul>
+                <ul class="amenities-list">
                   <li v-for="amenity in selectedHotel.amenities" :key="amenity">
                     <span class="material-icons">check</span>
                     {{ amenity }}
@@ -72,38 +80,67 @@
               </div>
 
               <div class="info-section">
-                <h4>Available Rooms</h4>
-                <ul>
-                  <li v-for="room in selectedHotel.rooms" :key="room">{{ room }}</li>
-                </ul>
+                <h4 class="rooms-title">Available Rooms</h4>
+                <div class="rooms-list">
+                  <div v-for="room in selectedHotel.rooms" :key="room.name">
+                    {{ room.type }} ({{ room.capacity }})
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </transition>
       </div>
     </main>
-
     <FooterComponent />
   </div>
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue';
+import { collection, getDocs } from 'firebase/firestore';
+import { getStorage, ref as storageRef, getDownloadURL } from 'firebase/storage';
+import { db } from '../firebaseConfig';
 import HeaderComponent from './Header.vue';
 import FooterComponent from './Footer.vue';
-import { ref, computed, onMounted } from 'vue';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { firebaseApp } from '../firebaseConfig';
 
-// Firebase setup
-const db = getFirestore(firebaseApp);
-
-// Reactive variables
 const hotels = ref([]);
 const selectedHotel = ref(null);
-const loading = ref(true); // Track loading state
-const error = ref(null); // Track errors
+const loading = ref(true);
+const error = ref(null);
 
-// Computed property for sorting hotels
+const fetchHotels = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'hotels'));
+    hotels.value = await Promise.all(querySnapshot.docs.map(async (doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        profilePicture: await getImageUrl(data.profilePicture),
+        images: await Promise.all(data.images.map(getImageUrl))
+      };
+    }));
+    loading.value = false;
+  } catch (err) {
+    console.error('Error fetching hotels:', err);
+    error.value = 'Failed to load hotels. Please try again later.';
+    loading.value = false;
+  }
+};
+
+const getImageUrl = async (path) => {
+  if (!path) return '';
+  try {
+    const storage = getStorage();
+    const imageRef = storageRef(storage, path);
+    return await getDownloadURL(imageRef);
+  } catch (error) {
+    console.error("Error getting image URL:", error);
+    return '';
+  }
+};
+
 const sortedHotels = computed(() => {
   if (!selectedHotel.value) return hotels.value;
   return [
@@ -112,33 +149,16 @@ const sortedHotels = computed(() => {
   ];
 });
 
-// Fetch data from Firestore
-const fetchHotels = async () => {
-  try {
-    const querySnapshot = await getDocs(collection(db, 'hotels'));
-    hotels.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    loading.value = false; // Set loading to false after data fetch
-  } catch (err) {
-    error.value = "Failed to load hotels. Please try again later.";
-    console.error("Error fetching hotels:", err);
-    loading.value = false;
-  }
-};
-
-// Toggle hotel details
 const toggleDetails = (hotel) => {
   selectedHotel.value = selectedHotel.value?.id === hotel.id ? null : hotel;
 };
 
-// Close details panel
 const closeDetails = () => {
   selectedHotel.value = null;
 };
 
-// Fetch hotels on component mount
 onMounted(fetchHotels);
 </script>
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -151,10 +171,12 @@ onMounted(fetchHotels);
 }
 
 .hero {
-  background-color: #1a1a1a;
+  margin-top: 2rem;
+  background-color: #013240;
   color: white;
   text-align: center;
   padding: 3rem 2rem;
+
 }
 
 .hero h1 {
@@ -170,6 +192,7 @@ onMounted(fetchHotels);
 
 .main-content {
   max-width: 1800px;
+  height: 1500px;
   margin: 0 auto;
   padding: 2rem;
   
@@ -263,7 +286,7 @@ onMounted(fetchHotels);
 }
 
 .details-panel {
-  width: 400px;
+  width: 1800px;
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -309,7 +332,7 @@ onMounted(fetchHotels);
 
 .gallery-grid img {
   width: 100%;
-  height: 100px;
+  height: 200px;
   object-fit: cover;
   border-radius: 4px;
 }

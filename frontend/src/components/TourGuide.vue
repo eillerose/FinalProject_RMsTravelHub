@@ -1,6 +1,6 @@
 <template>
   <div class="tour-guides-page">
-    <HeaderComponent/>
+    <HeaderComponent />
     <div class="banner">
       <h1>Our Tour Guides</h1>
       <p>Discover the Philippines with our expert local guides</p>
@@ -15,14 +15,17 @@
       </div>
 
       <div class="guides-container">
-        <div v-if="loading" class="loading-message">Loading tour guides...</div>
+        <div v-if="loading" class="loading-message">
+          <span class="loader"></span>
+          Loading tour guides...
+        </div>
         <div v-if="error" class="error-message">{{ error }}</div>
         <div v-else class="guides-grid">
           <div v-for="guide in displayedGuides" :key="guide.id" class="guide-card">
             <div class="guide-image-container">
-              <img :src="guide.image" :alt="guide.name" class="guide-image">
+              <img :src="guide.profilePhoto" :alt="guide.firstName + ' ' + guide.lastName" class="guide-image">
             </div>
-            <h3 class="guide-name">{{ guide.name }}</h3>
+            <h3 class="guide-name">{{ guide.firstName }} {{ guide.lastName }}</h3>
             <button @click="openGuideModal(guide)" class="view-profile-button">
               View Profile
             </button>
@@ -31,250 +34,245 @@
       </div>
     </main>
 
-    <div v-if="selectedGuide" class="modal-overlay" @click="closeGuideModal">
-      <div class="modal-content" @click.stop>
-        <button @click="closeGuideModal" class="close-button">×</button>
-        <div class="modal-layout">
-          <div class="modal-image-container">
-            <img :src="selectedGuide.image" :alt="selectedGuide.name" class="modal-guide-image">
-          </div>
-          <div class="modal-info">
-            <h2 class="modal-name">{{ selectedGuide.name }}</h2>
-            <div class="info-item">
-              <span class="material-icons">language</span>
-              <span>Languages: {{ selectedGuide.languages.join(", ") }}</span>
+    <Teleport to="body">
+      <div v-if="selectedGuide" class="modal-overlay" @click="closeGuideModal">
+        <div class="modal-content" @click.stop>
+          <button @click="closeGuideModal" class="close-button" aria-label="Close modal">×</button>
+          <div class="modal-layout">
+            <div class="modal-image-container">
+              <img :src="selectedGuide.profilePhoto" :alt="selectedGuide.firstName + ' ' + selectedGuide.lastName" class="modal-guide-image">
             </div>
-            <div class="info-item">
-              <span class="material-icons">star</span>
-              <span>Experience: {{ selectedGuide.experience }} years</span>
+            <div class="modal-info">
+              <h2 class="modal-name">{{ selectedGuide.firstName }} {{ selectedGuide.lastName }}</h2>
+              <div class="info-item">
+                <span class="material-icons">language</span>
+                <span>Languages: {{ selectedGuide.languagesSpoken.join(", ") }}</span>
+              </div>
+              <div class="info-item">
+                <span class="material-icons">star</span>
+                <span>Experience: {{ calculateExperience(selectedGuide.startDate) }} years</span>
+              </div>
+              <div class="info-item">
+                <span class="material-icons">local_offer</span>
+                <span>Specialization: {{ selectedGuide.specialization }}</span>
+              </div>
+              <p class="guide-bio">{{ selectedGuide.bio }}</p>
+
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Teleport>
     <FooterComponent />
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 import HeaderComponent from './Header.vue';
 import FooterComponent from './Footer.vue';
-import { ref, computed, onMounted } from 'vue';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { firebaseApp } from '../firebaseConfig';
 
-export default {
-  components: {
-    HeaderComponent,
-    FooterComponent,
-  },
-  setup() {
-    const db = getFirestore(firebaseApp);
-    const tourGuides = ref([]);
-    const showAllGuides = ref(false);
-    const selectedGuide = ref(null);
-    const loading = ref(true);
-    const error = ref(null);
+const tourGuides = ref([]);
+const showAllGuides = ref(false);
+const selectedGuide = ref(null);
+const loading = ref(true);
+const error = ref(null);
 
-    // Fetch tour guides from Firestore
-    const fetchTourGuides = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'tourGuides'));
-        tourGuides.value = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        loading.value = false;
-      } catch (err) {
-        error.value = 'Failed to load tour guides. Please try again later.';
-        console.error('Error fetching tour guides:', err);
-        loading.value = false;
-      }
-    };
-
-    const displayedGuides = computed(() =>
-      showAllGuides.value ? tourGuides.value : tourGuides.value.slice(0, 4)
-    );
-
-    const toggleShowAllGuides = () => {
-      showAllGuides.value = !showAllGuides.value;
-    };
-
-    const openGuideModal = (guide) => {
-      selectedGuide.value = guide;
-    };
-
-    const closeGuideModal = () => {
-      selectedGuide.value = null;
-    };
-
-    // Fetch tour guides on component mount
-    onMounted(fetchTourGuides);
-
-    return {
-      tourGuides,
-      showAllGuides,
-      displayedGuides,
-      selectedGuide,
-      toggleShowAllGuides,
-      openGuideModal,
-      closeGuideModal,
-      loading,
-      error,
-    };
-  },
+const fetchTourGuides = async () => {
+  try {
+    const q = query(collection(db, 'staff'), where("role", "==", "guides"));
+    const querySnapshot = await getDocs(q);
+    tourGuides.value = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    loading.value = false;
+  } catch (err) {
+    error.value = 'Failed to load tour guides. Please try again later.';
+    console.error('Error fetching tour guides:', err);
+    loading.value = false;
+  }
 };
+
+const displayedGuides = computed(() =>
+  showAllGuides.value ? tourGuides.value : tourGuides.value.slice(0, 4)
+);
+
+const toggleShowAllGuides = () => {
+  showAllGuides.value = !showAllGuides.value;
+};
+
+const openGuideModal = (guide) => {
+  selectedGuide.value = guide;
+};
+
+const closeGuideModal = () => {
+  selectedGuide.value = null;
+};
+
+const bookGuide = () => {
+  // Implement booking logic here
+  alert(`Booking ${selectedGuide.value.firstName} ${selectedGuide.value.lastName} as your guide!`);
+};
+
+const calculateExperience = (startDate) => {
+  const start = new Date(startDate);
+  const now = new Date();
+  return Math.floor((now - start) / (365.25 * 24 * 60 * 60 * 1000));
+};
+
+onMounted(fetchTourGuides);
 </script>
 
-  <style scoped>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-  @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
-  
-  .tour-guides-page {
-    font-family: 'Poppins', sans-serif;
-    color: #333;
-    line-height: 1.6;
-    background-color: #f5f5f5;
-  }
-  
-  .banner {
-    width: 100%;
-    background-image: url('/src/img/heroBg.jpg');
-    background-size: cover;
-    background-position: center;
-    text-align: center;
-    color: #fff;
-    padding: 0 20px;
-    height: 25vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin-top: 2rem;
+<style scoped>
+/* Styles remain unchanged */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+.tour-guides-page {
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  line-height: 1.6;
+  background-color: #f5f5f5;
+}
+
+.banner {
+  width: 100%;
+  background-color: #013240;
+  background-size: cover;
+  background-position: center;
+  text-align: center;
+  color: #fff;
+  padding: 4rem 20px;
+  height: 13vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 2rem;
 }
 
 .banner h1 {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Added text shadow for readability */
 }
 
 .banner p {
-    font-size: 18px;
-    margin-top: 0;
-    margin-bottom: 1rem;
-    color: white;
+  font-size: 1.25rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: white;
 }
-  
-  .main-content {
-    max-width: 1500px;
-    margin: auto;
-    margin-bottom: 6rem;
 
-  }
-  
-  .guides-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    margin-top: 2rem;
-  }
-  
-  .guides-header h2 {
-    font-size: 3rem;
-    font-weight: 600;
-  }
-  
-  .toggle-button {
-    background-color: #98b634;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background-color 0.3s;
-  }
-  
-  .toggle-button:hover {
-    background-color: #859e2d;
-  }
-  
-  .guides-container {
-    margin: 0 auto;
-    max-width: 1500px;
-    background-color: white;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-top: -2rem;
-  }
-  
-  .guides-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 4rem;
-  }
-  
-  .guide-card {
-    background-color: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem 1rem;
-  }
-  
-  .guide-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
-  
-  .guide-image-container {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin-bottom: 1.5rem;
-  }
-  
-  .guide-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .guide-name {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    color: #2c3e50;
-  }
-  
-  .view-profile-button {
-    width: 100%;
-    max-width: 200px;
-    padding: 0.75rem;
-    background-color: #98b634;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .view-profile-button:hover {
-    background-color: #859e2d;
-  }
-  
-  .modal-overlay {
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto 6rem;
+  padding: 0 1rem;
+}
+
+.guides-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 3rem 0;
+}
+
+.guides-header h2 {
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+
+.toggle-button {
+  background-color: #98b634;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.toggle-button:hover {
+  background-color: #859e2d;
+  transform: translateY(-2px);
+}
+
+.guides-container {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.guides-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.guide-card {
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+.guide-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.guide-image-container {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.guide-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.guide-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.view-profile-button {
+  width: 100%;
+  max-width: 200px;
+  padding: 0.75rem;
+  background-color: #98b634;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.view-profile-button:hover {
+  background-color: #859e2d;
+  transform: translateY(-2px);
+}
+
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -293,7 +291,7 @@ export default {
   width: 90%;
   max-width: 600px;
   position: relative;
-  padding: 1.5rem;
+  padding: 2rem;
 }
 
 .close-button {
@@ -348,6 +346,11 @@ export default {
   font-size: 1.25rem;
 }
 
+.guide-bio {
+  margin-top: 1rem;
+  color: #666;
+}
+
 .book-guide-button {
   width: 100%;
   padding: 0.75rem;
@@ -358,40 +361,71 @@ export default {
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.2s;
   margin-top: 1.5rem;
 }
 
 .book-guide-button:hover {
   background-color: #859e2d;
+  transform: translateY(-2px);
 }
 
-  
-  @media (max-width: 768px) {
-    .banner h1 {
-      font-size: 2.5rem;
-    }
-  
-    .guides-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-  
-    .toggle-button {
-      margin-top: 1rem;
-    }
-  
-    .guides-grid {
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 1.5rem;
-    }
-  
-    .guide-image-container {
-      width: 100px;
-      height: 100px;
-    }
+.loading-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.2rem;
+  color: #666;
+}
 
-    .modal-layout {
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #98b634;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  text-align: center;
+  color: #ff4d4f;
+  font-size: 1.2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+  .banner h1 {
+    font-size: 2.5rem;
+  }
+
+  .guides-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toggle-button {
+    margin-top: 1rem;
+  }
+
+  .guides-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .guide-image-container {
+    width: 100px;
+    height: 100px;
+  }
+
+  .modal-layout {
     flex-direction: column;
     align-items: center;
     text-align: center;
@@ -404,5 +438,5 @@ export default {
   .info-item {
     justify-content: center;
   }
-  }
-  </style>
+}
+</style>

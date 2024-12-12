@@ -13,6 +13,7 @@ import Login from './components/Login.vue';
 import Packages from './components/Packages.vue';
 import Signup from './components/Signup.vue';
 import TourGuide from './components/TourGuide.vue';
+import adminRoutes from './router/adminRoutes';
 import { getAuth } from 'firebase/auth';
 
 const routes = [
@@ -30,6 +31,7 @@ const routes = [
   { path: '/packages', component: Packages },
   { path: '/signup', component: Signup },
   { path: '/tour-guide', component: TourGuide },
+  ...adminRoutes,
 ];
 
 const router = createRouter({

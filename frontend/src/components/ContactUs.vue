@@ -134,7 +134,7 @@ export default {
 .banner {
     font-family: 'Poppins', sans-serif;
     width: 100%;
-    background-image: url('/src/img/heroBg.jpg');
+   background-color: #013240;
     background-size: cover;
     background-position: center;
     text-align: center;

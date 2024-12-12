@@ -13,8 +13,8 @@
         </div>
 
         <!-- Feedback Messages with Replies -->
-        <div v-if="feedbackMessages.length" class="feedback-grid">
-            <div v-for="(message, index) in feedbackMessages" :key="index" class="feedback-card">
+        <div v-if="activeFeedbackMessages.length" class="feedback-grid">
+            <div v-for="(message, index) in activeFeedbackMessages" :key="index" class="feedback-card">
                 <div class="feedback-header">
                     <div class="icon-and-text">
                         <span class="material-icons account-icon">account_circle</span>
@@ -57,25 +57,25 @@
                     <div class="icon-and-text">
                         <span class="material-icons account-icon">account_circle</span>
                         <div>
-                            <h3>{{ feedbackMessages[currentMessageIndex].name }}</h3>
-                            <p class="email">{{ feedbackMessages[currentMessageIndex].email }}</p>
+                            <h3>{{ activeFeedbackMessages[currentMessageIndex].name }}</h3>
+                            <p class="email">{{ activeFeedbackMessages[currentMessageIndex].email }}</p>
                         </div>
                     </div>
                     <button class="close-button" @click="closeModal">×</button>
                 </div>
                 <div class="modal-body">
                     <div class="feedback-content">
-                        <p>{{ feedbackMessages[currentMessageIndex].message }}</p>
+                        <p>{{ activeFeedbackMessages[currentMessageIndex].message }}</p>
                     </div>
                     <div class="replies">
-                        <h4>Replies ({{ feedbackMessages[currentMessageIndex].replies.length }})</h4>
-                        <div v-for="(reply, idx) in feedbackMessages[currentMessageIndex].replies" :key="idx" class="reply">
+                        <h4>Replies ({{ activeFeedbackMessages[currentMessageIndex].replies.length }})</h4>
+                        <div v-for="(reply, idx) in activeFeedbackMessages[currentMessageIndex].replies" :key="idx" class="reply">
                             <p><strong>{{ reply.userName }}:</strong> {{ reply.text }}</p>
                         </div>
                     </div>
                     <div class="modal-reply-form">
                         <input type="text" v-model="newReply[currentMessageIndex]" placeholder="Write a reply..." />
-                        <button @click="submitReply(currentMessageIndex, feedbackMessages[currentMessageIndex].id)">
+                        <button @click="submitReply(currentMessageIndex, activeFeedbackMessages[currentMessageIndex].id)">
                             <span class="material-icons">send</span>
                         </button>
                     </div>
@@ -108,6 +108,11 @@ export default {
             currentMessageIndex: null,
         };
     },
+    computed: {
+        activeFeedbackMessages() {
+            return this.feedbackMessages.filter(message => !message.archived);
+        }
+    },
     methods: {
         async fetchFeedbackMessages() {
             try {
@@ -116,7 +121,12 @@ export default {
                     const messageData = docSnapshot.data();
                     const repliesSnapshot = await getDocs(collection(db, `contacts/${docSnapshot.id}/replies`));
                     const replies = repliesSnapshot.docs.map((replyDoc) => replyDoc.data());
-                    return { id: docSnapshot.id, ...messageData, replies };
+                    return { 
+                        id: docSnapshot.id, 
+                        ...messageData, 
+                        replies,
+                        archived: messageData.archived || false // Ensure archived property exists
+                    };
                 }));
                 this.feedbackMessages = messages;
             } catch (error) {
@@ -179,7 +189,7 @@ export default {
 
 .banner {
     width: 100%;
-    background-image: url('/src/img/heroBg.jpg');
+    background-color: #013240;
     background-size: cover;
     background-position: center;
     text-align: center;
@@ -234,7 +244,7 @@ export default {
     padding: 10px;
     font-size: 1rem;
     color: #333;
-    background-color: #e6f7ff;
+    background-color: #f0f7f4;
     border-radius: 5px;
     margin: 20px 20px;
 }
@@ -244,7 +254,7 @@ export default {
 }
 
 .feedback-header {
-    background-color: #10375C;
+    background-color: #0a8d88;
     color: #fff;
     padding: 15px 20px;
     border-radius: 8px 8px 0 0;
@@ -282,7 +292,7 @@ export default {
     align-items: center;
     gap: 5px;
     cursor: pointer;
-    color: #004085;
+    color: #0a8d88;
     margin:20px;
 }
 
@@ -313,7 +323,7 @@ button {
 
 button .material-icons {
     font-size: 1.5rem;
-    color: #004085;
+    color: #0a8d88;
 }
 
 .submit-feedback-btn {
@@ -359,7 +369,7 @@ button .material-icons {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #10375C; /* Same color as the feedback header */
+    background-color: #0a8d88;
     color: #fff;
     padding: 15px 20px;
     border-radius: 8px 8px 0 0;
@@ -402,6 +412,7 @@ button .material-icons {
 
 .modal-reply-form button .material-icons {
     font-size: 1.5rem;
-    color: #004085;
+    color: #0a8d88
+    ;
 }
 </style>
