@@ -140,7 +140,7 @@ const reasons = ref([
 
 .banner {
   width: 100%;
-  background-color: #013240;
+  background-color: #006167;
   background-size: cover;
   background-position: center;
   text-align: center;
@@ -184,7 +184,7 @@ const reasons = ref([
 }
 
 .about-description {
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: #4B5563;
   max-width: 800px;
   margin: 0 auto 2.5rem;
@@ -220,7 +220,7 @@ const reasons = ref([
 
 .hover-card {
   padding: 1.25rem;
-  background-color: #f0f7f4;
+  background-color: #d7eeda;
   border-radius: 0.5rem;
   transition: transform 0.3s, box-shadow 0.3s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -324,7 +324,7 @@ const reasons = ref([
   border-radius: 50%;
   overflow: hidden;
   margin: -80px auto 20px;
-  border: 5px solid #0a8d88;
+  border: 3px solid #00b7af;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 

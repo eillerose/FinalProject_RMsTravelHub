@@ -172,8 +172,8 @@ onMounted(fetchPackages);
 
 .banner {
   position: relative;
-  height: 400px;
-  background-image: url('/src/img/heroBg.jpg');
+  height: 300px;
+  background-color: #013240;
   background-size: cover;
   background-position: center;
   display: flex;
@@ -181,16 +181,6 @@ onMounted(fetchPackages);
   justify-content: center;
   text-align: center;
   color: white;
-}
-
-.banner::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
 }
 
 .banner-content {
@@ -203,6 +193,7 @@ onMounted(fetchPackages);
 .banner h1 {
   font-size: 48px;
   font-weight: 700;
+  margin-top: 2rem;
   margin-bottom: 20px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }

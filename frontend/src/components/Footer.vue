@@ -57,7 +57,7 @@
 
 .footer {
   font-family: 'Poppins', sans-serif;
-  background-color: #013240;
+  background-color: #006167;
   color: #ffffff;
   padding: 4rem 2rem 2rem;
   z-index: 1000;
@@ -78,7 +78,7 @@
 }
 
 h3 {
-  color: #2ec4b6;
+  color: #fabf01;
   font-size: 1.2rem;
   margin-bottom: 1rem;
   position: relative;
@@ -89,7 +89,7 @@ h3::after {
   display: block;
   width: 50px;
   height: 2px;
-  background-color: #ffd700;
+  background-color: #fdd302;
   margin-top: 0.5rem;
 }
 
@@ -104,13 +104,14 @@ ul {
 }
 
 a {
-  color: #ffffff;
+  color: #d7eeda;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 a:hover {
-  color: #ffd700;
+  color: #00b7af;
+  font-weight: bold;
 }
 
 .social-icons {
@@ -129,7 +130,7 @@ a:hover {
 }
 
 .social-icon:hover {
-  background-color: #ffd700;
+  background-color: #00b7af;
   color: #1a3f5c;
 }
 

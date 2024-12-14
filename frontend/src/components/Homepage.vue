@@ -270,7 +270,7 @@ export default {
   padding: 15px 25px;
   font-size: 1.1rem;
   color: #fff;
-  background-color: #058883;
+  background-color: #00b7af;
   border: 2px solid white;
   border-radius: 10px;
   cursor: pointer;
@@ -323,7 +323,7 @@ export default {
 }
 
 .category-btn.active {
-  background-color: #058883;
+  background-color: #00b7af;
   color: white;
 }
 
@@ -392,7 +392,7 @@ export default {
 }
 
 .nav-btn:hover {
-  background: #2ec4b6;
+  background: #00b7af;
   color: white;
 }
 
@@ -517,7 +517,7 @@ export default {
 .company-subtitle {
   font-family: 'Poppins', sans-serif;
   font-size: 1rem;
-  color: #058883;
+  color: #00b7af;
   margin-top: 0.5rem;
 }
 

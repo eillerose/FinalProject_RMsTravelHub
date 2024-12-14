@@ -388,7 +388,7 @@ const setActiveTab = (index) => {
 
 .center-nav ul li a:hover,
 .center-nav ul li a.active {
-  color: #058883;
+  color: #72c9d5;
 }
 
 .auth-buttons {

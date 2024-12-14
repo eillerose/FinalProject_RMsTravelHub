@@ -140,13 +140,13 @@ onMounted(fetchTourGuides);
 
 .banner {
   width: 100%;
-  background-image: url('/src/img/heroBg.jpg');
+  background-color: #013240;
   background-size: cover;
   background-position: center;
   text-align: center;
   color: #fff;
   padding: 4rem 20px;
-  height: 25vh;
+  height: 13vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -157,7 +157,7 @@ onMounted(fetchTourGuides);
   font-size: 3.5rem;
   margin-bottom: 1rem;
   font-weight: bold;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Added text shadow for readability */
 }
 
 .banner p {

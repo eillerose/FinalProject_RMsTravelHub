@@ -62,7 +62,7 @@
               <td>
                 <div class="action-icons">
                   <template v-if="currentView === 'active'">
-                    <i class="material-icons edit-icon" @click="editUser(user)" title="Edit User">edit</i>
+                    <!-- <i class="material-icons edit-icon" @click="editUser(user)" title="Edit User">edit</i> -->
                     <i class="material-icons verify-icon" @click="toggleVerification(user)" :title="user.verified ? 'Unverify User' : 'Verify User'">
                       {{ user.verified ? 'verified_user' : 'gpp_maybe' }}
                     </i>
@@ -80,7 +80,7 @@
     </div>
 
     <!-- Edit User Modal -->
-    <div v-if="isModalOpen" class="modal-overlay">
+    <!-- <div v-if="isModalOpen" class="modal-overlay">
       <div class="modal">
         <h3>Edit User Profile</h3>
         <form @submit.prevent="saveUser">
@@ -118,7 +118,7 @@
           </div>
         </form>
       </div>
-    </div>
+    </div> -->
 
     <!-- Confirm Delete Modal -->
     <div v-if="isDeleteModalOpen" class="modal-overlay">

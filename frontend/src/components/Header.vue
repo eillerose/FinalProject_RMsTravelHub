@@ -1,4 +1,3 @@
-
 <template>
   <header class="header">
     <div class="container">
@@ -54,8 +53,18 @@
         </button>
         <transition name="fade">
           <ul v-if="isProfileDropdownOpen" class="profile-dropdown">
-            <li><router-link to="/edit-profile">Profile</router-link></li>
-            <li><a href="#" @click.prevent="logout">Logout</a></li>
+            <li>
+              <router-link to="/edit-profile">
+                <span class="material-icons">person</span>
+                Profile
+              </router-link>
+            </li>
+            <li>
+              <a href="#" @click.prevent="logout">
+                <span class="material-icons">logout</span>
+                Logout
+              </a>
+            </li>
           </ul>
         </transition>
       </div>
@@ -97,6 +106,7 @@ const logout = async () => {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 .header {
   font-family: 'Poppins', sans-serif;
@@ -107,7 +117,6 @@ const logout = async () => {
   left: 0;
   right: 0;
   z-index: 1000;
-
 }
 
 .container {
@@ -145,7 +154,7 @@ const logout = async () => {
 }
 
 .nav-list a {
-  position: relative; /* Added position: relative */
+  position: relative;
   color: #2D3436;
   text-decoration: none;
   font-size: 0.9rem;
@@ -157,7 +166,7 @@ const logout = async () => {
 }
 
 .nav-list a:hover {
-  color: #00B894;
+  color: #00b7af;
 }
 
 .dropdown-container {
@@ -234,7 +243,8 @@ const logout = async () => {
   border-radius: 0.5rem;
   padding: 0.5rem;
   margin-top: 0.5rem;
-  min-width: 160px;
+  min-width: 120px;
+  width: max-content;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   list-style: none;
   padding-left: 0;
@@ -242,14 +252,29 @@ const logout = async () => {
 }
 
 .profile-dropdown a {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   padding: 0.5rem;
   color: #2D3436;
   text-decoration: none;
   font-size: 0.9rem;
   border-radius: 0.25rem;
-  transition: all 0.2s ease;
-  text-align: center;
+  transition: color 0.2s ease;
+}
+
+.profile-dropdown a:hover {
+  color: #00b7af;
+}
+
+.profile-dropdown a:hover .material-icons {
+  color: #00b7af;
+}
+
+.profile-dropdown .material-icons {
+  font-size: 1.2rem;
+  transition: color 0.2s ease;
 }
 
 /* Transitions */
@@ -264,18 +289,18 @@ const logout = async () => {
   transform: translateY(-10px);
 }
 
-.router-link-active { /* Added CSS for active links */
-  color: #00B894 !important;
+.router-link-active {
+  color: #00b7af !important;
 }
 
-.nav-list .router-link-active::after { /* Added CSS for active links underline */
+.nav-list .router-link-active::after {
   content: '';
   position: absolute;
   bottom: -5px;
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #00B894;
+  background-color: #00b7af;
 }
 
 @media (max-width: 768px) {
@@ -292,3 +317,4 @@ const logout = async () => {
   }
 }
 </style>
+

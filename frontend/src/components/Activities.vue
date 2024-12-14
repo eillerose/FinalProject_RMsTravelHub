@@ -84,149 +84,148 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-.activities-page {
-  font-family: 'Poppins', sans-serif;
-  text-align: center;
-  padding: 20px;
-  background-color: #f4f4f4;
-}
-
-.container {
-  max-width: 1500px;
-  margin: 0 auto;
-}
-
-.title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-top: 7rem;
-  margin-bottom: 30px;
-  color: #333;
-
-}
-
-.subtitle {
-  font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #444;
-}
-
-.categories {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
-}
-
-.category-button {
-  font-family: 'Poppins', sans-serif;
-  background-color: #f0f0f0;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.category-button:hover {
-  background-color: #d0d0d0;
-}
-
-.category-button.active {
-  background-color: #007bff;
-  color: white;
-}
-
-.activities {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 40px;;
-}
-
-.loading {
-  font-size: 1.2rem;
-  color: #666;
-  margin-top: 20px;
-}
-
-.activity-cards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  justify-content: flex-start;
-}
-
-.activity-card {
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: box-shadow 0.3s;
-  width: calc(33.333% - 14px);
-  min-width: 250px;
-}
-
-.activity-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.activity-content {
-  display: flex;
-  padding: 15px;
-}
-
-.activity-image {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-right: 15px;
-  flex-shrink: 0;
-}
-
-.activity-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.activity-info {
-  flex: 1;
-  text-align: left;
-}
-
-.activity-info h3 {
-  margin: 0 0 5px 0;
-  font-size: 18px;
-  color: #333;
-  margin-bottom: -5px;
-}
-
-.activity-card .price {
-  font-weight: bold;
-  color: #4CAF50;
-  margin-bottom: -12px;
-}
-
-.activity-card .description {
-  font-size: 12px;
-  color: #555;
-  margin-bottom: -3px;
-}
-
-@media (max-width: 1024px) {
-  .activity-card {
-    width: calc(50% - 10px);
+  .activities-page {
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    padding: 20px;
+    background-color: #f4f4f4;
   }
-}
 
-@media (max-width: 768px) {
+  .container {
+    max-width: 1500px;
+    margin: 0 auto;
+  }
+
+  .title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-top: 7rem;
+    margin-bottom: 30px;
+    color: #333;
+
+  }
+
+  .subtitle {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #444;
+  }
+
+  .categories {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+
+  .category-button {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f0f0f0;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  .category-button:hover {
+    background-color: #d0d0d0;
+  }
+
+  .category-button.active {
+    background-color: #0a8d88;
+    color: white;
+  }
+
+  .activities {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;;
+  }
+
+  .loading {
+    font-size: 1.2rem;
+    color: #666;
+    margin-top: 20px;
+  }
+
+  .activity-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: flex-start;
+  }
+
   .activity-card {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+    width: calc(33.333% - 14px);
+    min-width: 250px;
+  }
+
+  .activity-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .activity-content {
+    display: flex;
+    padding: 15px;
+
+  }
+
+  .activity-image {
+    height: 200px;
+    overflow: hidden;
+  }
+
+  .activity-image img {
     width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
-}
+
+  .activity-info {
+    flex: 1;
+    text-align: left;
+    margin-left: 2rem;
+  }
+
+  .activity-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: -5px;
+  }
+
+  .activity-card .price {
+    font-weight: bold;
+    color: #4CAF50;
+    margin-bottom: -12px;
+  }
+
+  .activity-card .description {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: -3px;
+  }
+
+  @media (max-width: 1024px) {
+    .activity-card {
+      width: calc(50% - 10px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .activity-card {
+      width: 100%;
+    }
+  }
 </style>
