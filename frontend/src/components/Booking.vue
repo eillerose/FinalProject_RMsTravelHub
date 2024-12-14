@@ -68,13 +68,26 @@
           <!-- Step 3: Hotel and Room Selection -->
           <div v-if="currentStep === 2" class="booking-step">
             <h2 class="step-title">Select Hotel and Room</h2>
-            <div class="hotel-cards">
-              <div v-for="hotel in hotels" :key="hotel.id" class="hotel-card">
-                <h3 class="hotel-name">{{ hotel.name }}</h3>
-                <p class="hotel-description">{{ hotel.description }}</p>
-                <button @click="showHotelDetails(hotel)" class="view-details-btn">
-                  View Details
-                </button>
+            <div class="hotel-selection-container">
+              <div class="hotel-cards">
+                <div v-for="hotel in hotels" :key="hotel.id" class="hotel-card">
+                  <h3 class="hotel-name">{{ hotel.name }}</h3>
+                  <p class="hotel-description">{{ hotel.description }}</p>
+                  <button @click="showHotelDetails(hotel)" class="view-details-btn">
+                    View Details
+                  </button>
+                </div>
+              </div>
+              
+              <!-- New: Selected Room Display -->
+              <div v-if="booking.hotelAndRoom" class="selected-room-card">
+                <div class="selected-room-header">
+                  {{ booking.hotelAndRoom.hotel.name }}
+                </div>
+                <div class="selected-room-content">
+                  <p class="room-price">₱{{ booking.hotelAndRoom.room.price }} per night</p>
+                  <p class="room-capacity">Capacity: {{ booking.hotelAndRoom.room.capacity }} pax</p>
+                </div>
               </div>
             </div>
           </div>
@@ -265,6 +278,8 @@
             <p><strong>Check-in Date & Time:</strong> {{ formatDateTime(booking.checkInDate, booking.checkInTime) }}</p>
             <p><strong>Hotel:</strong> {{ booking.hotelAndRoom?.hotel.name }}</p>
             <p><strong>Room Type:</strong> {{ booking.hotelAndRoom?.room.name }}</p>
+            <p><strong>Room Price:</strong> ₱{{ booking.hotelAndRoom?.room.price }} per night</p>
+            <p><strong>Room Capacity:</strong> {{ booking.hotelAndRoom?.room.capacity }} pax</p>
           </div>
 
           <div class="summary-total">
@@ -788,6 +803,7 @@ const handleRecurring = (event) => {
   margin-top: 1rem;
 }
 
+
 .hotel-cards {
   display: flex;
   justify-content: center;
@@ -806,7 +822,7 @@ const handleRecurring = (event) => {
   align-items: center;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 400px;
+  width: 500px;
   max-width: 100%;
 }
 
@@ -828,14 +844,13 @@ const handleRecurring = (event) => {
   font-size: 1.5rem;
   font-weight: 600;
   color: #00b7af;
-  margin-bottom: 0.75rem;
 }
 
 .hotel-description {
   font-size: 0.875rem;
   color: #6b7280;
-  margin-bottom: 1.5rem;
-  max-width: 400px;
+  max-width: 500px;
+  margin-top: -1.5rem;
 }
 
 .view-details-btn {
@@ -941,8 +956,7 @@ const handleRecurring = (event) => {
   color: #4b5563;
 }
 
-.back-button:hover {
-  background: #e5e7eb;
+.back-button:hover {background: #e5e7eb;
 }
 
 .next-button,
@@ -951,8 +965,7 @@ const handleRecurring = (event) => {
   color: white;
 }
 
-.next-button:hover,
-.confirm-button:hover {
+.next-button:hover,.confirm-button:hover {
   background: #006167;
 }
 
@@ -1295,6 +1308,50 @@ const handleRecurring = (event) => {
   background: #A0AEC0;
   transform: none;
 }
+
+.hotel-selection-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.selected-room-card {
+  background-color: #e5f6ff;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  width: 300px;
+  margin: 1rem auto 0;
+  margin-top: -.75rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.selected-room-header {
+  background-color: #00b7af;
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.selected-room-content {
+
+  text-align: center;
+}
+
+.room-price {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #00b7af;
+  margin-bottom: 0.5rem;
+}
+
+.room-capacity {
+  color: #666;
+  font-size: 0.875rem;
+}
+
 
 @media (max-width: 768px) {
   .booking-content {
