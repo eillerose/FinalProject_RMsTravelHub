@@ -1,309 +1,323 @@
 <template>
-      <h1>RM's Travel and Tours Dashboard</h1>
+  <div class="dashboard">
+    <h1 class="dashboard-title">RM's Travel and Tours Dashboard</h1>
     <main class="dashboard-content">
       <!-- Key Metrics -->
       <section class="metrics-grid">
         <div v-for="metric in metrics" :key="metric.title" class="metric-card">
-          <h2>{{ metric.title }}</h2>
-          <p :class="['value', metric.class]">{{ metric.value }}</p>
-          <p :class="['change', metric.trend === 'up' ? 'up' : 'down']">
+          <h3 class="metric-title">{{ metric.title }}</h3>
+          <p :class="['metric-value', metric.class]">{{ metric.value }}</p>
+          <p :class="['metric-change', metric.trend === 'up' ? 'up' : 'down']">
             <span>{{ metric.trend === 'up' ? '↑' : '↓' }}</span>
             {{ metric.change }}% from last month
           </p>
         </div>
       </section>
       
-      <!-- Booking Trends Chart -->
-      <section class="chart-section">
-        <h2>Booking Trends</h2>
-        <BookingTrendsChart :chartData="bookingTrendsData" />
-      </section>
+      <!-- Charts Grid -->
+      <div class="charts-grid">
+        <!-- Pie Chart Section -->
+        <section class="chart-section">
+          <h3 class="chart-title">Booking Distribution</h3>
+          <div class="chart-wrapper">
+            <svg viewBox="0 0 200 200" class="pie-chart">
+              <g transform="translate(100, 100)">
+                <path v-for="(segment, index) in pieSegments" 
+                      :key="index"
+                      :d="segment.path"
+                      :fill="segment.color"
+                      class="pie-segment" />
+              </g>
+            </svg>
+            <div class="chart-legend">
+              <div v-for="item in bookingDistribution" 
+                   :key="item.label" 
+                   class="legend-item">
+                <span class="legend-color" :style="{ backgroundColor: item.color }"></span>
+                <span class="legend-label">{{ item.label }}: {{ item.value }}%</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Line Chart Section -->
+        <section class="chart-section">
+          <h3 class="chart-title">Monthly Bookings</h3>
+          <div class="chart-wrapper">
+            <svg viewBox="0 0 300 200" class="line-chart">
+              <!-- Grid -->
+              <g class="grid">
+                <line v-for="n in 5" 
+                      :key="n"
+                      x1="40" 
+                      :x2="280" 
+                      :y1="40 * n" 
+                      :y2="40 * n" 
+                      class="grid-line" />
+              </g>
+              
+              <!-- Line -->
+              <path :d="monthlyBookingsPath" 
+                    class="line-path" />
+              
+              <!-- Points -->
+              <g v-for="(point, index) in monthlyBookingPoints" 
+                 :key="index" 
+                 class="data-point-group">
+                <circle :cx="point.x" 
+                        :cy="point.y" 
+                        r="4" 
+                        class="data-point" />
+                <text :x="point.x" 
+                      :y="180" 
+                      class="axis-label">
+                  {{ monthlyBookings[index].month }}
+                </text>
+              </g>
+            </svg>
+          </div>
+        </section>
+
+        <!-- Bar Chart Section -->
+        <section class="chart-section">
+          <h3 class="chart-title">Revenue by Package</h3>
+          <div class="chart-wrapper">
+            <svg viewBox="0 0 300 200" class="bar-chart">
+              <g v-for="(bar, index) in packageBars" 
+                 :key="index" 
+                 class="bar-group">
+                <rect :x="bar.x"
+                      :y="bar.y"
+                      :width="bar.width"
+                      :height="bar.height"
+                      class="bar" />
+                <text :x="bar.x + bar.width/2"
+                      :y="180"
+                      class="axis-label">
+                  {{ packageRevenue[index].name }}
+                </text>
+                <text :x="bar.x + bar.width/2"
+                      :y="bar.y - 5"
+                      class="value-label">
+                  ₱{{ (packageRevenue[index].revenue/1000).toFixed(0) }}k
+                </text>
+              </g>
+            </svg>
+          </div>
+        </section>
+      </div>
       
       <div class="info-grid">
         <!-- Upcoming Tours -->
         <section class="info-card">
-          <h2>Upcoming Tours</h2>
-          <ul class="tour-list">
-            <li v-for="tour in upcomingTours" :key="tour.id" class="tour-item">
-              <div>
+          <h3 class="info-title">Upcoming Tours</h3>
+          <div class="tour-list">
+            <div v-for="tour in upcomingTours" 
+                 :key="tour.id" 
+                 class="tour-item">
+              <div class="tour-info">
                 <p class="tour-destination">{{ tour.destination }}</p>
-                <p class="tour-date">{{ formatDate(tour.checkInDate) }}</p>
+                <p class="tour-date">{{ formatDate(tour.date) }}</p>
               </div>
               <span :class="['tour-status', tour.status.toLowerCase()]">
                 {{ tour.status }}
               </span>
-            </li>
-          </ul>
+            </div>
+          </div>
         </section>
         
         <!-- Recent Activities -->
         <section class="info-card">
-          <h2>Recent Activities</h2>
-          <ul class="activity-list">
-            <li v-for="activity in recentActivities" :key="activity.id" class="activity-item">
-              <div :class="['activity-icon', activity.iconColor]">
-                <component :is="activity.icon" />
+          <h3 class="info-title">Recent Activities</h3>
+          <div class="activity-list">
+            <div v-for="activity in recentActivities" 
+                 :key="activity.id" 
+                 class="activity-item">
+              <div class="activity-icon">
+                <CalendarIcon class="icon" />
               </div>
-              <div class="activity-details">
-                <p class="activity-description">{{ activity.description }}</p>
-                <p class="activity-timestamp">{{ formatTimestamp(activity.timestamp) }}</p>
+              <div class="activity-info">
+                <p class="activity-title">{{ activity.title }}</p>
+                <p class="activity-time">{{ activity.time }}</p>
               </div>
-            </li>
-          </ul>
+            </div>
+          </div>
         </section>
       </div>
     </main>
-
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { UserIcon, CalendarIcon, DollarSignIcon, GlobeIcon } from 'lucide-vue-next'
-import { collection, query, orderBy, limit, getDocs, where, Timestamp } from 'firebase/firestore'
-import { db } from '../firebaseConfig'
+import { ref, computed, onMounted } from 'vue'
+import { CalendarIcon } from 'lucide-vue-next'
 
+// Metrics Data
 const metrics = ref([
-  { title: 'Total Bookings', value: '0', class: 'blue', trend: 'up', change: 0 },
-  { title: 'Revenue', value: '₱0', class: 'green', trend: 'up', change: 0 },
-  { title: 'Active Tours', value: '0', class: 'yellow', trend: 'up', change: 0 },
-  { title: 'Customer Satisfaction', value: '0/5', class: 'purple', trend: 'up', change: 0 },
+  { title: 'Total Bookings', value: '14', class: 'blue', trend: 'up', change: 5 },
+  { title: 'Revenue', value: '₱8,000', class: 'green', trend: 'up', change: 12 },
+  { title: 'Active Tours', value: '6', class: 'yellow', trend: 'up', change: 3 },
+  { title: 'Customer Satisfaction', value: '4.5/5', class: 'purple', trend: 'up', change: 1 }
 ])
 
-const upcomingTours = ref([])
-const recentActivities = ref([])
-const bookingTrendsData = ref([])
+// Chart Data
+const bookingDistribution = ref([
+  { label: 'Completed', value: 45, color: '#10b981' },
+  { label: 'Pending', value: 30, color: '#f59e0b' },
+  { label: 'Cancelled', value: 25, color: '#ef4444' }
+])
 
-const fetchMetrics = async () => {
-  const bookingsRef = collection(db, 'bookings')
-  const bookingsSnapshot = await getDocs(bookingsRef)
-  const totalBookings = bookingsSnapshot.size
+const monthlyBookings = ref([
+  { month: 'Jan', count: 12 },
+  { month: 'Feb', count: 19 },
+  { month: 'Mar', count: 15 },
+  { month: 'Apr', count: 25 },
+  { month: 'May', count: 32 },
+  { month: 'Jun', count: 28 }
+])
 
-  let totalRevenue = 0
-  let activeTours = 0
-  bookingsSnapshot.forEach((doc) => {
-    const booking = doc.data()
-    if (booking.status === 'Approved' || booking.status === 'Pending') {
-      totalRevenue += booking.totalPrice
-      activeTours++
-    }
-  })
+const packageRevenue = ref([
+  { name: 'Basic', revenue: 5000 },
+  { name: 'Standard', revenue: 12000 },
+  { name: 'Premium', revenue: 20000 },
+  { name: 'Luxury', revenue: 35000 }
+])
 
-  // TODO: Implement customer satisfaction calculation
-  const customerSatisfaction = 4.5 // Placeholder value
+// Sample Data
+const upcomingTours = ref([
+  {
+    id: 1,
+    destination: 'Agbing Seaside View Resort',
+    date: new Date('2024-01-20'),
+    status: 'Pending'
+  },
+  {
+    id: 2,
+    destination: 'Luckeh 5J Beach Resort',
+    date: new Date('2024-01-25'),
+    status: 'Approved'
+  }
+])
 
-  metrics.value = [
-    { title: 'Total Bookings', value: totalBookings.toString(), class: 'blue', trend: 'up', change: 5 },
-    { title: 'Revenue', value: `₱${totalRevenue.toLocaleString()}`, class: 'green', trend: 'up', change: 12 },
-    { title: 'Active Tours', value: activeTours.toString(), class: 'yellow', trend: 'up', change: 3 },
-    { title: 'Customer Satisfaction', value: `${customerSatisfaction.toFixed(1)}/5`, class: 'purple', trend: 'up', change: 1 },
-  ]
-}
+const recentActivities = ref([
+  {
+    id: 1,
+    title: 'New booking: Agbing Seaside View Resort',
+    time: 'Yesterday'
+  },
+  {
+    id: 2,
+    title: 'New booking: Agbing Seaside View Resort',
+    time: 'Yesterday'
+  },
+  {
+    id: 3,
+    title: 'New booking: Luckeh 5J Beach Resort',
+    time: 'Yesterday'
+  }
+])
 
-const fetchUpcomingTours = async () => {
-  const now = Timestamp.now()
-  const bookingsRef = collection(db, 'bookings')
-  const q = query(
-    bookingsRef,
-    where('checkInDate', '>', now),
-    where('status', 'in', ['Pending', 'Approved']),
-    orderBy('checkInDate'),
-    limit(5)
-  )
-  const querySnapshot = await getDocs(q)
-  upcomingTours.value = querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data(),
-    destination: `${doc.data().hotel.name}, ${doc.data().hotel.location}`,
-  }))
-}
-
-const fetchRecentActivities = async () => {
-  const bookingsRef = collection(db, 'bookings')
-  const q = query(bookingsRef, orderBy('createdAt', 'desc'), limit(5))
-  const querySnapshot = await getDocs(q)
-  recentActivities.value = querySnapshot.docs.map(doc => {
-    const booking = doc.data()
-    return {
-      id: doc.id,
-      description: `New booking: ${booking.hotel.name}`,
-      timestamp: booking.createdAt,
-      icon: CalendarIcon,
-      iconColor: 'green'
-    }
-  })
-}
-
-const fetchBookingTrends = async () => {
-  const bookingsRef = collection(db, 'bookings')
-  const sixMonthsAgo = new Date()
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
-  const q = query(
-    bookingsRef,
-    where('createdAt', '>', Timestamp.fromDate(sixMonthsAgo)),
-    orderBy('createdAt')
-  )
-  const querySnapshot = await getDocs(q)
+// Chart Computations
+const pieSegments = computed(() => {
+  const total = bookingDistribution.value.reduce((sum, item) => sum + item.value, 0)
+  let currentAngle = 0
   
-  const monthlyBookings = {}
-  querySnapshot.forEach(doc => {
-    const booking = doc.data()
-    const month = booking.createdAt.toDate().toLocaleString('default', { month: 'short' })
-    monthlyBookings[month] = (monthlyBookings[month] || 0) + 1
+  return bookingDistribution.value.map(item => {
+    const angle = (item.value / total) * Math.PI * 2
+    const startAngle = currentAngle
+    currentAngle += angle
+    
+    const x1 = Math.cos(startAngle) * 80
+    const y1 = Math.sin(startAngle) * 80
+    const x2 = Math.cos(currentAngle) * 80
+    const y2 = Math.sin(currentAngle) * 80
+    
+    const largeArcFlag = angle > Math.PI ? 1 : 0
+    
+    const path = `
+      M 0 0
+      L ${x1} ${y1}
+      A 80 80 0 ${largeArcFlag} 1 ${x2} ${y2}
+      Z
+    `
+    
+    return {
+      path,
+      color: item.color
+    }
   })
+})
 
-  bookingTrendsData.value = Object.entries(monthlyBookings).map(([month, count]) => ({ month, count }))
-}
+const monthlyBookingPoints = computed(() => {
+  const maxCount = Math.max(...monthlyBookings.value.map(b => b.count))
+  const width = 240
+  const height = 160
+  const padding = 40
+  
+  return monthlyBookings.value.map((booking, index) => {
+    const x = padding + (index * (width - padding) / (monthlyBookings.value.length - 1))
+    const y = height - (booking.count / maxCount * (height - padding))
+    return { x, y }
+  })
+})
 
-const formatDate = (timestamp) => {
-  if (!timestamp) return 'N/A'
-  return timestamp.toDate().toLocaleDateString('en-US', {
+const monthlyBookingsPath = computed(() => {
+  if (monthlyBookingPoints.value.length === 0) return ''
+  
+  return 'M ' + monthlyBookingPoints.value
+    .map(point => `${point.x} ${point.y}`)
+    .join(' L ')
+})
+
+const packageBars = computed(() => {
+  const maxRevenue = Math.max(...packageRevenue.value.map(p => p.revenue))
+  const barWidth = 40
+  const gap = 20
+  const height = 160
+  const padding = 40
+  
+  return packageRevenue.value.map((pkg, index) => {
+    const x = padding + index * (barWidth + gap)
+    const barHeight = (pkg.revenue / maxRevenue) * (height - padding)
+    return {
+      x,
+      y: height - barHeight,
+      width: barWidth,
+      height: barHeight
+    }
+  })
+})
+
+// Utility Functions
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   })
 }
-
-const formatTimestamp = (timestamp) => {
-  if (!timestamp) return 'N/A'
-  const now = new Date()
-  const date = timestamp.toDate()
-  const diffTime = Math.abs(now - date)
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-  if (diffDays === 0) return 'Today'
-  if (diffDays === 1) return 'Yesterday'
-  if (diffDays < 7) return `${diffDays} days ago`
-  return formatDate(timestamp)
-}
-
-onMounted(async () => {
-  await Promise.all([
-    fetchMetrics(),
-    fetchUpcomingTours(),
-    fetchRecentActivities(),
-    fetchBookingTrends()
-  ])
-})
-
-const BookingTrendsChart = {
-  props: {
-    chartData: {
-      type: Array,
-      required: true
-    }
-  },
-  setup(props) {
-    const width = 500;
-    const height = 300;
-    const padding = 40;
-
-    const maxCount = computed(() => Math.max(...props.chartData.map(d => d.count)));
-
-    const yAxisTicks = computed(() => {
-      const tickCount = 5;
-      const step = Math.ceil(maxCount.value / (tickCount - 1));
-      return Array.from({ length: tickCount }, (_, i) => i * step);
-    });
-
-    const getX = (index) => padding + (index * ((width - 2 * padding) / (props.chartData.length - 1)));
-    const getY = (count) => height - padding - ((count / maxCount.value) * (height - 2 * padding));
-
-    const points = computed(() => {
-      return props.chartData
-        .map((point, index) => `${getX(index)},${getY(point.count)}`)
-        .join(' ');
-    });
-
-    return {
-      width,
-      height,
-      padding,
-      yAxisTicks,
-      getX,
-      getY,
-      points
-    };
-  },
-  template: `
-    <div class="chart-wrapper">
-      <svg class="chart" :viewBox="'0 0 ' + width + ' ' + height">
-        <g class="x-axis">
-          <line :x1="padding" :y1="height - padding" :x2="width - padding" :y2="height - padding" />
-          <text 
-            v-for="(point, index) in chartData" 
-            :key="index"
-            :x="getX(index)"
-            :y="height - padding + 20"
-            text-anchor="middle"
-          >
-            {{ point.month }}
-          </text>
-        </g>
-        <g class="y-axis">
-          <line :x1="padding" :y1="padding" :x2="padding" :y2="height - padding" />
-          <text 
-            v-for="tick in yAxisTicks" 
-            :key="tick"
-            :x="padding - 10"
-            :y="getY(tick)"
-            text-anchor="end"
-            alignment-baseline="middle"
-          >
-            {{ tick }}
-          </text>
-        </g>
-        <polyline
-          class="chart-line"
-          fill="none"
-          stroke="#3b82f6"
-          stroke-width="2"
-          :points="points"
-        />
-        <g>
-          <circle 
-            v-for="(point, index) in chartData" 
-            :key="index"
-            class="chart-dot" 
-            :cx="getX(index)" 
-            :cy="getY(point.count)" 
-            r="4" 
-            fill="#3b82f6" 
-          />
-        </g>
-      </svg>
-    </div>
-  `
-};
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
 .dashboard {
-  font-family: 'Poppins', sans-serif;
+  padding: 2rem;
   background-color: #f8fafc;
   min-height: 100vh;
 }
 
-.dashboard-header {
-  background-color: #ffffff;
-  padding: 1.5rem 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.dashboard-header h1 {
-  font-size: 1.5rem;
+.dashboard-title {
+  font-size: 1.875rem;
   font-weight: 600;
   color: #1e293b;
-  margin: 0;
+  margin-bottom: 2rem;
 }
 
 .dashboard-content {
-  max-width: 1500px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
 }
 
+/* Metrics Grid */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -312,81 +326,200 @@ const BookingTrendsChart = {
 }
 
 .metric-card {
-  background-color: #f0f7f4;
-  border-radius: 0.5rem;
+  background: white;
   padding: 1.5rem;
+  border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease;
 }
 
-.metric-card:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.metric-card h2 {
-  font-size: 1.5rem;
-  font-weight: bold;
+.metric-title {
+  font-size: 0.875rem;
   color: #64748b;
   margin-bottom: 0.5rem;
 }
 
-.value {
-  font-size: 1.5rem;
+.metric-value {
+  font-size: 1.875rem;
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
-.value.blue { color: #3b82f6; }
-.value.green { color: #10b981; }
-.value.yellow { color: #f59e0b; }
-.value.purple { color: #8b5cf6; }
+.metric-value.blue { color: #3b82f6; }
+.metric-value.green { color: #10b981; }
+.metric-value.yellow { color: #f59e0b; }
+.metric-value.purple { color: #8b5cf6; }
 
-.change {
-  font-size: 0.75rem;
+.metric-change {
+  font-size: 0.875rem;
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
 
-.change.up { color: #10b981; }
-.change.down { color: #ef4444; }
+.metric-change.up { color: #10b981; }
+.metric-change.down { color: #ef4444; }
 
-.chart-section, .info-card {
-  background-color: #ffffff;
-  border-radius: 0.5rem;
+/* Charts Grid */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.chart-section {
+  background: white;
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.chart-section h2, .info-card h2 {
-  font-size: 1.125rem;
+.chart-title {
+  font-size: 1rem;
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 1rem;
 }
 
+.chart-wrapper {
+  position: relative;
+  height: 300px;
+}
+
+/* Pie Chart */
+.pie-chart {
+  width: 100%;
+  height: 100%;
+}
+
+.pie-segment {
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.pie-segment:hover {
+  transform: translateX(2px) translateY(2px);
+}
+
+.chart-legend {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* Line Chart */
+.line-chart {
+  width: 100%;
+  height: 100%;
+}
+
+.grid-line {
+  stroke: #e2e8f0;
+  stroke-width: 1;
+}
+
+.line-path {
+  fill: none;
+  stroke: #3b82f6;
+  stroke-width: 2;
+  animation: drawLine 2s ease-out forwards;
+}
+
+.data-point {
+  fill: #3b82f6;
+  transition: r 0.2s;
+}
+
+.data-point:hover {
+  transition: r 6;
+}
+
+/* Bar Chart */
+.bar-chart {
+  width: 100%;
+  height: 100%;
+}
+
+.bar {
+  fill: #10b981;
+  transition: opacity 0.2s;
+  animation: growBar 1s ease-out forwards;
+}
+
+.bar:hover {
+  opacity: 0.8;
+}
+
+.axis-label {
+  fill: #64748b;
+  font-size: 0.75rem;
+  text-anchor: middle;
+}
+
+.value-label {
+  fill: #64748b;
+  font-size: 0.75rem;
+  text-anchor: middle;
+  font-weight: 500;
+}
+
+/* Info Grid */
 .info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
 }
 
-.tour-list, .activity-list {
-  list-style-type: none;
-  padding: 0;
+.info-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.tour-item, .activity-item {
+.info-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+/* Tours */
+.tour-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tour-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0;
+  padding-bottom: 1rem;
   border-bottom: 1px solid #e2e8f0;
 }
 
-.tour-item:last-child, .activity-item:last-child {
+.tour-item:last-child {
   border-bottom: none;
+  padding-bottom: 0;
 }
 
 .tour-destination {
@@ -396,15 +529,20 @@ const BookingTrendsChart = {
 }
 
 .tour-date {
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: #64748b;
 }
 
 .tour-status {
-  font-size: 1rem;
+  font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
   border-radius: 9999px;
   font-weight: 500;
+}
+
+.tour-status.pending {
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
 .tour-status.approved {
@@ -412,9 +550,24 @@ const BookingTrendsChart = {
   color: #065f46;
 }
 
-.tour-status.pending {
-  background-color: #fef3c7;
-  color: #92400e;
+/* Activities */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .activity-icon {
@@ -423,85 +576,59 @@ const BookingTrendsChart = {
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  border-radius: 50%;
-  margin-right: 1rem;
+  background-color: #d1fae5;
+  border-radius: 9999px;
 }
 
-.activity-icon.green { background-color: #d1fae5; color: #059669; }
-.activity-icon.blue { background-color: #dbeafe; color: #3b82f6; }
-.activity-icon.yellow { background-color: #fef3c7; color: #d97706; }
-.activity-icon.purple { background-color: #ede9fe; color: #7c3aed; }
-
-.activity-details {
-  flex-grow: 1;
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #059669;
 }
 
-.activity-description {
-  font-size: 1rem;
+.activity-title {
+  font-size: 0.875rem;
   font-weight: 500;
   color: #1e293b;
-
+  margin-bottom: 0.25rem;
 }
 
-.activity-timestamp {
-  font-size: .75rem;
+.activity-time {
+  font-size: 0.75rem;
   color: #64748b;
 }
 
-.chart-wrapper {
-  width: 100%;
-  height: 300px;
-}
-
-.chart {
-  width: 100%;
-  height: 100%;
-}
-
-.chart-line {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: drawLine 2s ease-out forwards;
-}
-
-.chart-dot {
-  opacity: 0;
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-.x-axis line, .y-axis line {
-  stroke: #e2e8f0;
-  stroke-width: 1;
-}
-
-.x-axis text, .y-axis text {
-  font-size: 1rem;
-  fill: #64748b;
-}
-
 @keyframes drawLine {
+  from {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+  }
   to {
+    stroke-dasharray: 1000;
     stroke-dashoffset: 0;
   }
 }
 
-@keyframes fadeIn {
+@keyframes growBar {
+  from {
+    transform: scaleY(0);
+  }
   to {
-    opacity: 1;
+    transform: scaleY(1);
   }
 }
 
 @media (max-width: 768px) {
-  .dashboard-content {
+  .dashboard {
     padding: 1rem;
   }
-
-  .metrics-grid {
-    grid-template-columns: 1fr;
+  
+  .dashboard-title {
+    font-size: 1.5rem;
   }
-
-  .info-grid {
-    grid-template-columns: 1fr;
+  
+  .chart-wrapper {
+    height: 250px;
   }
 }
 </style>

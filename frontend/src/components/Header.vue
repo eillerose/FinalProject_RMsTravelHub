@@ -166,7 +166,7 @@ const logout = async () => {
 }
 
 .nav-list a:hover {
-  color: #00B894;
+  color: #00b7af;
 }
 
 .dropdown-container {
@@ -265,11 +265,11 @@ const logout = async () => {
 }
 
 .profile-dropdown a:hover {
-  color: #00B894;
+  color: #00b7af;
 }
 
 .profile-dropdown a:hover .material-icons {
-  color: #00B894;
+  color: #00b7af;
 }
 
 .profile-dropdown .material-icons {
@@ -290,7 +290,7 @@ const logout = async () => {
 }
 
 .router-link-active {
-  color: #00B894 !important;
+  color: #00b7af !important;
 }
 
 .nav-list .router-link-active::after {
@@ -300,7 +300,7 @@ const logout = async () => {
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #00B894;
+  background-color: #00b7af;
 }
 
 @media (max-width: 768px) {

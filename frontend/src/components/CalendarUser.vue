@@ -1,10 +1,11 @@
 <template>
   <div class="calendar-container">
     <div class="calendar-wrapper">
-      <div class="date-section">
-        <div class="calendar-navigation">
+      <!-- Calendar Card -->
+      <div class="calendar-card">
+        <div class="calendar-header">
           <button class="nav-arrow" @click="prevMonth">&lt;</button>
-          <h2 class="current-month">{{ currentMonthName }} {{ currentYear }}</h2>
+          <h2 class="current-month">{{ currentMonthName }}</h2>
           <button class="nav-arrow" @click="nextMonth">&gt;</button>
         </div>
         <div class="calendar-grid">
@@ -31,10 +32,13 @@
           </div>
         </div>
       </div>
-      <div class="time-section">
-        <div v-if="selectedDate" class="selected-date">{{ formatSelectedDate }}</div>
+
+      <!-- Time Selection Card -->
+      <div class="time-card">
+        <div v-if="selectedDate" class="selected-date">
+          {{ formatSelectedDate }}
+        </div>
         <h3 class="time-title">Select Time</h3>
-        
         <div class="time-slots">
           <button
             v-for="time in timeSlots"
@@ -63,10 +67,10 @@ export default {
       currentDate: new Date(),
       selectedDate: null,
       selectedTime: null,
-      weekdays: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+      weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       timeSlots: [
         '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
-        '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'
+        '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM'
       ],
     }
   },
@@ -151,149 +155,159 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
-
 .calendar-container {
-  font-family: 'Poppins', sans-serif;
-  max-width: 800px;
-  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  max-width: 900px;
+  margin: 20px auto;
   padding: 20px;
 }
 
 .calendar-wrapper {
-  display: flex;
-  background: white;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+}
+
+.calendar-card, .time-card {
+  background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.date-section, .time-section {
-  flex: 1;
-  padding: 20px;
-}
-
-.date-section {
-  border-right: 1px solid #e0e0e0;
-}
-
-.calendar-navigation {
+.calendar-header {
+  background: #00BFA6;
+  color: white;
+  padding: 16px;
+  border-radius: 8px 8px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  background-color: pink;
+}
+
+.current-month {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0;
 }
 
 .nav-arrow {
   background: none;
   border: none;
-  font-size: 24px;
-  color: #333;
+  color: white;
+  font-size: 20px;
   cursor: pointer;
-  padding: 5px 10px;
+  padding: 4px 8px;
 }
 
-.current-month {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
+.calendar-grid {
+  padding: 16px;
 }
 
-.weekdays, .days {
+.weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-}
-
-.weekday, .day {
-  text-align: center;
-  padding: 10px 5px;
-  font-size: 14px;
+  margin-bottom: 8px;
 }
 
 .weekday {
-  font-weight: 600;
+  text-align: center;
   color: #666;
+  font-size: 14px;
+  padding: 8px;
+  font-weight: 500;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
 }
 
 .day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
   cursor: pointer;
-  border-radius: 50%;
-  transition: background-color 0.2s, color 0.2s;
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
 .day:hover:not(.disabled):not(.other-month) {
-  background-color: #f0f0f0;
+  background: #f5f5f5;
 }
 
 .day.other-month {
-  color: #ccc;
+  color: #ddd;
 }
 
 .day.selected {
-  background-color: #10b981;
+  background: #1a1a1a;
   color: white;
 }
 
 .day.today {
+  color: #00BFA6;
   font-weight: 600;
-  color: #10b981;
 }
 
 .day.disabled {
-  color: #ccc;
+  color: #ddd;
   cursor: not-allowed;
 }
 
-.time-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 15px;
+.time-card {
+  padding: 20px;
 }
 
 .selected-date {
-  font-size: 16px;
-  color: #666;
+  font-size: 18px;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.time-title {
+  color: #00BFA6;
+  font-size: 20px;
   margin-bottom: 20px;
+  font-weight: 500;
 }
 
 .time-slots {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
 .time-slot {
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
+  padding: 12px;
+  border: 1px solid #00BFA6;
+  border-radius: 8px;
   background: white;
-  color: #333;
+  color: #00BFA6;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .time-slot:hover {
-  background-color: #f5f5f5;
+  background: rgba(0, 191, 166, 0.1);
 }
 
 .time-slot.selected {
-  background-color: #10b981;
+  background: #00BFA6;
   color: white;
-  border-color: #10b981;
 }
 
 @media (max-width: 768px) {
   .calendar-wrapper {
-    flex-direction: column;
-  }
-
-  .date-section {
-    border-right: none;
-    border-bottom: 1px solid #e0e0e0;
+    grid-template-columns: 1fr;
   }
 
   .time-slots {
@@ -301,3 +315,4 @@ export default {
   }
 }
 </style>
+

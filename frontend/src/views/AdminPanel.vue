@@ -10,32 +10,54 @@
         <!-- Sections -->
         <div v-for="section in menuSections" :key="section.title" class="menu-section">
           <div class="section-title">{{ section.title }}</div>
-          <router-link
-            v-for="item in section.items"
-            :key="item.path"
-            :to="item.path"
-            class="nav-item"
-            :class="{ 'active': $route.path === item.path }"
-          >
-            <component :is="item.icon" class="nav-icon" />
-            <span>{{ item.name }}</span>
-          </router-link>
+          <template v-for="item in section.items" :key="item.path">
+            <div v-if="item.subItems" class="nav-item-with-subitems">
+              <div @click="toggleSubItems(item)" class="nav-item">
+                <component :is="item.icon" class="nav-icon" />
+                <span>{{ item.name }}</span>
+                <ChevronDown
+                  :class="['subitems-toggle', { 'rotated': expandedItems[item.name] }]"
+                />
+              </div>
+              <div v-show="expandedItems[item.name]" class="subitems">
+                <router-link
+                  v-for="subItem in item.subItems"
+                  :key="subItem.path"
+                  :to="subItem.path"
+                  class="nav-item sub-item"
+                  :class="{ 'active': $route.path === subItem.path }"
+                >
+                  <component :is="subItem.icon" class="nav-icon" />
+                  <span>{{ subItem.name }}</span>
+                </router-link>
+              </div>
+            </div>
+            <router-link
+              v-else
+              :to="item.path"
+              class="nav-item"
+              :class="{ 'active': $route.path === item.path }"
+            >
+              <component :is="item.icon" class="nav-icon" />
+              <span>{{ item.name }}</span>
+            </router-link>
+          </template>
         </div>
-
       </nav>
     </aside>
 
     <div class="main-wrapper">
-      
       <main class="content-body">
-        <router-view></router-view>
+        <router-view v-slot="{ Component }">
+          <component :is="Component" />
+        </router-view>
       </main>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   LayoutDashboard,
@@ -47,11 +69,21 @@ import {
   CalendarCheck,
   UserCircle,
   MessageSquare,
-  LogOut
+  LogOut,
+  ChevronDown,
+  Calendar
 } from 'lucide-vue-next'
+
+import AdminCalendar from '@/views/AdminCalendar.vue'
 
 const route = useRoute()
 const currentPageTitle = computed(() => route.meta.title || '')
+
+const expandedItems = ref({})
+
+const toggleSubItems = (item) => {
+  expandedItems.value[item.name] = !expandedItems.value[item.name]
+}
 
 const menuSections = [
   {
@@ -68,7 +100,14 @@ const menuSections = [
       { name: 'Activities', path: '/admin/activities', icon: Activity },
       { name: 'Staffs', path: '/admin/staffs', icon: Users },
       { name: 'Hotels', path: '/admin/hotels', icon: Building2 },
-      { name: 'Booking', path: '/admin/booking', icon: CalendarCheck },
+      {
+        name: 'Booking',
+        icon: CalendarCheck,
+        subItems: [
+          { name: 'All Bookings', path: '/admin/booking', icon: CalendarCheck },
+          { name: 'Calendar', path: '/admin/booking/calendar', icon: Calendar }
+        ]
+      },
       { name: 'Guest', path: '/admin/guest', icon: UserCircle },
       { name: 'Feedback', path: '/admin/feedback', icon: MessageSquare }
     ]
@@ -161,6 +200,7 @@ const menuSections = [
   border-radius: 0.5rem;
   font-size: 1rem;
   margin: 0.125rem 0;
+  cursor: pointer;
 }
 
 .nav-icon {
@@ -175,10 +215,31 @@ const menuSections = [
 
 .nav-item.active {
   background-color: #e0f2fe;
-  color: #545454
+  color: #545454;
 }
 
+.nav-item-with-subitems {
+  display: flex;
+  flex-direction: column;
+}
 
+.subitems {
+  margin-left: 1.5rem;
+}
+
+.sub-item {
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.subitems-toggle {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.subitems-toggle.rotated {
+  transform: rotate(180deg);
+}
 
 .main-wrapper {
   flex: 1;
@@ -186,20 +247,6 @@ const menuSections = [
   flex-direction: column;
   overflow: hidden;
   margin: 1rem 1rem 1rem 0;
-}
-
-.content-header {
-  background-color: white;
-  padding: 1.25rem 1.5rem;
-  border-radius: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1e293b;
 }
 
 .content-body {
@@ -235,3 +282,4 @@ const menuSections = [
   overflow: hidden;
 }
 </style>
+
