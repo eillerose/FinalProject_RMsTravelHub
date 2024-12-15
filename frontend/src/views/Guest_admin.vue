@@ -1,4 +1,5 @@
 <template>
+   <h1 class="section-title">User Management</h1>
   <div class="user-management">
     <div class="user-list-container">
       <div class="user-table-container">
@@ -7,7 +8,6 @@
             <tr>
               <th colspan="6">
                 <div class="table-header">
-                  <h2>User Management</h2>
                   <div class="view-toggle">
                     <button 
                       @click="currentView = 'active'" 
@@ -62,7 +62,7 @@
               <td>
                 <div class="action-icons">
                   <template v-if="currentView === 'active'">
-                    <i class="material-icons edit-icon" @click="editUser(user)" title="Edit User">edit</i>
+                    <!-- <i class="material-icons edit-icon" @click="editUser(user)" title="Edit User">edit</i> -->
                     <i class="material-icons verify-icon" @click="toggleVerification(user)" :title="user.verified ? 'Unverify User' : 'Verify User'">
                       {{ user.verified ? 'verified_user' : 'gpp_maybe' }}
                     </i>
@@ -80,7 +80,7 @@
     </div>
 
     <!-- Edit User Modal -->
-    <div v-if="isModalOpen" class="modal-overlay">
+    <!-- <div v-if="isModalOpen" class="modal-overlay">
       <div class="modal">
         <h3>Edit User Profile</h3>
         <form @submit.prevent="saveUser">
@@ -118,7 +118,7 @@
           </div>
         </form>
       </div>
-    </div>
+    </div> -->
 
     <!-- Confirm Delete Modal -->
     <div v-if="isDeleteModalOpen" class="modal-overlay">
@@ -270,13 +270,14 @@ export default {
 
 .user-management {
   padding: 20px;
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
 }
 
-h1 {
-  font-size: 24px;
-  margin-bottom: 20px;
+.section-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 .view-toggle {
@@ -285,6 +286,7 @@ h1 {
 }
 
 .view-toggle button {
+  font-family: 'Poppins', sans-serif;
   padding: 10px 20px;
   border: none;
   background-color: white;
@@ -296,7 +298,7 @@ h1 {
 }
 
 .view-toggle button.active {
-  border-bottom: 2px solid #1976d2;
+  border-bottom: 2px solid #0a8d88;
   color: #1976d2;
   font-weight: bold;
 }
@@ -453,6 +455,10 @@ th {
   margin-bottom: 16px;
 }
 
+h3{
+  margin-top: 1rem;
+  font-size: 2rem;
+}
 label {
   display: block;
   margin-bottom: 8px;
@@ -460,7 +466,8 @@ label {
 }
 
 input, textarea {
-  width: 100%;
+  font-family: 'Poppins', sans-serif;
+  width: 95%;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -479,6 +486,7 @@ textarea {
 }
 
 .cancel-btn, .save-btn, .delete-btn {
+  font-family: 'Poppins', sans-serif;
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
@@ -487,12 +495,12 @@ textarea {
 }
 
 .cancel-btn {
-  background-color: #f5f5f5;
-  color: #333;
+  background-color: red;
+  color: white;
 }
 
 .save-btn {
-  background-color: #1976d2;
+  background-color: #0a8d88;
   color: white;
 }
 
@@ -501,17 +509,6 @@ textarea {
   color: white;
 }
 
-.cancel-btn:hover {
-  background-color: #eeeeee;
-}
-
-.save-btn:hover {
-  background-color: #1565c0;
-}
-
-.delete-btn:hover {
-  background-color: #c62828;
-}
 
 .warning {
   color: #ff9800;

@@ -128,13 +128,13 @@ export default {
     align-items: center;
     background-color: #f0f5f5;
     padding: 20px;
-    min-height: 100vh; /* Ensure it takes up at least the full screen height */
+    min-height: 100vh;
 }
 
 .banner {
     font-family: 'Poppins', sans-serif;
     width: 100%;
-    background-image: url('/src/img/heroBg.jpg');
+    background-color: #006167;
     background-size: cover;
     background-position: center;
     text-align: center;
@@ -269,8 +269,8 @@ textarea {
 
 button {
     font-family: 'Poppins', sans-serif;
-    background-color: #fdb812;
-    color: #fff;
+    background-color: #fdd302;
+    color: white;
     padding: 10px 15px;
     margin-top: 2rem;
     border: none;
@@ -282,7 +282,7 @@ button {
 }
 
 button:hover {
-    background-color: #F3C623;
+    background-color: #ffcd6e;
 }
 
 .map-container {

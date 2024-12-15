@@ -1,7 +1,7 @@
 <template>
+    <h1 class="section-title">Booking Management</h1>
   <div class="booking-management">
-    <h1 class="title">Booking Management</h1>
-    
+
     <div v-if="loading" class="loading">
       <div class="loader"></div>
       <p>Loading bookings...</p>
@@ -443,17 +443,18 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 .booking-management {
-  padding: 2rem;
-  max-width: 1200px;
+  font-family: 'Poppins', sans-serif;
+  max-width: 1500px;
   margin: 0 auto;
 }
 
-.title {
+.section-title {
   font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
-  color: #333;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 .loading, .error {
@@ -483,6 +484,7 @@ onUnmounted(() => {
 }
 
 .tab-btn {
+  font-family: 'Poppins', sans-serif;
   padding: 0.5rem 1rem;
   margin: 0 0.25rem;
   border: none;
@@ -493,12 +495,16 @@ onUnmounted(() => {
 }
 
 .tab-btn.active {
-  background-color: #3498db;
+  background-color: #0a8d88;
   color: white;
 }
 
 .table-container {
+
   overflow-x: auto;
+  margin-bottom: 4rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
 }
 
 .bookings-table {
@@ -560,11 +566,13 @@ onUnmounted(() => {
 }
 
 .actions {
+  font-family: 'Poppins', sans-serif;
   display: flex;
   gap: 0.5rem;
 }
 
 .btn {
+  font-family: 'Poppins', sans-serif;
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 4px;
@@ -583,6 +591,17 @@ onUnmounted(() => {
   color: white;
 }
 
+.btn-secondary {
+  font-family: 'Poppins', sans-serif;
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-primary {
+  font-family: 'Poppins', sans-serif;
+  background-color: #0a8d88;
+  color: white;
+}
 .btn-assign {
   background-color: #2ecc71;
   color: white;
@@ -630,6 +649,7 @@ onUnmounted(() => {
 }
 
 .modal {
+ 
   background-color: white;
   padding: 2rem;
   border-radius: 8px;
@@ -648,13 +668,15 @@ onUnmounted(() => {
 }
 
 .form-group input {
-  width: 100%;
+  width: 98%;
+  font-family: 'Poppins', sans-serif;
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
 .modal-actions {
+  
   display: flex;
   justify-content: flex-end;
   gap: 1rem;

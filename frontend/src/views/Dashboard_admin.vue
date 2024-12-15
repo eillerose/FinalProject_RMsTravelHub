@@ -1,59 +1,59 @@
 <template>
-  <div class="dashboard">
-    <h1>RM's Travel and Tours Dashboard</h1>
-    
-    <!-- Key Metrics -->
-    <div class="metrics">
-      <div v-for="metric in metrics" :key="metric.title" class="metric-card">
-        <h2>{{ metric.title }}</h2>
-        <p :class="['value', metric.class]">{{ metric.value }}</p>
-        <p :class="['change', metric.trend === 'up' ? 'up' : 'down']">
-          <span>{{ metric.trend === 'up' ? '↑' : '↓' }}</span>
-          {{ metric.change }}% from last month
-        </p>
-      </div>
-    </div>
-    
-    <!-- Booking Trends Chart -->
-    <div class="chart-container">
-      <h2>Booking Trends</h2>
-      <BookingTrendsChart :chartData="bookingTrendsData" />
-    </div>
-    
-    <div class="info-grid">
-      <!-- Upcoming Tours -->
-      <div class="info-card">
-        <h2>Upcoming Tours</h2>
-        <ul class="tour-list">
-          <li v-for="tour in upcomingTours" :key="tour.id" class="tour-item">
-            <div>
-              <p class="tour-destination">{{ tour.destination }}</p>
-              <p class="tour-date">{{ formatDate(tour.checkInDate) }}</p>
-            </div>
-            <span :class="['tour-status', tour.status.toLowerCase()]">
-              {{ tour.status }}
-            </span>
-          </li>
-        </ul>
-      </div>
+      <h1>RM's Travel and Tours Dashboard</h1>
+    <main class="dashboard-content">
+      <!-- Key Metrics -->
+      <section class="metrics-grid">
+        <div v-for="metric in metrics" :key="metric.title" class="metric-card">
+          <h2>{{ metric.title }}</h2>
+          <p :class="['value', metric.class]">{{ metric.value }}</p>
+          <p :class="['change', metric.trend === 'up' ? 'up' : 'down']">
+            <span>{{ metric.trend === 'up' ? '↑' : '↓' }}</span>
+            {{ metric.change }}% from last month
+          </p>
+        </div>
+      </section>
       
-      <!-- Recent Activities -->
-      <div class="info-card">
-        <h2>Recent Activities</h2>
-        <ul class="activity-list">
-          <li v-for="activity in recentActivities" :key="activity.id" class="activity-item">
-            <div :class="['activity-icon', activity.iconColor]">
-              <component :is="activity.icon" />
-            </div>
-            <div class="activity-details">
-              <p class="activity-description">{{ activity.description }}</p>
-              <p class="activity-timestamp">{{ formatTimestamp(activity.timestamp) }}</p>
-            </div>
-          </li>
-        </ul>
+      <!-- Booking Trends Chart -->
+      <section class="chart-section">
+        <h2>Booking Trends</h2>
+        <BookingTrendsChart :chartData="bookingTrendsData" />
+      </section>
+      
+      <div class="info-grid">
+        <!-- Upcoming Tours -->
+        <section class="info-card">
+          <h2>Upcoming Tours</h2>
+          <ul class="tour-list">
+            <li v-for="tour in upcomingTours" :key="tour.id" class="tour-item">
+              <div>
+                <p class="tour-destination">{{ tour.destination }}</p>
+                <p class="tour-date">{{ formatDate(tour.checkInDate) }}</p>
+              </div>
+              <span :class="['tour-status', tour.status.toLowerCase()]">
+                {{ tour.status }}
+              </span>
+            </li>
+          </ul>
+        </section>
+        
+        <!-- Recent Activities -->
+        <section class="info-card">
+          <h2>Recent Activities</h2>
+          <ul class="activity-list">
+            <li v-for="activity in recentActivities" :key="activity.id" class="activity-item">
+              <div :class="['activity-icon', activity.iconColor]">
+                <component :is="activity.icon" />
+              </div>
+              <div class="activity-details">
+                <p class="activity-description">{{ activity.description }}</p>
+                <p class="activity-timestamp">{{ formatTimestamp(activity.timestamp) }}</p>
+              </div>
+            </li>
+          </ul>
+        </section>
       </div>
-    </div>
-  </div>
+    </main>
+
 </template>
 
 <script setup>
@@ -185,7 +185,6 @@ onMounted(async () => {
   ])
 })
 
-// Add this component definition
 const BookingTrendsChart = {
   props: {
     chartData: {
@@ -256,7 +255,7 @@ const BookingTrendsChart = {
         <polyline
           class="chart-line"
           fill="none"
-          stroke="#0ea5e9"
+          stroke="#3b82f6"
           stroke-width="2"
           :points="points"
         />
@@ -267,8 +266,8 @@ const BookingTrendsChart = {
             class="chart-dot" 
             :cx="getX(index)" 
             :cy="getY(point.count)" 
-            r="3" 
-            fill="#0ea5e9" 
+            r="4" 
+            fill="#3b82f6" 
           />
         </g>
       </svg>
@@ -278,39 +277,44 @@ const BookingTrendsChart = {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 .dashboard {
-  font-family: Arial, sans-serif;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f3f4f6;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8fafc;
+  min-height: 100vh;
 }
 
-h1 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #111827;
-  margin-bottom: 20px;
+.dashboard-header {
+  background-color: #ffffff;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-h2 {
-  font-size: 18px;
+.dashboard-header h1 {
+  font-size: 1.5rem;
   font-weight: 600;
-  color: #374151;
-  margin-bottom: 10px;
+  color: #1e293b;
+  margin: 0;
 }
 
-.metrics {
+.dashboard-content {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .metric-card {
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
+  background-color: #f0f7f4;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
 }
@@ -319,36 +323,53 @@ h2 {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.value {
-  font-size: 24px;
+.metric-card h2 {
+  font-size: 1.5rem;
   font-weight: bold;
-  margin: 10px 0;
+  color: #64748b;
+  margin-bottom: 0.5rem;
 }
 
-.value.blue { color: #2563eb; }
+.value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.value.blue { color: #3b82f6; }
 .value.green { color: #10b981; }
-.value.yellow { color: #d97706; }
-.value.purple { color: #7c3aed; }
+.value.yellow { color: #f59e0b; }
+.value.purple { color: #8b5cf6; }
 
 .change {
-  font-size: 14px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .change.up { color: #10b981; }
 .change.down { color: #ef4444; }
 
-.chart-container, .info-card {
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+.chart-section, .info-card {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chart-section h2, .info-card h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1rem;
 }
 
 .info-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
 }
 
 .tour-list, .activity-list {
@@ -360,23 +381,30 @@ h2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tour-item:last-child, .activity-item:last-child {
+  border-bottom: none;
 }
 
 .tour-destination {
-  font-weight: 600;
-  color: #111827;
+  font-weight: 500;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
 }
 
 .tour-date {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: 1rem;
+  color: #64748b;
 }
 
 .tour-status {
-  font-size: 12px;
-  padding: 4px 8px;
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 9999px;
+  font-weight: 500;
 }
 
 .tour-status.approved {
@@ -393,14 +421,14 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
-  margin-right: 15px;
+  margin-right: 1rem;
 }
 
 .activity-icon.green { background-color: #d1fae5; color: #059669; }
-.activity-icon.blue { background-color: #dbeafe; color: #2563eb; }
+.activity-icon.blue { background-color: #dbeafe; color: #3b82f6; }
 .activity-icon.yellow { background-color: #fef3c7; color: #d97706; }
 .activity-icon.purple { background-color: #ede9fe; color: #7c3aed; }
 
@@ -409,20 +437,15 @@ h2 {
 }
 
 .activity-description {
-  font-size: 14px;
+  font-size: 1rem;
   font-weight: 500;
-  color: #111827;
+  color: #1e293b;
+
 }
 
 .activity-timestamp {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-@media (max-width: 768px) {
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
+  font-size: .75rem;
+  color: #64748b;
 }
 
 .chart-wrapper {
@@ -447,13 +470,13 @@ h2 {
 }
 
 .x-axis line, .y-axis line {
-  stroke: #e5e7eb;
+  stroke: #e2e8f0;
   stroke-width: 1;
 }
 
 .x-axis text, .y-axis text {
-  font-size: 12px;
-  fill: #6b7280;
+  font-size: 1rem;
+  fill: #64748b;
 }
 
 @keyframes drawLine {
@@ -467,5 +490,18 @@ h2 {
     opacity: 1;
   }
 }
-</style>
 
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: 1rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

@@ -1,273 +1,220 @@
 <template>
   <div class="package-manager">
-    <!-- Top Row -->
-    <div class="top-row">
-      <!-- Package Components -->
-      <div class="card package-components">
-        <h2>Package Components</h2>
-        
-        <!-- Tabs -->
-        <div class="tabs" role="tablist">
-          <button
-            v-for="tab in tabs"
-            :key="tab"
-            @click="currentTab = tab"
-            :class="{ active: currentTab === tab }"
-            role="tab"
-            :aria-selected="currentTab === tab"
-          >
-            {{ tab }}
-          </button>
-        </div>
-
-        <!-- Component List -->
-        <div class="scrollable-content component-list">
-          <div v-if="loading.components" class="loading-indicator">
-            <div class="loader" aria-hidden="true"></div>
-            <span class="sr-only">Loading components...</span>
-          </div>
-          <div v-else v-for="item in filteredComponents" :key="item.id" class="component-item">
-            <div class="component-info">
-              <div>
-                <label>{{ item.name }}</label>
-                <div class="price">Price: Php{{ item.price }}</div>
+    <div class="layout-container">
+      <!-- Top Row: Package Details and Package Template -->
+      <div class="top-row">
+        <!-- Package Details -->
+        <div class="card package-details">
+          <h2>Package Details</h2>
+          <div class="scrollable-content">
+            <div class="package-grid">
+              <!-- Basic Info Card -->
+              <div class="detail-card basic-info">
+                <h3>Basic Information</h3>
+                <div class="form-group">
+                  <label for="package-name">Package Name</label>
+                  <input 
+                    id="package-name"
+                    v-model="packageDetails.name"
+                    type="text" 
+                    placeholder="Enter package name" 
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="package-description">Description</label>
+                  <textarea 
+                    id="package-description"
+                    v-model="packageDetails.description"
+                    rows="3"
+                    placeholder="Enter package description"
+                  ></textarea>
+                </div>
               </div>
-            </div>
-            <div class="button-group">
-              <button v-if="showCheckboxes && !isComponentSelected(item)" class="select-button" @click="selectComponent(item)">
-                Select
-              </button>
-              <button v-if="showCheckboxes && isComponentSelected(item)" class="remove-button" @click="removeComponent(item)">
-                Remove
-              </button>
-              <button class="view-details" @click="viewDetails(item)">Details</button>
-            </div>
-          </div>
-        </div>
 
-        <div class="fixed-button">
-          <button @click="showAddComponentModal = true">Add New Component</button>
-        </div>
-      </div>
-
-      <!-- Package Templates -->
-      <div class="card package-templates">
-        <h2>Package Templates</h2>
-        
-        <div class="scrollable-content template-list">
-          <div v-if="loading.packages" class="loading-indicator">
-            <div class="loader" aria-hidden="true"></div>
-            <span class="sr-only">Loading packages...</span>
-          </div>
-          <div v-else v-for="pkg in packages" :key="pkg.id" class="template-item" @click="selectPackage(pkg)">
-            <div class="template-info">
-              <span>{{ pkg.name }}</span>
-              <button class="delete" @click.stop="confirmDeletePackage(pkg.id)" :disabled="loading.deleting === pkg.id">
-                <span v-if="loading.deleting === pkg.id" class="loader small" aria-hidden="true"></span>
-                <span v-else>Delete</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="fixed-button">
-          <button @click="createNewPackage">Create New Package</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom Row -->
-    <div class="bottom-row">
-      <!-- Package Details -->
-      <div class="card package-details">
-        <h2>Package Details</h2>
-        
-        <div class="scrollable-content">
-          <div class="form">
-            <div class="form-group">
-              <label for="package-name">Package Name</label>
-              <input 
-                id="package-name"
-                v-model="packageDetails.name"
-                type="text" 
-                placeholder="Package Name" 
-                required
-                :class="{ 'input-error': !packageDetails.name }"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="package-description">Description</label>
-              <textarea 
-                id="package-description"
-                v-model="packageDetails.description"
-                rows="4"
-              ></textarea>
-            </div>
-
-            <div class="form-group">
-              <label for="package-discount">Discount (%)</label>
-              <input 
-                id="package-discount"
-                v-model="packageDetails.discount"
-                type="number" 
-                placeholder="0"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="package-price">Custom Price</label>
-              <input 
-                id="package-price"
-                v-model="packageDetails.customPrice"
-                type="number" 
-                placeholder="Enter custom price"
-              />
-            </div>
-
-            <div class="form-group">
-              <label class="checkbox-label">
-                <input 
-                  v-model="packageDetails.useCustomPrice"
-                  type="checkbox"
-                />
-                Use Custom Price
-              </label>
-            </div>
-
-            <div class="form-group">
-              <label class="checkbox-label">
-                <input 
-                  v-model="packageDetails.includePackageOptions"
-                  type="checkbox"
-                />
-                Include Package Options
-              </label>
-            </div>
-
-            <div class="form-group">
-              <label for="package-image">Package Image</label>
-              <input 
-                id="package-image"
-                type="file" 
-                @change="handleFileUpload" 
-                accept="image/*"
-                ref="fileInput"
-              />
-              <div v-if="uploadProgress > 0 && uploadProgress < 100" class="progress-bar" role="progressbar" :aria-valuenow="uploadProgress" aria-valuemin="0" aria-valuemax="100">
-                <div :style="{ width: `${uploadProgress}%` }" class="progress"></div>
-              </div>
-              <img v-if="packageDetails.imageUrl" :src="packageDetails.imageUrl" alt="Package Image" class="preview-image" />
-            </div>
-
-            <div class="total-price">
-              Total Estimated Price: Php{{ displayedPrice }}
-            </div>
-
-            <div v-if="packageDetails.discount > 0" class="discounted-price">
-              Discounted Price: Php{{ discountedDisplayedPrice }}
-            </div>
-          </div>
-        </div>
-
-        <div class="fixed-bottom-buttons">
-          <div class="button-group">
-            <button class="cancel" @click="cancelPackageChanges">Cancel</button>
-            <button class="save" @click="savePackageChanges" :disabled="loading.saving">
-              <span v-if="loading.saving" class="loader small" aria-hidden="true"></span>
-              <span v-else>Save Changes</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Selected Components -->
-      <div class="card selected-components">
-        <h2>Selected Components</h2>
-        <div class="scrollable-content selected-list">
-          <div v-for="type in componentTypes" :key="type">
-            <h3>{{ type }}</h3>
-            <div v-for="component in getComponentsByType(type)" :key="component.id" class="selected-item">
-              <div>
-                <div class="component-name">{{ component.name }}</div>
-                <div class="price">Price: Php{{ component.price }}</div>
-              </div>
-              <button class="remove" @click="removeComponent(component)">Remove</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Package Options -->
-      <div class="card package-options">
-        <h2>Package Options</h2>
-        <div class="scrollable-content">
-          <div v-if="!creatingNewOption && !editingOption">
-            <div v-for="option in packageOptions" :key="option.id" class="package-option-item">
-              <div class="option-header">
-                <h3>{{ option.name }}</h3>
-                <div>
-                  <button 
-                    v-if="packageDetails.includePackageOptions" 
-                    @click.stop="toggleOptionSelection(option)" 
-                    :class="{ 'selected': isOptionSelected(option) }"
-                  >
-                    {{ isOptionSelected(option) ? 'Selected' : 'Select' }}
-                  </button>
-                  <button 
-                    v-else 
-                    @click.stop="deletePackageOption(option.id)" 
-                    class="delete-button"
-                  >
-                    Delete
+              <!-- Pricing Card -->
+              <div class="detail-card pricing">
+                <h3>Pricing</h3>
+                <div class="form-group">
+                  <label for="pricing-mode">Pricing Mode</label>
+                  <select id="pricing-mode" v-model="packageDetails.pricingMode">
+                    <option value="fixed">Fixed Price</option>
+                    <option value="options">Options-based Pricing</option>
+                  </select>
+                </div>
+                <div v-if="packageDetails.pricingMode === 'fixed'" class="form-group">
+                  <label for="fixed-price">Fixed Price (Php)</label>
+                  <input 
+                    id="fixed-price"
+                    v-model.number="packageDetails.fixedPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Enter fixed price"
+                  />
+                </div>
+                <div v-else>
+                  <div class="price-summary">
+                    <div class="base-price">
+                      Base Price (Sum of Components): Php{{ estimatedBasePrice }}
+                    </div>
+                    <div v-if="packageDetails.options.length > 0" class="option-info">
+                      {{ packageDetails.options.length }} pricing option(s) available
+                    </div>
+                    <div v-else class="no-options">
+                      No pricing options set. Add options to allow guest pricing selection.
+                    </div>
+                  </div>
+                  <button class="package-options-btn" @click="showPackageOptionsModal = true">
+                    <SettingsIcon class="icon" />
+                    Manage Pricing Options
                   </button>
                 </div>
               </div>
-              <div class="details-hint" @click="editPackageOption(option)">Click to view and edit details</div>
-            </div>
-          </div>
-          <div v-else class="package-option-form">
-            <div class="form-group">
-              <label for="package-option-name">Package Option Name</label>
-              <input 
-                id="package-option-name"
-                v-model="newPackageOption.name" 
-                type="text" 
-                placeholder="Package Option Name" 
-                class="form-input"
-              />
-            </div>
-            
-            <div class="form-group">
-              <label>Pricing Per Pax</label>
-              <div v-for="(price, index) in newPackageOption.pricing" :key="index" class="price-row">
-                <input 
-                  v-model="price.pax" 
-                  placeholder="Pax Range (e.g, 1-2)" 
-                  class="form-input"
-                />
-                <input 
-                  v-model.number="price.price" 
-                  type="number" 
-                  placeholder="Price Per Head" 
-                  class="form-input"
-                />
-                <button @click="removePricing(index)" class="remove-button">Remove</button>
+
+              <!-- Image Upload Card -->
+              <div class="detail-card image-upload">
+                <h3>Package Image</h3>
+                <div class="form-group">
+                  <label for="package-image">Upload Image</label>
+                  <input 
+                    id="package-image"
+                    type="file" 
+                    @change="handleFileUpload" 
+                    accept="image/*"
+                    ref="fileInput"
+                  />
+                  <div v-if="uploadProgress > 0 && uploadProgress < 100" class="progress-bar" role="progressbar" :aria-valuenow="uploadProgress" aria-valuemin="0" aria-valuemax="100">
+                    <div :style="{ width: `${uploadProgress}%` }" class="progress"></div>
+                  </div>
+                </div>
+                <div class="image-preview">
+                  <img v-if="packageDetails.imageUrl" :src="packageDetails.imageUrl" alt="Package Image" class="preview-image" />
+                  <div v-else class="no-image">No image uploaded</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="fixed-bottom-buttons">
-          <div v-if="!creatingNewOption && !editingOption">
-            <button @click="startCreatingNewOption" class="create-button">Create New Package Option</button>
-          </div>
-          <div v-else class="button-group">
-            <button @click="cancelPackageOptionChanges" class="cancel-button">Cancel</button>
-            <button @click="addPricing" class="add-button">Add Pricing Option</button>
-            <button @click="savePackageOption" class="save-button" :disabled="loading.saving">
-              <span v-if="loading.saving" class="loader small" aria-hidden="true"></span>
-              <span v-else>{{ editingOption ? 'Update' : 'Save' }}</span>
+
+          <div class="action-buttons">
+            <button class="cancel" @click="cancelPackageChanges">
+              <XIcon class="icon" />
+              Cancel
             </button>
+            <button class="save" @click="savePackageChanges" :disabled="loading.saving">
+              <span v-if="loading.saving" class="loader small" aria-hidden="true"></span>
+              <span v-else>
+                <SaveIcon class="icon" />
+                Save Changes
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Package Templates -->
+        <div class="card package-templates">
+          <h2>Package Templates</h2>
+          
+          <div class="scrollable-content template-list">
+            <div v-if="loading.packages" class="loading-indicator">
+              <div class="loader" aria-hidden="true"></div>
+              <span class="sr-only">Loading packages...</span>
+            </div>
+            <div v-else v-for="pkg in packages" :key="pkg.id" class="template-item" @click="selectPackage(pkg)">
+              <div class="template-info">
+                <span>{{ pkg.name }}</span>
+                <button class="delete" @click.stop="confirmDeletePackage(pkg.id)" :disabled="loading.deleting === pkg.id">
+                  <span v-if="loading.deleting === pkg.id" class="loader small" aria-hidden="true"></span>
+                  <span v-else>
+                    <TrashIcon class="icon" />
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="fixed-button">
+            <button @click="createNewPackage">
+              <PlusIcon class="icon" />
+              Create New Package
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row: Package Components and Selected Components -->
+      <div class="bottom-row">
+        <!-- Package Components -->
+        <div class="card package-components">
+          <h2>Package Components</h2>
+          
+          <!-- Tabs -->
+          <div class="tabs" role="tablist">
+            <button
+              v-for="tab in tabs"
+              :key="tab"
+              @click="currentTab = tab"
+              :class="{ active: currentTab === tab }"
+              role="tab"
+              :aria-selected="currentTab === tab"
+            >
+              {{ tab }}
+            </button>
+          </div>
+
+          <!-- Component List -->
+          <div class="scrollable-content component-list">
+            <div v-if="loading.components" class="loading-indicator">
+              <div class="loader" aria-hidden="true"></div>
+              <span class="sr-only">Loading components...</span>
+            </div>
+            <div v-else class="component-grid">
+              <div v-for="item in filteredComponents" :key="item.id" class="component-card">
+                <div class="component-actions">
+                  <button v-if="showCheckboxes && !isComponentSelected(item)" class="select-button" @click="selectComponent(item)">
+                    <PlusCircleIcon class="icon" />
+                  </button>
+                  <button v-if="showCheckboxes && isComponentSelected(item)" class="remove-button" @click="removeComponent(item)">
+                    <MinusCircleIcon class="icon" />
+                  </button>
+                  <button class="view-details" @click="viewDetails(item)">
+                    <EyeIcon class="icon" />
+                  </button>
+                </div>
+                <div class="component-info">
+                  <h3 class="component-name">{{ item.name }}</h3>
+                  <div class="price">Php{{ item.price }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fixed-button">
+            <button @click="showAddComponentModal = true">
+              <PlusIcon class="icon" />
+              Add New Component
+            </button>
+          </div>
+        </div>
+
+        <!-- Selected Components -->
+        <div class="card selected-components">
+          <h2>Selected Components</h2>
+          <div class="scrollable-content selected-list">
+            <div v-for="type in componentTypes" :key="type" class="selected-type">
+              <h3 class="type-title">{{ type }}</h3>
+              <div class="selected-items">
+                <div v-for="component in getComponentsByType(type)" :key="component.id" class="selected-item">
+                  <div class="selected-info">
+                    <div class="component-name">{{ component.name }}</div>
+                    <div class="price">Php{{ component.price }}</div>
+                  </div>
+                  <button class="remove" @click="removeComponent(component)">
+                    <XCircleIcon class="icon" />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -296,10 +243,16 @@
           </select>
         </div>
         <div class="button-group">
-          <button @click="closeModal('addComponent')">Cancel</button>
+          <button @click="closeModal('addComponent')">
+            <XIcon class="icon" />
+            Cancel
+          </button>
           <button @click="addComponent" :disabled="loading.adding">
             <span v-if="loading.adding" class="loader small" aria-hidden="true"></span>
-            <span v-else>Add Component</span>
+            <span v-else>
+              <PlusIcon class="icon" />
+              Add Component
+            </span>
           </button>
         </div>
       </div>
@@ -330,13 +283,50 @@
         <div class="button-group">
           <button @click="saveComponentDetails" :disabled="loading.saving">
             <span v-if="loading.saving" class="loader small" aria-hidden="true"></span>
-            <span v-else>Update</span>
+            <span v-else>
+              <SaveIcon class="icon" />
+              Update
+            </span>
           </button>
           <button @click="deleteComponent" :disabled="loading.deleting">
             <span v-if="loading.deleting" class="loader small" aria-hidden="true"></span>
-            <span v-else>Delete</span>
+            <span v-else>
+              <TrashIcon class="icon" />
+              Delete
+            </span>
           </button>
-          <button @click="closeModal('viewDetails')">Close</button>
+          <button @click="closeModal('viewDetails')">
+            <XIcon class="icon" />
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Package Options Modal -->
+    <div v-if="showPackageOptionsModal" class="modal" role="dialog" aria-labelledby="package-options-title">
+      <div class="modal-content">
+        <h2 id="package-options-title">Manage Pricing Options</h2>
+        <div class="package-options-list">
+          <div v-for="option in packageOptions" :key="option.id" class="package-option-item">
+            <div class="option-info">
+              <div class="option-name">{{ option.name }}</div>
+              <div class="option-price">Price Range: ₱{{ getLowestOptionPrice(option) }} - ₱{{ getHighestOptionPrice(option) }}</div>
+            </div>
+            <button 
+              class="toggle-option-btn" 
+              @click="toggleOptionInPackage(option)"
+              :class="{ 'added': isOptionInPackage(option.id) }"
+            >
+              {{ isOptionInPackage(option.id) ? 'Remove' : 'Add' }}
+            </button>
+          </div>
+        </div>
+        <div class="button-group">
+          <button @click="closePackageOptionsModal">
+            <XIcon class="icon" />
+            Close
+          </button>
         </div>
       </div>
     </div>
@@ -344,10 +334,21 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { db, storage } from '../firebaseConfig';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { 
+  XIcon, 
+  SaveIcon, 
+  TrashIcon, 
+  PlusIcon, 
+  PlusCircleIcon, 
+  MinusCircleIcon, 
+  EyeIcon, 
+  XCircleIcon,
+  SettingsIcon
+} from 'lucide-vue-next';
 
 // Firestore collections
 const componentsCollection = collection(db, 'components');
@@ -367,44 +368,24 @@ const packageOptions = ref([]);
 // Modal controls and temporary storage
 const showAddComponentModal = ref(false);
 const showViewDetailsModal = ref(false);
+const showPackageOptionsModal = ref(false);
 const selectedComponentDetails = ref({});
 const newComponent = ref({ name: '', price: 0, type: 'Accommodations', description: '' });
 const packageDetails = ref({ 
   id: null, 
   name: '', 
   description: '', 
-  discount: 0, 
   components: [], 
-  includePackageOptions: false,
-  selectedOptions: [],
   imageUrl: '',
-  customPrice: null,
-  useCustomPrice: false
-});
-
-// Package options
-const packageOptionsData = ref({
-  paymentTerms: 'full',
-  terms: ''
-});
-
-// New package option
-const creatingNewOption = ref(false);
-const editingOption = ref(false);
-const newPackageOption = ref({
-  id: null,
-  name: '',
-  pricing: [
-    { pax: '1-2', price: 0 },
-    { pax: '3-4', price: 0 },
-  ],
+  options: [],
+  pricingMode: 'fixed',
+  fixedPrice: 0
 });
 
 // Loading states
 const loading = ref({
   components: false,
   packages: false,
-  packageOptions: false,
   saving: false,
   deleting: null,
   adding: false
@@ -415,10 +396,10 @@ const uploadProgress = ref(0);
 const fileInput = ref(null);
 
 // Fetch data on mount
-onMounted(() => {
-  fetchComponents();
-  fetchPackages();
-  fetchPackageOptions();
+onMounted(async () => {
+  await fetchComponents();
+  await fetchPackages();
+  await fetchPackageOptions();
 });
 
 // Fetch functions
@@ -447,14 +428,14 @@ const fetchPackages = async () => {
 };
 
 const fetchPackageOptions = async () => {
-  loading.value.packageOptions = true;
   try {
     const snapshot = await getDocs(packageOptionsCollection);
-    packageOptions.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    packageOptions.value = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
   } catch (error) {
     console.error("Error fetching package options:", error);
-  } finally {
-    loading.value.packageOptions = false;
   }
 };
 
@@ -464,17 +445,14 @@ const clearPackageDetails = () => {
     id: null, 
     name: '', 
     description: '', 
-    discount: 0, 
     components: [], 
-    includePackageOptions: false,
-    selectedOptions: [],
     imageUrl: '',
-    customPrice: null,
-    useCustomPrice: false
+    options: [],
+    pricingMode: 'fixed',
+    fixedPrice: 0
   };
   components.value.forEach(component => (component.selected = false));
   showCheckboxes.value = false;
-  packageOptionsData.value = { paymentTerms: 'full', terms: '' };
   resetFileInput();
 };
 
@@ -492,13 +470,11 @@ const selectPackage = async (pkg) => {
     id: pkg.id,
     name: pkg.name,
     description: pkg.description,
-    discount: pkg.discount,
     components: pkg.components || [],
-    includePackageOptions: pkg.includePackageOptions || false,
-    selectedOptions: pkg.selectedOptions || [],
     imageUrl: pkg.imageUrl || '',
-    customPrice: pkg.customPrice || null,
-    useCustomPrice: pkg.useCustomPrice || false
+    options: pkg.options || [],
+    pricingMode: pkg.pricingMode || 'fixed',
+    fixedPrice: pkg.fixedPrice || 0
   };
 
   components.value.forEach((component) => {
@@ -519,23 +495,12 @@ const savePackageChanges = async () => {
     const newPackage = {
       name: packageDetails.value.name,
       description: packageDetails.value.description,
-      discount: packageDetails.value.discount,
       components: packageDetails.value.components,
-      paymentTerms: packageOptionsData.value.paymentTerms,
-      terms: packageOptionsData.value.terms,
-      includePackageOptions: packageDetails.value.includePackageOptions,
-      selectedOptions: packageDetails.value.selectedOptions,
       imageUrl: packageDetails.value.imageUrl,
-      customPrice: packageDetails.value.customPrice,
-      useCustomPrice: packageDetails.value.useCustomPrice,
-      estimatedPrice: Number(totalPrice.value)
+      options: packageDetails.value.options,
+      pricingMode: packageDetails.value.pricingMode,
+      fixedPrice: packageDetails.value.fixedPrice
     };
-    
-    if (!newPackage.useCustomPrice || newPackage.customPrice === null) {
-      newPackage.price = newPackage.estimatedPrice;
-    } else {
-      newPackage.price = Number(newPackage.customPrice);
-    }
 
     if (packageDetails.value.id) {
       const packageRef = doc(db, 'packages', packageDetails.value.id);
@@ -582,13 +547,17 @@ const selectComponent = (item) => {
   packageDetails.value.components.push({
     id: item.id,
     name: item.name,
-    type: item.type
+    type: item.type,
+    price: item.price
   });
 };
 
 const removeComponent = (component) => {
   packageDetails.value.components = packageDetails.value.components.filter(c => c.id !== component.id);
-  components.value.find(c => c.id === component.id).selected = false;
+  const componentToUpdate = components.value.find(c => c.id === component.id);
+  if (componentToUpdate) {
+    componentToUpdate.selected = false;
+  }
 };
 
 const isComponentSelected = (component) => {
@@ -640,97 +609,6 @@ const deleteComponent = async () => {
   }
 };
 
-// Package option functions
-const toggleOptionSelection = (option) => {
-  const index = packageDetails.value.selectedOptions.findIndex(o => o.id === option.id);
-  if (index !== -1) {
-    packageDetails.value.selectedOptions.splice(index, 1);
-  } else {
-    packageDetails.value.selectedOptions.push(option);
-  }
-};
-
-const isOptionSelected = (option) => {
-  return packageDetails.value.selectedOptions.some(o => o.id === option.id);
-};
-
-const startCreatingNewOption = () => {
-  creatingNewOption.value = true;
-  editingOption.value = false;
-  resetNewPackageOption();
-};
-
-const cancelPackageOptionChanges = () => {
-  creatingNewOption.value = false;
-  editingOption.value = false;
-  resetNewPackageOption();
-};
-
-const resetNewPackageOption = () => {
-  newPackageOption.value = {
-    id: null,
-    name: '',
-    pricing: [
-      { pax: '1-2', price: 0 },
-      { pax: '3-4', price: 0 },
-    ],
-  };
-};
-
-const addPricing = () => {
-  newPackageOption.value.pricing.push({ pax: '', price: 0 });
-};
-
-const removePricing = (index) => {
-  newPackageOption.value.pricing.splice(index, 1);
-};
-
-const savePackageOption = async () => {
-  if (!newPackageOption.value.name) {
-    alert('Package option name is required');
-    return;
-  }
-
-  loading.value.saving = true;
-  try {
-    if (editingOption.value) {
-      const optionRef = doc(db, 'packageOptions', newPackageOption.value.id);
-      await updateDoc(optionRef, newPackageOption.value);
-      const index = packageOptions.value.findIndex(o => o.id === newPackageOption.value.id);
-      if (index !== -1) {
-        packageOptions.value[index] = { ...newPackageOption.value };
-      }
-    } else {
-      const docRef = await addDoc(collection(db, 'packageOptions'), newPackageOption.value);
-      packageOptions.value.push({ ...newPackageOption.value, id: docRef.id });
-    }
-    cancelPackageOptionChanges();
-  } catch (error) {
-    console.error("Error saving package option:", error);
-    alert('An error occurred while saving the package option. Please try again.');
-  } finally {
-    loading.value.saving = false;
-  }
-};
-
-const editPackageOption = (option) => {
-  newPackageOption.value = JSON.parse(JSON.stringify(option));
-  editingOption.value = true;
-  creatingNewOption.value = false;
-};
-
-const deletePackageOption = async (id) => {
-  if (confirm('Are you sure you want to delete this package option?')) {
-    try {
-      await deleteDoc(doc(db, 'packageOptions', id));
-      packageOptions.value = packageOptions.value.filter(option => option.id !== id);
-    } catch (error) {
-      console.error("Error deleting package option:", error);
-      alert('An error occurred while deleting the package option. Please try again.');
-    }
-  }
-};
-
 // File upload functions
 const handleFileUpload = async (event) => {
   const file = event.target.files[0];
@@ -769,33 +647,42 @@ const resetFileInput = () => {
   uploadProgress.value = 0;
 };
 
+// Package options functions
+const getLowestOptionPrice = (option) => {
+  const prices = option.pricing.map(p => Number(p.pricePerHead)).filter(p => !isNaN(p));
+  return prices.length > 0 ? Math.min(...prices).toFixed(2) : '0.00';
+};
+
+const getHighestOptionPrice = (option) => {
+  const prices = option.pricing.map(p => Number(p.pricePerHead)).filter(p => !isNaN(p));
+  return prices.length > 0 ? Math.max(...prices).toFixed(2) : '0.00';
+};
+
+const toggleOptionInPackage = (option) => {
+  const index = packageDetails.value.options.findIndex(o => o.id === option.id);
+  if (index === -1) {
+    packageDetails.value.options.push({
+      id: option.id,
+      name: option.name,
+      pricing: option.pricing
+    });
+  } else {
+    packageDetails.value.options.splice(index, 1);
+  }
+};
+
+const closePackageOptionsModal = () => {
+  showPackageOptionsModal.value = false;
+};
+
 // Computed properties
+const estimatedBasePrice = computed(() => {
+  return packageDetails.value.components.reduce((sum, component) => sum + (component.price || 0), 0).toFixed(2);
+});
+
 const filteredComponents = computed(() =>
   components.value.filter(component => component.type === currentTab.value)
 );
-
-const totalPrice = computed(() => {
-  const subtotal = packageDetails.value.components.reduce((sum, component) => {
-    const fullComponent = components.value.find(c => c.id === component.id);
-    return sum + (fullComponent ? fullComponent.price : 0);
-  }, 0);
-  return subtotal.toFixed(2);
-});
-
-const displayedPrice = computed(() => {
-  if (packageDetails.value.useCustomPrice && packageDetails.value.customPrice !== null) {
-    return Number(packageDetails.value.customPrice).toFixed(2);
-  }
-  return totalPrice.value;
-});
-
-const discountedDisplayedPrice = computed(() => {
-  const price = packageDetails.value.useCustomPrice && packageDetails.value.customPrice !== null
-    ? Number(packageDetails.value.customPrice)
-    : Number(totalPrice.value);
-  const discountFactor = (100 - packageDetails.value.discount) / 100;
-  return (price * discountFactor).toFixed(2);
-});
 
 const componentTypes = computed(() => {
   return [...new Set(packageDetails.value.components.map(c => c.type))];
@@ -830,116 +717,105 @@ const getComponentsByType = (type) => {
   return packageDetails.value.components.filter(c => c.type === type);
 };
 
-// Watch effect
-watch(() => packageDetails.value.includePackageOptions, (newValue) => {
-  if (!newValue) {
-    packageDetails.value.selectedOptions = [];
-  }
-});
+const isOptionInPackage = (optionId) => {
+  return packageDetails.value.options.some(o => o.id === optionId);
+};
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 .package-manager {
-  padding: 15px;
-  font-family: Arial, sans-serif;
+  padding: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+}
+
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .top-row, .bottom-row {
   display: flex;
-  gap: 15px;
-  margin-bottom: 22px;
-}
-
-.bottom-row {
-  width: 100%;
-  justify-content: space-between;
+  gap: 10px;
 }
 
 .card {
   border: 1px solid #e0e0e0;
-  border-radius: 16px;
+  border-radius: 8px;
   background-color: white;
-  padding: 20px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  height: 450px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.package-details, .package-templates {
+  flex: 1;
+  height: 400px;
 }
 
 .package-components {
-  flex: 1;
-}
-
-.package-templates {
-  width: 400px;
-}
-
-.package-details {
-  width: 35%;
-  display: flex;
-  flex-direction: column;
+  flex: 3;
+  height: 350px;
 }
 
 .selected-components {
-  width: 25%;
-}
-
-.selected-components .scrollable-content {
-  max-height: 350px;
-  overflow-y: auto;
-}
-
-.package-options {
-  width: 40%;
+  flex: 2;
+  height: 350px;
 }
 
 h2 {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: bold;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .tabs {
   display: flex;
-  background-color: #b0a9a9;
-  border-radius: 5px;
+  background-color: #f0f7f4;
+  border-radius: 4px;
   padding: 2px;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
 }
 
 .tabs button {
+  font-family: 'Poppins', sans-serif;
   flex: 1 0 auto;
-  padding: 5px 16px;
-  font-size: 14px;
+  padding: 4px 8px;
+  font-size: 11px;
   border: none;
   background: none;
-  border-radius: 4px;
+  border-radius: 2px;
   cursor: pointer;
   transition: background-color 0.3s, box-shadow 0.3s;
   white-space: nowrap;
-  margin: 2px;
+  margin: 1px;
 }
 
 .tabs button.active {
   background-color: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .scrollable-content {
   flex-grow: 1;
   overflow-y: auto;
-  margin-bottom: 13px;
+  margin-bottom: 10px;
   scrollbar-width: thin;
 }
 
 .package-details .scrollable-content {
-  padding-right: 10px;
+  padding-right: 5px;
 }
 
 .component-list, .template-list, .selected-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
 }
 
 .component-item, .selected-item, .template-item {
@@ -951,23 +827,26 @@ h2 {
 .component-info {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
 }
 
 .price {
-  font-size: 14px;
-  color: #666;
+  font-size: 9px;
 }
 
 button {
-  padding: 10px 16px;
-  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+  padding: 4px 8px;
+  font-size: 10px;
   font-weight: 500;
   border: 1px solid #e0e0e0;
   background-color: white;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 button:hover {
@@ -980,14 +859,16 @@ button:hover {
 
 .fixed-button button {
   width: 100%;
-  padding: 10px 24px;
-  background-color: #f0f0f0;
+  padding: 6px 12px;
+  background-color: #0a8d88;
+  color: white;
+  justify-content: center;
 }
 
 .template-item {
-  padding: 16px;
+  padding: 8px;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
 }
 
@@ -1003,37 +884,41 @@ button:hover {
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 label {
   display: block;
-  font-size: 14px;
-  margin-bottom: 8px;
+  font-size: 11px;
+  margin-bottom: 4px;
 }
 
 input, textarea, select {
   width: 95%;
-  padding: 8px;
+  padding: 4px;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 12px;
+  border-radius: 4px;
+  font-size: 11px;
 }
 
 textarea {
   resize: vertical;
 }
 
-.total-price, .discounted-price {
-  font-size: 14px;
+.base-price, .option-info, .no-options {
+  font-size: 12px;
   font-weight: bold;
-  margin-top: 16px;
+  margin-top: 4px;
+}
+
+.option-info, .no-options {
+  color: #0a8d88;
 }
 
 .button-group {
   display: flex;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 5px;
+  margin-top: 8px;
 }
 
 .button-group button {
@@ -1045,7 +930,9 @@ textarea {
 }
 
 .component-name {
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 10px;
+  margin-bottom: 2px;
 }
 
 .modal {
@@ -1056,7 +943,7 @@ textarea {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1064,14 +951,15 @@ textarea {
 
 .modal-content {
   background-color: #fefefe;
-  padding: 25px;
+  padding: 15px;
   border: 1px solid #888;
   width: 80%;
-  max-width: 500px;
-  border-radius: 8px;
+  max-width: 400px;
+  border-radius: 4px;
 }
 
 .delete {
+  padding: 6px 12px;
   background-color: #ff4d4f;
   color: white;
 }
@@ -1084,27 +972,27 @@ textarea {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100px;
-  font-size: 14px;
+  height: 50px;
+  font-size: 12px;
   color: #666;
 }
 
 .loader {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #3498db;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   animation: spin 1s linear infinite;
   display: inline-block;
-  margin-right: 10px;
+  margin-right: 5px;
 }
 
 .loader.small {
-  width: 12px;
-  height: 12px;
-  border-width: 2px;
-  margin-right: 5px;
+  width: 10px;
+  height: 10px;
+  border-width: 1px;
+  margin-right: 3px;
 }
 
 @keyframes spin {
@@ -1117,136 +1005,246 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.package-option-item {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-  cursor: pointer;
-}
-
-.package-option-item:hover {
-  background-color: #f0f0f0;
-}
-
-.package-option-item h3 {
-  margin-top: 0;
-  margin-bottom: 8px;
-}
-
-.package-option-form {
-  padding: 20px;
-  border-radius: 8px;
-  background-color: white;
-}
-
-.price-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-  align-items: center;
-}
-
-.form-input {
-  padding: 8px 12px;
-  border: 1px solid #e0e0e0;
+.preview-image {
+  max-width: 100%;
+  max-height: 100px;
+  object-fit: cover;
   border-radius: 4px;
-  font-size: 14px;
+  margin-top: 5px;
 }
 
-.option-header {
+.package-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.detail-card {
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.detail-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.basic-info, .pricing {
+  grid-column: span 2;
+}
+
+.image-upload {
+  height: 150px;
+}
+
+.image-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.no-image {
+  color: #999;
+  font-size: 11px;
+}
+
+.price-summary {
+  background-color: #e6f7ff;
+  border-radius: 4px;
+  padding: 6px;
+  margin-top: 6px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.action-buttons button {
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+.cancel {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.save {
+  background-color: #0a8d88;
+  color: white;
+}
+
+.save:hover {
+  background-color: #077c77;
+}
+
+.component-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.component-card {
+  position: relative;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100px;
+}
+
+.component-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.component-actions {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  gap: 4px;
+}
+
+.component-actions button {
+  padding: 2px;
+  font-size: 8px;
+}
+
+.component-actions .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.selected-type {
+  margin-bottom: 10px;
+}
+
+.type-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.selected-items {
+  display: grid;
+  gap: 6px;
+}
+
+.selected-item {
+  background-color: #f0f7ff;
+  border-radius: 4px;
+  padding: 6px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.create-button, .cancel-button, .add-button, .save-button, .delete-button {
-  padding: 10px 16px;
-  font-size: 12px;
+.selected-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.selected-item .remove {
+  padding: 3px 6px;
+  font-size: 10px;
+}
+
+.icon {
+  width: 14px;
+  height: 14px;
+}
+
+.package-options-btn {
+  margin-top: 10px;
+  background-color: #1890ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.package-options-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.package-option-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.option-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.option-name {
   font-weight: 500;
-  border: 1px solid #e0e0e0;
-  background-color: white;
-  border-radius: 8px;
+}
+
+.option-price {
+  font-size: 12px;
+  color: #0a8d88;
+}
+
+.toggle-option-btn {
+  padding: 4px 8px;
+  background-color: #0a8d88;
+  color: white;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
-.create-button:hover, .cancel-button:hover, .add-button:hover, .save-button:hover, .delete-button:hover {
-  background-color: #f0f0f0;
-}
-
-.button-group {
-  display: flex;
-  gap: 8px;
-}
-
-.button-group button {
-  flex: 1;
-}
-
-.fixed-bottom-buttons {
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid #e0e0e0;
-}
-
-.delete-button {
+.toggle-option-btn.added {
   background-color: #ff4d4f;
-  color: white;
 }
 
-.delete-button:hover {
-  background-color: #ff7875;
+.toggle-option-btn:hover {
+  opacity: 0.9;
 }
 
-.details-hint {
-  font-size: 12px;
-  color: #999;
-  margin-top: -13px;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  margin-right: 8px;
-  width: auto;
-}
-
-.preview-image {
-  max-width: 100%;
-  max-height: 200px;
-  margin-top: 10px;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 10px;
-  background-color: #e0e0e0;
-  border-radius: 5px;
-  margin-top: 10px;
-}
-
-.progress {
-  height: 100%;
-  background-color: #4caf50;
-  border-radius: 5px;
-  transition: width 0.3s ease;
-}
-
-.package-image-container {
-  margin-top: 20px;
-  text-align: center;
-}
-
-.package-image {
-  max-width: 100%;
-  max-height: 200px;
-  border-radius: 8px;
+@media (max-width: 768px) {
+  .top-row, .bottom-row {
+    flex-direction: column;
+  }
+  
+  .package-details,
+  .package-templates,
+  .package-components,
+  .selected-components {
+    width: 100%;
+  }
+  
+  .package-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .basic-info, .pricing {
+    grid-column: span 1;
+  }
 }
 </style>
 

@@ -1,175 +1,178 @@
 <template>
+  <h1 class="section-title">Hotel Management</h1>
   <div class="hotel-management">
-    <!-- Main Panel -->
-    <div class="main-panel">
+
       <div class="header">
-        <h2>Hotel Management</h2>
         <div class="search-container">
           <input v-model="searchTerm" type="text" placeholder="Search hotels..." class="search-input">
+          <SearchIcon class="search-icon" />
         </div>
-      </div>
-
-      <div class="hotel-list">
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 5%;">ID</th>
-              <th style="width: 30%;">Hotel Name</th>
-              <th style="width: 30%;">Location</th>
-              <th style="width: 20%;">Contact</th>
-              <th style="width: 15%;">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="isLoading">
-              <td colspan="5" class="text-center">
-                <div class="loading-spinner"></div>
-                Loading...
-              </td>
-            </tr>
-            <tr v-else v-for="(hotel, index) in filteredHotels" :key="hotel.id" @click="selectHotel(hotel)">
-              <td>{{ index + 1 }}</td>
-              <td>{{ hotel.name }}</td>
-              <td>{{ hotel.location }}</td>
-              <td>{{ hotel.phone }}</td>
-              <td class="actions">
-                <button class="edit-btn" @click.stop="editHotel(hotel)" :disabled="isLoading">
-                  <span v-if="isLoading && loadingHotel === hotel.id" class="loading-spinner small"></span>
-                  <span v-else>Edit</span>
-                </button>
-                <button class="delete-btn" @click.stop="deleteHotel(hotel.id)" :disabled="isLoading">
-                  <span v-if="isLoading && loadingHotel === hotel.id" class="loading-spinner small"></span>
-                  <span v-else>Delete</span>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="add-hotel-container">
         <button @click="openAddHotelModal" class="add-btn" :disabled="isLoading">
-          <span v-if="isLoading && !loadingHotel" class="loading-spinner small"></span>
-          <span v-else>Add New Hotel</span>
+          <PlusIcon v-if="!isLoading" />
+          <LoaderIcon v-else class="spin" />
+          Add New Hotel
         </button>
       </div>
-    </div>
 
-    <!-- Side Panel -->
-    <div v-if="selectedHotel" class="side-panel" :class="{ 'active': selectedHotel }">
-      <div class="panel-header">
-        <h2>{{ selectedHotel.name }}</h2>
-        <button class="close-btn" @click="closePanel">×</button>
-      </div>
-
-      <div class="panel-content">
-        <img :src="selectedHotel.profilePicture" alt="Hotel Profile" class="profile-picture">
-        <p class="description">{{ selectedHotel.description }}</p>
-
-        <div class="section">
-          <h3>Gallery</h3>
-          <div class="gallery-grid">
-            <img v-for="(image, index) in selectedHotel.images" 
-                 :key="index" 
-                 :src="image" 
-                 :alt="`${selectedHotel.name} - Image ${index + 1}`"
-            />
+      <div class="hotel-list" v-if="!isLoading">
+        <div v-for="(hotel, index) in filteredHotels" :key="hotel.id" class="hotel-card" @click="selectHotel(hotel)">
+          <img :src="hotel.profilePicture" :alt="hotel.name" class="hotel-image">
+          <div class="hotel-info">
+            <h3>{{ hotel.name }}</h3>
+            <p>{{ hotel.location }}</p>
+            <p>{{ hotel.phone }}</p>
           </div>
-        </div>
-
-        <div class="section">
-          <h3>Contact Information</h3>
-          <p>📞 {{ selectedHotel.phone }}</p>
-          <p>✉️ {{ selectedHotel.email }}</p>
-          <p>🌐 {{ selectedHotel.website }}</p>
-        </div>
-
-        <div class="section">
-          <h3>Amenities</h3>
-          <ul class="amenities-list">
-            <li v-for="amenity in selectedHotel.amenities" :key="amenity">
-              ✓ {{ amenity }}
-            </li>
-          </ul>
-        </div>
-
-        <div class="section">
-          <h3>Available Rooms</h3>
-          <ul class="rooms-list">
-            <li v-for="room in selectedHotel.rooms" :key="room.type">
-              {{ room.type }} ({{ room.capacity }}) - ${{ room.price }} per night
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- Add/Edit Modal -->
-    <div v-if="showModal" class="modal">
-      <div class="modal-content">
-        <h2>{{ isEditing ? 'Edit Hotel' : 'Add New Hotel' }}</h2>
-        <button @click="closeModal" class="modal-close-btn">&times;</button>
-        <form @submit.prevent="saveHotel">
-          <div class="form-group">
-            <label>Profile Picture</label>
-            <input type="file" @change="handleProfilePicture" accept="image/*">
-            <img v-if="profilePreview" :src="profilePreview" alt="Profile Preview" class="image-preview">
-          </div>
-          <div class="form-group">
-            <label>Hotel Name</label>
-            <input v-model="currentHotel.name" required>
-          </div>
-
-          <div class="form-group">
-            <label>Description</label>
-            <textarea v-model="currentHotel.description" required></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Location</label>
-            <input v-model="currentHotel.location" required>
-          </div>
-
-          <div class="form-group">
-            <label>Contact Information</label>
-            <input v-model="currentHotel.phone" placeholder="Phone">
-            <input v-model="currentHotel.email" placeholder="Email">
-            <input v-model="currentHotel.website" placeholder="Website">
-          </div>
-
-          <div class="form-group">
-            <label>Gallery Images</label>
-            <input type="file" @change="handleGalleryImages" accept="image/*" multiple>
-            <div class="gallery-preview">
-              <img v-for="(image, index) in galleryPreviews" :key="index" :src="image" alt="Gallery Preview" class="image-preview">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Amenities (comma-separated)</label>
-            <input v-model="amenitiesList" placeholder="WiFi, Pool, etc.">
-          </div>
-
-          <div class="form-group">
-            <label>Rooms</label>
-            <div v-for="(room, index) in currentHotel.rooms" :key="index" class="room-input">
-              <input v-model="room.type" placeholder="Room Type">
-              <input v-model="room.capacity" placeholder="Capacity">
-              <input v-model="room.price" type="number" placeholder="Price per night" step="0.01">
-              <button type="button" @click="removeRoom(index)">Remove</button>
-            </div>
-            <button type="button" @click="addRoom">Add Room</button>
-          </div>
-
-          <div class="modal-buttons">
-            <button type="button" @click="closeModal">Cancel</button>
-            <button type="submit" :disabled="isLoading">
-              <span v-if="isLoading" class="loading-spinner small"></span>
-              <span v-else>{{ isEditing ? 'Update' : 'Add' }} Hotel</span>
+          <div class="hotel-actions">
+            <button class="edit-btn" @click.stop="editHotel(hotel)">
+              <EditIcon />
+            </button>
+            <button class="delete-btn" @click.stop="deleteHotel(hotel.id)">
+              <TrashIcon />
             </button>
           </div>
-        </form>
+        </div>
       </div>
-    </div>
+      
+      <div v-else class="loading">
+        <LoaderIcon class="spin" />
+        <p>Loading hotels...</p>
+      </div>
+   
+
+    <!-- Side Panel -->
+    <transition name="slide">
+      <div v-if="selectedHotel" class="side-panel">
+        <div class="panel-header">
+          <h2>{{ selectedHotel.name }}</h2>
+          <button class="close-btn" @click="closePanel">
+            <XIcon />
+          </button>
+        </div>
+
+        <div class="panel-content">
+          <img :src="selectedHotel.profilePicture" :alt="selectedHotel.name" class="profile-picture">
+          <p class="description">{{ selectedHotel.description }}</p>
+
+          <div class="section">
+            <h3>Gallery</h3>
+            <div class="gallery-grid">
+              <img v-for="(image, index) in selectedHotel.images" 
+                   :key="index" 
+                   :src="image" 
+                   :alt="`${selectedHotel.name} - Image ${index + 1}`"
+              />
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>Contact Information</h3>
+            <p><PhoneIcon /> {{ selectedHotel.phone }}</p>
+            <p><MailIcon /> {{ selectedHotel.email }}</p>
+            <p><GlobeIcon /> {{ selectedHotel.website }}</p>
+          </div>
+
+          <div class="section">
+            <h3>Amenities</h3>
+            <ul class="amenities-list">
+              <li v-for="amenity in selectedHotel.amenities" :key="amenity">
+                <CheckIcon /> {{ amenity }}
+              </li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>Available Rooms</h3>
+            <ul class="rooms-list">
+              <li v-for="room in selectedHotel.rooms" :key="room.type">
+                <BedDoubleIcon /> {{ room.type }} ({{ room.capacity }}) - ${{ room.price }} per night
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Add/Edit Modal -->
+    <transition name="fade">
+      <div v-if="showModal" class="modal">
+        <div class="modal-content">
+          <h2>{{ isEditing ? 'Edit Hotel' : 'Add New Hotel' }}</h2>
+          <button @click="closeModal" class="modal-close-btn">
+            <XIcon />
+          </button>
+          <form @submit.prevent="saveHotel">
+            <div class="form-group">
+              <label>Profile Picture</label>
+              <div class="file-input">
+                <input type="file" @change="handleProfilePicture" accept="image/*" id="profile-picture">
+                <label for="profile-picture">
+                  <UploadCloudIcon />
+                  Choose File
+                </label>
+              </div>
+              <img v-if="profilePreview" :src="profilePreview" alt="Profile Preview" class="image-preview">
+            </div>
+            <div class="form-group">
+              <label>Hotel Name</label>
+              <input v-model="currentHotel.name" required>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea v-model="currentHotel.description" required></textarea>
+            </div>
+            <div class="form-group">
+              <label>Location</label>
+              <input v-model="currentHotel.location" required>
+            </div>
+            <div class="form-group">
+              <label>Contact Information</label>
+              <input v-model="currentHotel.phone" placeholder="Phone">
+              <input v-model="currentHotel.email" placeholder="Email">
+              <input v-model="currentHotel.website" placeholder="Website">
+            </div>
+            <div class="form-group">
+              <label>Gallery Images</label>
+              <div class="file-input">
+                <input type="file" @change="handleGalleryImages" accept="image/*" multiple id="gallery-images">
+                <label for="gallery-images">
+                  <UploadCloudIcon />
+                  Choose Files
+                </label>
+              </div>
+              <div class="gallery-preview">
+                <img v-for="(image, index) in galleryPreviews" :key="index" :src="image" alt="Gallery Preview" class="image-preview">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Amenities (comma-separated)</label>
+              <input v-model="amenitiesList" placeholder="WiFi, Pool, etc.">
+            </div>
+            <div class="form-group">
+              <label>Rooms</label>
+              <div v-for="(room, index) in currentHotel.rooms" :key="index" class="room-input">
+                <input v-model="room.type" placeholder="Room Type">
+                <input v-model="room.capacity" placeholder="Capacity">
+                <input v-model="room.price" type="number" placeholder="Price per night" step="0.01">
+                <button type="button" @click="removeRoom(index)" class="remove-room-btn">
+                  <MinusIcon />
+                </button>
+              </div>
+              <button type="button" @click="addRoom" class="add-room-btn">
+                <PlusIcon />
+                Add Room
+              </button>
+            </div>
+            <div class="modal-buttons">
+              <button type="button" @click="closeModal" class="cancel-btn">Cancel</button>
+              <button type="submit" :disabled="isLoading" class="save-btn">
+                <LoaderIcon v-if="isLoading" class="spin" />
+                <span v-else>{{ isEditing ? 'Update' : 'Add' }} Hotel</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -178,13 +181,27 @@ import { ref, computed, onMounted } from 'vue'
 import { db, storage } from '../firebaseConfig.js'
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { 
+  SearchIcon, 
+  PlusIcon, 
+  EditIcon, 
+  TrashIcon, 
+  XIcon, 
+  PhoneIcon, 
+  MailIcon, 
+  GlobeIcon, 
+  CheckIcon, 
+  BedDoubleIcon, 
+  UploadCloudIcon,
+  MinusIcon,
+  LoaderIcon
+} from 'lucide-vue-next'
 
 const hotels = ref([])
 const selectedHotel = ref(null)
 const showModal = ref(false)
 const isEditing = ref(false)
 const isLoading = ref(false)
-const loadingHotel = ref(null)
 const currentHotel = ref({
   name: '',
   description: '',
@@ -217,7 +234,7 @@ const fetchHotels = async () => {
       ...doc.data(),
       timestamp: doc.data().timestamp || Date.now()
     }))
-    hotels.value.sort((a, b) => a.timestamp - b.timestamp)
+    hotels.value.sort((a, b) => b.timestamp - a.timestamp)
   } catch (error) {
     console.error('Error fetching hotels:', error)
   } finally {
@@ -234,7 +251,6 @@ const uploadFile = async (file, path) => {
 const saveHotel = async () => {
   try {
     isLoading.value = true
-    loadingHotel.value = currentHotel.value.id
     
     let profilePictureUrl = currentHotel.value.profilePicture
     if (currentHotel.value.profilePicture instanceof File) {
@@ -270,7 +286,6 @@ const saveHotel = async () => {
     console.error('Error saving hotel:', error)
   } finally {
     isLoading.value = false
-    loadingHotel.value = null
   }
 }
 
@@ -278,7 +293,6 @@ const deleteHotel = async (id) => {
   if (confirm('Are you sure you want to delete this hotel?')) {
     try {
       isLoading.value = true
-      loadingHotel.value = id
       await deleteDoc(doc(db, 'hotels', id))
       await fetchHotels()
       if (selectedHotel.value?.id === id) {
@@ -288,7 +302,6 @@ const deleteHotel = async (id) => {
       console.error('Error deleting hotel:', error)
     } finally {
       isLoading.value = false
-      loadingHotel.value = null
     }
   }
 }
@@ -380,434 +393,484 @@ const handleGalleryImages = (event) => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 .hotel-management {
-  display: flex;
-  gap: 20px;
-  height: 80vh;
-  padding: 20px;
-  max-width: 1200px;
+  font-family: 'Poppins', sans-serif;
+  max-width: 1500px;
   margin: 0 auto;
+  padding: 2rem;
+  color: #333;
 }
 
-.main-panel, .side-panel {
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+.section-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 .main-panel {
-  flex: 1;
-  background: white;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.side-panel {
-  width: 350px;
-  background: white;
-  transition: transform 0.3s ease-out;
-  transform: translateX(100%);
-  display: flex;
-  flex-direction: column;
-  height: 80vh;
-}
-
-.side-panel.active {
-  transform: translateX(0);
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
+}
+
+.search-container {
+  position: relative;
+  flex-grow: 1;
+  margin-right: 1rem;
+}
+
+.search-input {
+  font-family: 'Poppins', sans-serif;
+  width: 95%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+}
+
+.add-btn {
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  font-size: 1rem;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #0a8d88;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem 0.75rem ;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-btn:hover {
+  background-color: #2980b9;
+}
+
+.hotel-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.hotel-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.hotel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.hotel-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.hotel-info {
+  padding: 1rem;
+}
+
+.hotel-info h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.hotel-info p {
+  color: #718096;
+  margin-bottom: 0.25rem;
+}
+
+.hotel-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.5rem;
+}
+
+.edit-btn,
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s;
+}
+
+.edit-btn:hover {
+  color: #3498db;
+}
+
+.delete-btn:hover {
+  color: #e74c3c;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #a0aec0;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.side-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100vh;
+  background: white;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  z-index: 1000;
 }
 
 .panel-header {
-  padding: 10px 20px;
-  border-bottom: 1px solid #e0e0e0;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .panel-header h2 {
-  margin: 0;
-  font-size: 18px;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .close-btn {
   background: none;
   border: none;
-  font-size: 24px;
   cursor: pointer;
+  font-size: 1.5rem;
+  color: #718096;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #e74c3c;
 }
 
 .panel-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
+  padding: 1.5rem;
 }
 
-.panel-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.panel-content::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.panel-content::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-.panel-content::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-.search-container {
-  display: flex;
-  align-items: center;
-}
-
-.search-input {
-  padding: 8px;
-  border: 1px solid #d0d0d0;
-  border-radius: 4px;
-  width: 200px;
-  transition: box-shadow 0.3s;
-}
-
-.search-input:focus {
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  outline: none;
-}
-
-table {
+.profile-picture {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
 }
 
-th {
-  background-color: #f5f5f5;
-  text-align: left;
-  padding: 12px;
-  font-weight: normal;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-td {
-  padding: 12px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.edit-btn, .delete-btn, .add-btn {
-  padding: 2px 8px;
-  border: 1px solid #d0d0d0;
-  border-radius: 3px;
-  background-color: #fff;
-  color: #555;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.edit-btn:hover, .add-btn:hover {
-  background-color: #e8e8e8;
-  color: #333;
-}
-
-.delete-btn {
-  background-color: #ffebee;
-  color: #d32f2f;
-  border-color: #ffcdd2;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.delete-btn:hover {
-  background-color: #ffcdd2;
-}
-
-.add-btn {
-  background-color: #f5f5f5;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.add-hotel-container {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 20px;
-}
-
-.hotel-list {
-  flex: 1;
-  overflow-y: auto;
+.description {
+  color: #4a5568;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
 }
 
 .section {
-  margin-bottom: 15px;
+  margin-bottom: 1.5rem;
 }
 
 .section h3 {
-  margin: 0 0 5px 0;
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #2d3748;
 }
 
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 5px;
+  gap: 0.5rem;
 }
 
 .gallery-grid img {
   width: 100%;
-  height: 60px;
+  height: 100px;
   object-fit: cover;
+  border-radius: 4px;
 }
 
-.amenities-list, .rooms-list {
-  list-style: none;
+.amenities-list,
+.rooms-list {
+  list-style-type: none;
   padding: 0;
-  margin: 0;
-  font-size: 12px;
 }
 
-.amenities-list li, .rooms-list li {
-  margin-bottom: 3px;
+.amenities-list li,
+.rooms-list li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
 }
 
-.description {
-  line-height: 1.6;
-  color: #666;
-}
-
-.contact-info p {
-  margin: 5px 0;
-}
-
-.profile-picture {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 15px;
+.amenities-list li svg,
+.rooms-list li svg {
+  margin-right: 0.5rem;
+  color: #3498db;
 }
 
 .modal {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1001;
 }
 
 .modal-content {
-  background: #fafafa;
-  padding: 30px;
-  border-radius: 10px;
-  width: 500px;
-  max-height: 70vh;
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
   overflow-y: auto;
-  border: 1px solid #e0e0e0;
-  margin-top: 10vh;
 }
 
-.modal-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.modal-content::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.modal-content::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
-}
-
-.modal-content::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
-.modal h2 {
-  margin-bottom: 20px;
-  font-size: 24px;
-  border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 10px;
-  color: #333;
+.modal-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
 }
 
 .modal-close-btn {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 24px;
+  top: 1rem;
+  right: 1rem;
   background: none;
   border: none;
+  font-size: 1.5rem;
   cursor: pointer;
+  color: #718096;
+  transition: color 0.2s;
+}
+
+.modal-close-btn:hover {
+  color: #e74c3c;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
   font-weight: 500;
-  font-size: 14px;
-  color: #333;
+  margin-bottom: 0.5rem;
+  color: #2d3748;
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
   width: 100%;
-  padding: 8px;
-  margin-bottom: 8px;
-  border: 1px solid #e0e0e0;
-  background-color: #fff;
-  transition: border-color 0.3s;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
-  border-color: #b0b0b0;
+.form-group textarea:focus,
+.form-group select:focus {
   outline: none;
+  border-color: #3498db;
 }
 
-.room-input {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-  align-items: center;
+.file-input {
+  position: relative;
+  overflow: hidden;
 }
 
-.room-input input {
-  flex: 1;
+.file-input input[type="file"] {
+  position: absolute;
+  left: -9999px;
 }
 
-.room-input input[type="number"] {
-  width: 100px;
-}
-
-.room-input button {
-  background-color: #ff0000;
-  color: #fff;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.room-input button:hover {
-  background-color: #cc0000;
-}
-
-.modal-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.edit-btn, .delete-btn, .add-btn, .modal-buttons button {
-  padding: 8px 16px;
+.file-input label {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: #3498db;
+  color: white;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.2s;
 }
 
-.modal-buttons button {
-  background-color: #f5f5f5;
-  color: #333;
-  border: 1px solid #d0d0d0;
-}
-
-.modal-buttons button[type="submit"] {
-  background-color: #e0e0e0;
-  color: #333;
-}
-
-.modal-buttons button:hover {
-  opacity: 0.8;
-}
-
-tbody tr {
-  transition: background-color 0.3s;
-}
-
-tbody tr:hover {
-  background-color: #f8f8f8;
-}
-
-h3 {
-  margin: 20px 0 10px;
-  font-size: 1.2em;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-li {
-  margin-bottom: 5px;
+.file-input label:hover {
+  background-color: #2980b9;
 }
 
 .image-preview {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  margin-top: 10px;
+  max-width: 100%;
+  height: auto;
+  margin-top: 1rem;
   border-radius: 4px;
 }
 
 .gallery-preview {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
-.gallery-preview .image-preview {
-  width: 80px;
-  height: 80px;
+.gallery-preview img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
-.loading-spinner {
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid #3498db;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  animation: spin 1s linear infinite;
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 5px;
+.room-input {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.loading-spinner.small {
-  width: 12px;
-  height: 12px;
-  border-width: 1px;
+.room-input input {
+  flex: 1;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.remove-room-btn,
+.add-room-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.remove-room-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.remove-room-btn:hover {
+  background-color: #c0392b;
+}
+
+.add-room-btn {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.add-room-btn:hover {
+  background-color: #27ae60;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.cancel-btn,
+.save-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancel-btn {
+  background-color: #e2e8f0;
+  color: #4a5568;
+}
+
+.cancel-btn:hover {
+  background-color: #cbd5e0;
+}
+
+.save-btn {
+  background-color: #3498db;
+  color: white;
+}
+
+.save-btn:hover {
+  background-color: #2980b9;
+}
+
+.save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Transitions */
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  transform: translateX(100%);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

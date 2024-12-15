@@ -1,29 +1,32 @@
 <template>
+  <h1 class="section-title">Tour Staffs</h1>
   <div class="staff-management">
+
+    
+    <!-- Tabs and Search moved to the top -->
+    <div class="header">
+      <div class="tabs">
+        <button 
+          v-for="tab in tabs" 
+          :key="tab.id"
+          @click="activeTab = tab.id"
+          :class="['tab-button', { 'active': activeTab === tab.id }]"
+        >
+          {{ tab.name }}
+        </button>
+      </div>
+      <div class="search-container">
+        <input 
+          v-model="searchQuery" 
+          type="text" 
+          placeholder="Search" 
+          class="search-input"
+        >
+      </div>
+    </div>
+
     <!-- Main Container -->
     <div class="main-container">
-      <!-- Tabs and Search -->
-      <div class="header">
-        <div class="tabs">
-          <button 
-            v-for="tab in tabs" 
-            :key="tab.id"
-            @click="activeTab = tab.id"
-            :class="['tab-button', { 'active': activeTab === tab.id }]"
-          >
-            {{ tab.name }}
-          </button>
-        </div>
-        <div class="search-container">
-          <input 
-            v-model="searchQuery" 
-            type="text" 
-            placeholder="Search" 
-            class="search-input"
-          >
-        </div>
-      </div>
-
       <!-- Table -->
       <div class="table-container">
         <table class="staff-table">
@@ -324,123 +327,157 @@ fetchStaff()
 </script>
 
 <style scoped>
-/* Styles remain unchanged */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 .staff-management {
-  display: flex;
-  height: 85vh;
-  font-family: Arial, sans-serif;
+  font-family: 'Poppins', sans-serif;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
-.main-container {
-  flex: 1;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
-  position: relative;
-  background-color: white;
-  overflow-y: auto;
+.section-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 2rem;
 }
 
 .tabs {
   display: flex;
-  border-bottom: 1px solid #e0e0e0;
 }
 
 .tab-button {
+  font-family: 'Poppins', sans-serif;
   background: none;
   border: none;
-  padding: 8px 16px;
+  padding: 0.5rem 1rem;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.3s ease;
 }
 
 .tab-button.active {
-  border-bottom: 2px solid #000;
+  color: #1a1a1a;
+  border-bottom: 2px solid #1a1a1a;
 }
 
 .search-container {
   width: 300px;
-  margin-right: 30px;
 }
 
 .search-input {
-  width: 100%;
-  padding: 8px;
+  font-family: 'Poppins', sans-serif;
+  width: 94%;
+  padding: 0.5rem;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 1rem;
+}
+
+.main-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  position: relative;
 }
 
 .table-container {
-  margin-bottom: 60px;
   overflow-x: auto;
+  margin-bottom: 4rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
 }
 
 .staff-table {
   width: 100%;
   border-collapse: collapse;
+  
 }
 
-.staff-table th,
+.staff-table th,.staff-table th,
 .staff-table td {
-  padding: 12px;
+  padding: 1rem;
   text-align: left;
   border-bottom: 1px solid #e0e0e0;
 }
 
 .staff-table th {
-  font-weight: 500;
-  color: #666;
+  font-weight: 600;
+  color: #1a1a1a;
+  background-color: #f8f8f8;
 }
 
 .action-button {
-  padding: 6px 12px;
+  font-family: 'Poppins', sans-serif;
+  padding: 0.5rem .5rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
-  margin-right: 8px;
+  font-size: 1rem;
+  margin-right: 1rem;
+  transition: background-color 0.3s ease;
 }
 
 .action-button.edit {
-  background-color: #f0f0f0;
+  background-color: #3498db;
+  color: white;
+}
+
+.action-button.edit:hover {
+  background-color: #d0d0d0;
 }
 
 .action-button.delete {
-  background-color: #ffebee;
-  color: #d32f2f;
+  background-color: red;
+  color: white;
+}
+
+.action-button.delete:hover {
+  background-color: #ffcdd2;
 }
 
 .add-button {
+  font-family: 'Poppins', sans-serif;
   position: absolute;
-  bottom: 16px;
-  right: 16px;
-  padding: 8px 16px;
-  background-color: #f0f0f0;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #0a8d88;
+  color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.add-button:hover {
+  background-color: #076c68;
 }
 
 .side-panel {
-  width: 50%;
+  width: 400px;
   height: 100vh;
   background: white;
-  border-left: 1px solid #e0e0e0;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
   overflow-y: auto;
   position: fixed;
   top: 0;
   right: 0;
   transform: translateX(100%);
+  z-index: 1000;
 }
 
 .side-panel.open {
@@ -448,51 +485,69 @@ fetchStaff()
 }
 
 .panel-content {
-  padding: 24px;
+  padding: 2rem;
 }
 
 .panel-content h2 {
-  margin-bottom: 24px;
-  font-size: 18px;
-  font-weight: 500;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 1.5rem;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 8px;
+  padding: 0.75rem;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #0a8d88;
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 24px;
+  gap: 1rem;
+  margin-top: 2rem;
 }
 
 .cancel-button,
 .submit-button {
-  padding: 8px 16px;
+  padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
 }
 
 .cancel-button {
-  background-color: #f0f0f0;
+  background-color: #e0e0e0;
+  color: #1a1a1a;
+}
+
+.cancel-button:hover {
+  background-color: #d0d0d0;
 }
 
 .submit-button {
-  background-color: #000;
+  background-color: #0a8d88;
   color: white;
+}
+
+.submit-button:hover {
+  background-color: #076c68;
 }
 
 .profile-photo {
@@ -507,7 +562,7 @@ fetchStaff()
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  margin-top: 8px;
+  margin-top: 1rem;
 }
 
 .modal-overlay {
@@ -520,31 +575,38 @@ fetchStaff()
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 2000;
 }
 
 .modal-content {
   background-color: white;
-  padding: 24px;
+  padding: 2rem;
   border-radius: 8px;
   max-width: 500px;
   width: 100%;
 }
 
 .large-profile-photo {
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   object-fit: cover;
-  margin-bottom: 16px;
+  margin-bottom: 1.5rem;
 }
 
 .close-button {
-  margin-top: 16px;
-  padding: 8px 16px;
-  background-color: #f0f0f0;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #e0e0e0;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.close-button:hover {
+  background-color: #d0d0d0;
 }
 </style>

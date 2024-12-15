@@ -1,192 +1,201 @@
 <template>
-  <div class="container">
-    <div class="card main-card">
-      <div class="card-header">
-        <h2 class="card-title">Feedback Management</h2>
-        <div class="search-container">
-          <span class="search-icon">🔍</span>
-          <input v-model="searchTerm" type="text" class="search-input" placeholder="Search feedbacks">
+  <div class="feedback-management">
+    <div class="header">
+      <h1 class="title">Feedback Management</h1>
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input 
+          v-model="searchTerm" 
+          type="text" 
+          class="search-input" 
+          placeholder="Search Feedbacks"
+        >
+      </div>
+    </div>
+    
+    <div class="container">
+      <div class="card main-card">
+        <div class="card-content">
+          <div v-if="loading.feedbacks" class="loading-indicator">
+            <div class="loader"></div>
+            Loading feedbacks...
+          </div>
+          <div v-else class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th class="w-1/12">ID</th>
+                  <th class="w-2/12">Name</th>
+                  <th class="w-3/12">Email</th>
+                  <th class="w-4/12">Message</th>
+                  <th class="w-1/12">Status</th>
+                  <th class="w-1/12">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr 
+                  v-for="feedback in paginatedFeedbacks" 
+                  :key="feedback.id"
+                  @click="selectFeedback(feedback)"
+                  :class="{ 'selected-row': selectedFeedback && selectedFeedback.id === feedback.id }"
+                >
+                  <td>{{ truncateId(feedback.id) }}</td>
+                  <td>{{ feedback.name }}</td>
+                  <td>{{ feedback.email }}</td>
+                  <td>{{ truncateFeedback(feedback.message) }}</td>
+                  <td>
+                    <select 
+                      v-model="feedback.status" 
+                      @change="updateFeedbackStatus(feedback)" 
+                      @click.stop
+                      :disabled="loading.updateStatus === feedback.id"
+                      class="status-select"
+                    >
+                      <option>New</option>
+                      <option>In Progress</option>
+                      <option>Resolved</option>
+                    </select>
+                    <span v-if="loading.updateStatus === feedback.id" class="loader small"></span>
+                  </td>
+                  <td>
+                    <button 
+                      @click.stop="archiveFeedback(feedback)" 
+                      class="archive-btn" 
+                      title="Archive"
+                      :disabled="loading.archive === feedback.id"
+                    >
+                      <span v-if="loading.archive === feedback.id" class="loader small"></span>
+                      <span v-else>🗑️</span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <div class="pagination-controls">
+              <button @click="prevPage" :disabled="currentPage === 1" class="pagination-btn">&lt;</button>
+              <span>{{ currentPage }} of {{ totalPages }}</span>
+              <button @click="nextPage" :disabled="currentPage === totalPages" class="pagination-btn">&gt;</button>
+            </div>
+            <div class="action-buttons">
+              <button @click="generateReport" class="btn btn-primary">Generate Report</button>
+              <button @click="setActiveView('archives')" class="btn btn-secondary">View Archives</button>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="card-content">
-        <div v-if="loading.feedbacks" class="loading-indicator">
-          <div class="loader"></div>
-          Loading feedbacks...
+
+      <div v-if="activeView === 'archives'" class="card side-card">
+        <div class="card-header">
+          <h2 class="card-title">Archived Feedbacks</h2>
+          <button @click="closeActiveView" class="close-btn">❌</button>
         </div>
-        <div v-else class="table-container">
-          <table>
+        <div class="card-content">
+          <div v-if="loading.archives" class="loading-indicator">
+            <div class="loader"></div>
+            Loading archived feedbacks...
+          </div>
+          <div v-else class="archived-feedbacks-list">
+            <div 
+              v-for="feedback in archivedFeedbacks" 
+              :key="feedback.id" 
+              class="archived-feedback"
+              :class="{ 'selected': selectedArchivedFeedback && selectedArchivedFeedback.id === feedback.id }"
+              @click="selectArchivedFeedback(feedback)"
+            >
+              <h4>{{ feedback.name }}</h4>
+              <p>{{ truncateFeedback(feedback.message, 100) }}</p>
+              <p><strong>Email:</strong> {{ feedback.email }}</p>
+              <p><strong>Status:</strong> {{ feedback.status }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="fixed-button-container">
+          <button 
+            @click="restoreFeedback(selectedArchivedFeedback)" 
+            class="btn btn-secondary"
+            :disabled="!selectedArchivedFeedback || loading.restore"
+          >
+            <span v-if="loading.restore" class="loader small"></span>
+            <span v-else>Restore</span>
+          </button>
+        </div>
+      </div>
+
+      <div v-if="selectedFeedback" class="card side-card">
+        <div class="card-header">
+          <h2 class="card-title">Feedback Details</h2>
+          <button @click="closeActiveView" class="close-btn">❌</button>
+        </div>
+        <div class="card-content">
+          <div class="feedback-details">
+            <p><strong>ID:</strong> {{ selectedFeedback.id }}</p>
+            <p><strong>Name:</strong> {{ selectedFeedback.name }}</p>
+            <p><strong>Email:</strong> {{ selectedFeedback.email }}</p>
+            <p><strong>Status:</strong> {{ selectedFeedback.status }}</p>
+            <p><strong>Message:</strong></p>
+            <p class="full-feedback">{{ selectedFeedback.message }}</p>
+            
+            <h4>Replies</h4>
+            <div v-if="selectedFeedback.replies && selectedFeedback.replies.length > 0">
+              <div v-for="(reply, index) in selectedFeedback.replies" :key="index" class="reply">
+                <p><strong>Admin:</strong> {{ reply.text }}</p>
+                <p><small>{{ formatDate(reply.date) }}</small></p>
+              </div>
+            </div>
+            <div v-else>
+              <p>No replies yet.</p>
+            </div>
+            
+            <div class="form-group">
+              <label for="reply">Add Reply</label>
+              <textarea v-model="newReply" id="reply" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="fixed-button-container">
+          <button 
+            @click="addReply" 
+            class="btn btn-primary"
+            :disabled="loading.addReply"
+          >
+            <span v-if="loading.addReply" class="loader small"></span>
+            <span v-else>Send Reply</span>
+          </button>
+        </div>
+      </div>
+
+      <div v-if="activeView === 'report'" class="card side-card">
+        <div class="card-header">
+          <h2 class="card-title">Feedback Report</h2>
+          <button @click="closeActiveView" class="close-btn">❌</button>
+        </div>
+        <div class="card-content">
+          <table class="report-table">
             <thead>
               <tr>
-                <th class="w-1/12">ID</th>
-                <th class="w-2/12">Name</th>
-                <th class="w-3/12">Email</th>
-                <th class="w-4/12">Message</th>
-                <th class="w-1/12">Status</th>
-                <th class="w-1/12">Actions</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Message</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr 
-                v-for="feedback in paginatedFeedbacks" 
-                :key="feedback.id"
-                @click="selectFeedback(feedback)"
-                :class="{ 'selected-row': selectedFeedback && selectedFeedback.id === feedback.id }"
-              >
+              <tr v-for="feedback in feedbacks" :key="feedback.id">
                 <td>{{ truncateId(feedback.id) }}</td>
                 <td>{{ feedback.name }}</td>
                 <td>{{ feedback.email }}</td>
-                <td>{{ truncateFeedback(feedback.message) }}</td>
-                <td>
-                  <select 
-                    v-model="feedback.status" 
-                    @change="updateFeedbackStatus(feedback)" 
-                    @click.stop
-                    :disabled="loading.updateStatus === feedback.id"
-                  >
-                    <option>New</option>
-                    <option>In Progress</option>
-                    <option>Resolved</option>
-                  </select>
-                  <span v-if="loading.updateStatus === feedback.id" class="loader small"></span>
-                </td>
-                <td>
-                  <button 
-                    @click.stop="archiveFeedback(feedback)" 
-                    class="archive-btn" 
-                    title="Archive"
-                    :disabled="loading.archive === feedback.id"
-                  >
-                    <span v-if="loading.archive === feedback.id" class="loader small"></span>
-                    <span v-else>🗑️</span>
-                  </button>
-                </td>
+                <td>{{ truncateFeedback(feedback.message, 30) }}</td>
+                <td>{{ feedback.status }}</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="pagination">
-          <div class="pagination-controls">
-            <button @click="prevPage" :disabled="currentPage === 1" class="pagination-btn"> < </button>
-            <span>{{ currentPage }} of {{ totalPages }}</span>
-            <button @click="nextPage" :disabled="currentPage === totalPages" class="pagination-btn"> > </button>
-          </div>
-          <div>
-            <button @click="generateReport" class="btn btn-primary">Generate Report</button>
-            <button @click="setActiveView('archives')" class="btn btn-secondary">View Archives</button>
-          </div>
+        <div class="fixed-button-container">
+          <button @click="printReport" class="btn btn-primary">Print Report</button>
         </div>
-      </div>
-    </div>
-
-    <div v-if="activeView === 'archives'" class="card side-card">
-      <div class="card-header">
-        <h2 class="card-title">Archived Feedbacks</h2>
-        <button @click="closeActiveView" class="close-btn">❌</button>
-      </div>
-      <div class="card-content">
-        <div v-if="loading.archives" class="loading-indicator">
-          <div class="loader"></div>
-          Loading archived feedbacks...
-        </div>
-        <div v-else class="archived-feedbacks-list">
-          <div 
-            v-for="feedback in archivedFeedbacks" 
-            :key="feedback.id" 
-            class="archived-feedback"
-            :class="{ 'selected': selectedArchivedFeedback && selectedArchivedFeedback.id === feedback.id }"
-            @click="selectArchivedFeedback(feedback)"
-          >
-            <h4>{{ feedback.name }}</h4>
-            <p>{{ truncateFeedback(feedback.message, 100) }}</p>
-            <p><strong>Email:</strong> {{ feedback.email }}</p>
-            <p><strong>Status:</strong> {{ feedback.status }}</p>
-          </div>
-        </div>
-      </div>
-      <div class="fixed-button-container">
-        <button 
-          @click="restoreFeedback(selectedArchivedFeedback)" 
-          class="btn btn-secondary"
-          :disabled="!selectedArchivedFeedback || loading.restore"
-        >
-          <span v-if="loading.restore" class="loader small"></span>
-          <span v-else>Restore</span>
-        </button>
-      </div>
-    </div>
-
-    <div v-if="selectedFeedback" class="card side-card">
-      <div class="card-header">
-        <h2 class="card-title">Feedback Details</h2>
-        <button @click="closeActiveView" class="close-btn">❌</button>
-      </div>
-      <div class="card-content">
-        <div class="feedback-details">
-          <p><strong>ID:</strong> {{ selectedFeedback.id }}</p>
-          <p><strong>Name:</strong> {{ selectedFeedback.name }}</p>
-          <p><strong>Email:</strong> {{ selectedFeedback.email }}</p>
-          <p><strong>Status:</strong> {{ selectedFeedback.status }}</p>
-          <p><strong>Message:</strong></p>
-          <p class="full-feedback">{{ selectedFeedback.message }}</p>
-          
-          <h4>Replies</h4>
-          <div v-if="selectedFeedback.replies && selectedFeedback.replies.length > 0">
-            <div v-for="(reply, index) in selectedFeedback.replies" :key="index" class="reply">
-              <p><strong>Admin:</strong> {{ reply.text }}</p>
-              <p><small>{{ formatDate(reply.date) }}</small></p>
-            </div>
-          </div>
-          <div v-else>
-            <p>No replies yet.</p>
-          </div>
-          
-          <div class="form-group">
-            <label for="reply">Add Reply</label>
-            <textarea v-model="newReply" id="reply" rows="3"></textarea>
-          </div>
-        </div>
-      </div>
-      <div class="fixed-button-container">
-        <button 
-          @click="addReply" 
-          class="btn btn-primary"
-          :disabled="loading.addReply"
-        >
-          <span v-if="loading.addReply" class="loader small"></span>
-          <span v-else>Send Reply</span>
-        </button>
-      </div>
-    </div>
-
-    <div v-if="activeView === 'report'" class="card side-card">
-      <div class="card-header">
-        <h2 class="card-title">Feedback Report</h2>
-        <button @click="closeActiveView" class="close-btn">❌</button>
-      </div>
-      <div class="card-content">
-        <table class="report-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Message</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="feedback in feedbacks" :key="feedback.id">
-              <td>{{ truncateId(feedback.id) }}</td>
-              <td>{{ feedback.name }}</td>
-              <td>{{ feedback.email }}</td>
-              <td>{{ truncateFeedback(feedback.message, 30) }}</td>
-              <td>{{ feedback.status }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="fixed-button-container">
-        <button @click="printReport" class="btn btn-primary">Print Report</button>
       </div>
     </div>
   </div>
@@ -482,116 +491,158 @@ onMounted(fetchFeedbacks);
 </script>
 
 <style scoped>
-.container {
+
+.feedback-management {
+  font-family: 'Poppins', sans-serif;
+  min-height: 80vh;
+  background-color: white;
+  padding: 20px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.header {
   display: flex;
-  gap: 1rem;
-  padding: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+.title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.search-container {
+  position: relative;
+  width: 300px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.search-input {
+  font-family: 'Poppins', sans-serif;
+  width: 83%;
+  padding: 8px 8px 8px 35px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #999;
+}
+
+.container {
   max-width: 1400px;
   margin: 0 auto;
 }
 
 .card {
-  background-color: white;
+  background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
 .main-card {
-  flex: 1;
   min-width: 800px;
 }
 
-.side-card {
-  width: 400px;
-  position: relative;
-}
-
-.card-header {
-  padding: 15px;
-  border-bottom: 1px solid #e0e0e0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-title {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.search-container {
-  position: relative;
-}
-
-.search-icon {
-  position: absolute;
-  left: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.search-input {
-  padding: 8px 8px 8px 30px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  width: 250px;
+.card-content {
+  padding: 20px;
 }
 
 .table-container {
   overflow-x: auto;
-  height: 400px;
-  width: 100%;
 }
 
 table {
+  font-family: 'Poppins', sans-serif;
   width: 100%;
-  table-layout: fixed;
-}
-
-th, td {
-  width: 20%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
+  border-collapse: collapse;
+  background: white;
 }
 
 th {
-  background-color: #f8f9fa;
+  background: #f8f9fa;
+  padding: 12px 16px;
+  text-align: left;
   font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  color: #444;
 }
 
 tr:hover {
-  background-color: #f5f5f5;
-  cursor: pointer;
+  background-color: #f8f9fa;
 }
 
 .selected-row {
-  background-color: #e3f2fd;
+  background-color: #f0f7ff;
+}
+
+.status-select {
+  font-family: 'Poppins', sans-serif;
+  padding: 6px 24px 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 12 12'%3E%3Cpath stroke='%23666' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.archive-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.archive-btn:hover {
+  opacity: 1;
 }
 
 .pagination {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  margin-top: 20px;
+  padding: 0 16px;
 }
 
 .pagination-controls {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 12px;
 }
 
 .pagination-btn {
-  padding: 4px 8px;
-  border: 1px solid #e0e0e0;
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: white;
   border-radius: 4px;
-  background: none;
   cursor: pointer;
 }
 
@@ -600,163 +651,59 @@ tr:hover {
   cursor: not-allowed;
 }
 
-.feedback-details {
-  padding: 1rem;
-}
-
-.full-feedback {
-  margin: 1rem 0;
-  white-space: pre-wrap;
-  background-color: #f8f9fa;
-  padding: 1rem;
-  border-radius: 4px;
-}
-
-.reply {
-  margin: 1rem 0;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-}
-
-.form-group {
-  margin: 1rem 0;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-textarea {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  resize: vertical;
+.action-buttons {
+  display: flex;
+  gap: 8px;
 }
 
 .btn {
+  font-family: 'Poppins', sans-serif;
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
-  cursor: pointer;
   font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .btn-primary {
-  background-color: #1976d2;
+  background: #0a8d88;
   color: white;
 }
+
 
 .btn-secondary {
-  background-color: #757575;
+  background: #6c757d;
   color: white;
-  margin-left: 8px;
 }
 
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.25rem;
-  cursor: pointer;
-  padding: 4px;
-}
-
-.archive-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.25rem;
-}
-
-.archived-feedbacks-list {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.archived-feedback {
-  background-color: #f8f9fa;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.archived-feedback:hover {
-  background-color: #e9ecef;
-}
-
-.archived-feedback.selected {
-  background-color: #e3f2fd;
-}
-
-.archived-feedback h4 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
-}
-
-.archived-feedback p {
-  margin: 0.25rem 0;
-  font-size: 0.9rem;
-}
-
-.report-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.report-table th, .report-table td {
-  border: 1px solid #e0e0e0;
-  padding: 8px;
-  text-align: left;
-}
-
-.report-table th {
-  background-color: #f8f9fa;
-}
-
-.mt-4 {
-  margin-top: 1rem;
-}
-
-.fixed-button-container {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  display: flex;
-  gap: 0.5rem;
+.btn-secondary:hover {
+  background: #5a6268;
 }
 
 .loading-indicator {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100px;
-  font-size: 14px;
+  padding: 40px;
   color: #666;
 }
 
 .loader {
   border: 3px solid #f3f3f3;
-  border-top: 3px solid #3498db;
+  border-top: 3px solid #4a90e2;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   animation: spin 1s linear infinite;
-  display: inline-block;
-  margin-right: 10px;
+  margin-right: 12px;
 }
 
 .loader.small {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   border-width: 2px;
-  margin-right: 5px;
+  margin-right: 8px;
 }
 
 @keyframes spin {
@@ -764,8 +711,117 @@ textarea {
   100% { transform: rotate(360deg); }
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.side-card {
+  background-color: #f0f7f4;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 400px;
+  height: calc(70vh - 40px);
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  background-color: #0a8d88;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.card-title {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #666;
+}
+
+.archived-feedbacks-list {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.archived-feedback {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.archived-feedback:hover {
+  background-color: #f8f9fa;
+}
+
+.archived-feedback.selected {
+  background-color: #e3f2fd;
+}
+
+.feedback-details p {
+  margin: 8px 0;
+}
+
+.full-feedback {
+  white-space: pre-wrap;
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.reply {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.form-group {
+  margin-top: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+textarea {
+  width: 95%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.fixed-button-container {
+  padding: 16px;
+  border-top: 1px solid #eee;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.report-table th,
+.report-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.report-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
 }
 </style>

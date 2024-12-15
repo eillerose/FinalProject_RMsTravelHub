@@ -2,6 +2,7 @@ import AdminPanel from '../views/AdminPanel.vue';
 import Dashboard from '../views/Dashboard_admin.vue';
 import Logbook from '../views/Logbook_admin.vue';
 import Packages from '../views/Packages_admin.vue';
+import PackageOptions from '../views/PackageOptions.vue';
 import Activities from '../views/Activities_admin.vue';
 import Staffs from '../views/Staffs_admin.vue';
 import Booking from '../views/Booking_admin.vue';
@@ -19,6 +20,7 @@ const adminRoutes = [
       { path: 'dashboard', component: Dashboard },
       { path: 'logbook', component: Logbook },
       { path: 'packages', component: Packages },
+      { path: 'options', component: PackageOptions },
       { path: 'activities', component: Activities },
       { path: 'staffs', component: Staffs },
       { path: 'hotels', component: Hotel },

@@ -48,18 +48,18 @@
                   </li>
                 </ul>
               </div>
-            </div>
-            <div v-if="selectedPackage.includePackageOptions" class="package-options">
-              <h3>Package Options</h3>
-              <div class="options-grid">
-                <button 
-                  v-for="option in selectedPackage.selectedOptions" 
-                  :key="option.id"
-                  class="option-btn"
-                  @click="openOptionsModal(option)"
-                >
-                  {{ option.name }}
-                </button>
+              <div v-if="selectedPackage.pricingMode === 'options'" class="package-options">
+                <h3>Package Options</h3>
+                <div class="options-grid">
+                  <button 
+                    v-for="option in selectedPackage.options" 
+                    :key="option.id"
+                    class="option-btn"
+                    @click="showOptionDetails(option)"
+                  >
+                    {{ option.name }}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -67,19 +67,19 @@
       </div>
     </div>
 
-    <!-- Package Options Modal -->
-    <div v-if="showOptionsModal" class="modal-overlay" @click.self="closeOptionsModal">
+    <!-- Package Option Details Modal -->
+    <div v-if="showOptionDetailsModal" class="modal-overlay" @click.self="closeOptionDetailsModal">
       <div class="modal-content options-modal">
-        <button class="close-btn" @click="closeOptionsModal">×</button>
+        <button class="close-btn" @click="closeOptionDetailsModal">×</button>
         <div class="modal-details">
           <h2 class="options-title">{{ selectedOption.name }}</h2>
           <div class="pricing-grid">
             <div v-for="(price, index) in selectedOption.pricing" :key="index" class="pricing-card">
               <div class="pax-info">
-                <h3>{{ price.pax }} PAX</h3>
+                <h3>{{ price.paxRange }} PAX</h3>
               </div>
               <div class="price-info">
-                <p class="price">₱{{ price.price.toLocaleString() }}</p>
+                <p class="price">₱{{ price.pricePerHead.toLocaleString() }}</p>
                 <p class="per-person">per person</p>
               </div>
             </div>
@@ -103,7 +103,7 @@ const packages = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const showModal = ref(false);
-const showOptionsModal = ref(false);
+const showOptionDetailsModal = ref(false);
 const selectedPackage = ref(null);
 const selectedOption = ref(null);
 
@@ -126,7 +126,7 @@ const fetchPackages = async () => {
         id: doc.id,
         ...data,
         components: data.components || [],
-        selectedOptions: data.selectedOptions || []
+        options: data.options || []
       };
     });
     loading.value = false;
@@ -149,13 +149,13 @@ const closeModal = () => {
   document.body.style.overflow = 'auto';
 };
 
-const openOptionsModal = (option) => {
+const showOptionDetails = (option) => {
   selectedOption.value = option;
-  showOptionsModal.value = true;
+  showOptionDetailsModal.value = true;
 };
 
-const closeOptionsModal = () => {
-  showOptionsModal.value = false;
+const closeOptionDetailsModal = () => {
+  showOptionDetailsModal.value = false;
   selectedOption.value = null;
 };
 
@@ -172,8 +172,8 @@ onMounted(fetchPackages);
 
 .banner {
   position: relative;
-  height: 400px;
-  background-image: url('/src/img/heroBg.jpg');
+  height: 300px;
+  background-color: #013240;
   background-size: cover;
   background-position: center;
   display: flex;
@@ -181,16 +181,6 @@ onMounted(fetchPackages);
   justify-content: center;
   text-align: center;
   color: white;
-}
-
-.banner::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
 }
 
 .banner-content {
@@ -203,6 +193,7 @@ onMounted(fetchPackages);
 .banner h1 {
   font-size: 48px;
   font-weight: 700;
+  margin-top: 2rem;
   margin-bottom: 20px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
@@ -228,7 +219,7 @@ onMounted(fetchPackages);
 
 .packages-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
   gap: 30px;
 }
 
@@ -299,8 +290,10 @@ onMounted(fetchPackages);
 
 .modal-content {
   background: white;
-  width: 800px;
-  height: 600px;
+  width: 90%;
+  max-width: 1000px;
+  height: 90vh;
+  max-height: 700px;
   position: relative;
   border-radius: 10px;
   overflow: hidden;
@@ -315,7 +308,7 @@ onMounted(fetchPackages);
 }
 
 .modal-image-side {
-  width: 300px;
+  width: 50%;
   background-size: cover;
   background-position: center;
   position: relative;
@@ -477,8 +470,8 @@ onMounted(fetchPackages);
 
 @media (max-width: 850px) {
   .modal-content {
-    width: 90%;
-    height: 90vh;
+    width: 95%;
+    height: 95vh;
   }
   
   .modal-grid {
@@ -489,17 +482,14 @@ onMounted(fetchPackages);
     width: 100%;
     height: 200px;
   }
+
+  .modal-details {
+    max-height: calc(95vh - 200px);
+    overflow-y: auto;
+  }
 }
 
 @media (max-width: 768px) {
-  .modal-grid {
-    flex-direction: column;
-  }
-  
-  .modal-image-side {
-    min-height: 200px;
-  }
-  
   .banner h1 {
     font-size: 36px;
   }
@@ -548,3 +538,4 @@ onMounted(fetchPackages);
   padding: 40px;
 }
 </style>
+

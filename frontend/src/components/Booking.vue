@@ -1,18 +1,31 @@
 <template>
   <div class="booking-container">
-    <header-component />
+    <HeaderComponent />
+    
     <div class="booking-form">
-      <h1 class="booking-title">Book Your Stay</h1>
-      
-      <!-- Progress Steps -->
-      <div class="progress-steps">
-        <div v-for="(step, index) in steps" :key="index" class="progress-step">
-          <div class="step-circle" :class="{ 'active': currentStep >= index, 'completed': currentStep > index }">
-            <span v-if="currentStep <= index">{{ index + 1 }}</span>
-            <CheckIcon v-else />
+      <!-- Header Section with Title and Progress Steps -->
+      <div class="booking-header">
+        <h1 class="booking-title">Book Your Stay</h1>
+        <div class="progress-steps">
+          <div v-for="(step, index) in steps" :key="index" class="progress-step">
+            <div 
+              class="step-circle" 
+              :class="{ 
+                'active': index === currentStep, 
+                'completed': index < currentStep 
+              }"
+            >
+              <span v-if="index < currentStep">
+                <CheckIcon class="check-icon" />
+              </span>
+              <span v-else>{{ index + 1 }}</span>
+            </div>
+            <div 
+              class="step-line" 
+              :class="{ 'active': index < currentStep }"
+            ></div>
+            <span class="step-name">{{ step }}</span>
           </div>
-          <span class="step-name">{{ step }}</span>
-          <div v-if="index < steps.length - 1" class="step-line" :class="{ 'active': currentStep > index }"></div>
         </div>
       </div>
 
@@ -37,7 +50,12 @@
                 <div class="package-details">
                   <h3 class="package-name">{{ pkg.name }}</h3>
                   <p class="package-description">{{ pkg.description }}</p>
-                  <div class="package-price">₱{{ pkg.price }}</div>
+                  <div v-if="pkg.pricingMode === 'fixed'" class="package-price">
+                    ₱{{ pkg.fixedPrice }}
+                  </div>
+                  <div v-else-if="pkg.pricingMode === 'options'" class="package-price">
+                    Options available
+                  </div>
                 </div>
               </div>
             </div>
@@ -56,16 +74,26 @@
           <!-- Step 3: Hotel and Room Selection -->
           <div v-if="currentStep === 2" class="booking-step">
             <h2 class="step-title">Select Hotel and Room</h2>
-            <div class="hotel-cards">
-              <div v-for="hotel in hotels" :key="hotel.id" class="hotel-card">
-                <div class="hotel-image-wrapper">
-                  <img :src="hotel.image" :alt="hotel.name" class="hotel-image">
+            <div class="hotel-selection-container">
+              <div class="hotel-cards">
+                <div v-for="hotel in hotels" :key="hotel.id" class="hotel-card">
+                  <h3 class="hotel-name">{{ hotel.name }}</h3>
+                  <p class="hotel-description">{{ hotel.description }}</p>
+                  <button @click="showHotelDetails(hotel)" class="view-details-btn">
+                    View Details
+                  </button>
                 </div>
-                <h3 class="hotel-name">{{ hotel.name }}</h3>
-                <p class="hotel-description">{{ hotel.description }}</p>
-                <button @click="showHotelDetails(hotel)" class="view-details-btn">
-                  View Details
-                </button>
+              </div>
+              
+              <!-- Selected Room Display -->
+              <div v-if="booking.hotelAndRoom" class="selected-room-card">
+                <div class="selected-room-header">
+                  {{ booking.hotelAndRoom.hotel.name }}
+                </div>
+                <div class="selected-room-content">
+                  <p class="room-price">₱{{ booking.hotelAndRoom.room.price }} per night</p>
+                  <p class="room-capacity">Capacity: {{ booking.hotelAndRoom.room.capacity }} pax</p>
+                </div>
               </div>
             </div>
           </div>
@@ -105,6 +133,7 @@
                       id="guests" 
                       v-model="booking.guests" 
                       min="1" 
+                      @change="validateGuestCount"
                       required
                     >
                   </div>
@@ -121,6 +150,7 @@
           v-if="currentStep > 0" 
           @click="prevStep" 
           class="nav-button back-button"
+          type="button"
         >
           <ArrowLeftIcon />
           Previous
@@ -129,6 +159,7 @@
           v-if="currentStep < steps.length - 1" 
           @click="nextStep" 
           class="nav-button next-button"
+          type="button"
         >
           Next
           <ArrowRightIcon />
@@ -137,9 +168,52 @@
           v-if="currentStep === steps.length - 1" 
           @click="showSummaryView" 
           class="nav-button confirm-button"
+          type="button"
         >
           Review Booking
         </button>
+      </div>
+    </div>
+
+    <!-- Package Details Modal -->
+    <div v-if="showPackageModal && selectedPackage?.pricingMode === 'options'" class="modal">
+      <div class="modal-content package-modal">
+        <button class="close-modal-btn" @click="closePackageModal">
+          <XIcon />
+        </button>
+        
+        <div class="package-modal-header">
+          <h2 class="package-modal-title">{{ selectedPackage?.name }}</h2>
+        </div>
+
+        <div class="package-pricing-grid">
+          <label 
+            v-for="(option, index) in selectedPackage.options" 
+            :key="index" 
+            class="pricing-column"
+            :class="{ 'selected': selectedPricingColumn === index }"
+          >
+            <input 
+              type="radio" 
+              :name="'pricing-column'" 
+              :value="index" 
+              v-model="selectedPricingColumn"
+              class="pricing-radio"
+            >
+            <h3 class="accommodation-type">{{ option.name }}</h3>
+            <ul class="price-list">
+              <li v-for="(price, priceIndex) in option.pricing" :key="priceIndex">
+                {{ price.paxRange }} – PHP {{ price.pricePerHead }}
+              </li>
+            </ul>
+          </label>
+        </div>
+
+        <div class="package-modal-footer">
+          <button @click="confirmPackageSelection" class="confirm-package-btn" :disabled="!canConfirmPackage">
+            Select Package
+          </button>
+        </div>
       </div>
     </div>
 
@@ -154,7 +228,6 @@
           <img 
             :src="selectedHotel?.image || '/placeholder.svg?height=120&width=120'" 
             :alt="selectedHotel?.name"
-            class="hotel-header-image"
           />
           <div class="hotel-header-content">
             <h2 class="hotel-header-title">{{ selectedHotel?.name }}</h2>
@@ -208,9 +281,25 @@
           <div class="summary-section">
             <h3>Package Details</h3>
             <p><strong>Package:</strong> {{ booking.package?.name }}</p>
+            <p v-if="booking.package?.pricingMode === 'options'">
+              <strong>Pricing Option:</strong> {{ booking.package?.selectedOption?.name }}
+            </p>
             <p><strong>Check-in Date & Time:</strong> {{ formatDateTime(booking.checkInDate, booking.checkInTime) }}</p>
             <p><strong>Hotel:</strong> {{ booking.hotelAndRoom?.hotel.name }}</p>
             <p><strong>Room Type:</strong> {{ booking.hotelAndRoom?.room.type }}</p>
+            <p><strong>Room Price:</strong> ₱{{ booking.hotelAndRoom?.room.price }} per night</p>
+            <p><strong>Room Capacity:</strong> {{ booking.hotelAndRoom?.room.capacity }} pax</p>
+          </div>
+
+          <div class="summary-section">
+            <h3>Bill Breakdown</h3>
+            <p v-if="booking.package?.pricingMode === 'fixed'">
+              <strong>Package Price:</strong> ₱{{ booking.package?.fixedPrice }}
+            </p>
+            <p v-else-if="booking.package?.pricingMode === 'options'">
+              <strong>Package Price:</strong> ₱{{ calculatePackagePrice() }} (₱{{ getPerHeadPrice() }} per person x {{ booking.guests }} guests)
+            </p>
+            <p><strong>Room Price:</strong> ₱{{ booking.hotelAndRoom?.room.price }}</p>
           </div>
 
           <div class="summary-total">
@@ -256,10 +345,14 @@ const booking = reactive({
 const packages = ref([]);
 const hotels = ref([]);
 
+const showPackageModal = ref(false);
+const selectedPackage = ref(null);
+const selectedPricingColumn = ref(null);
+
 onMounted(async () => {
   await fetchPackages();
   await fetchHotels();
-  
+
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUser.value = user;
@@ -277,7 +370,9 @@ const fetchPackages = async () => {
     const packagesSnapshot = await getDocs(packagesCollection);
     packages.value = packagesSnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
+      options: doc.data().options || [],
+      fixedPrice: doc.data().fixedPrice || 0,
     }));
   } catch (error) {
     console.error("Error fetching packages:", error);
@@ -298,7 +393,41 @@ const fetchHotels = async () => {
 };
 
 const selectPackage = (pkg) => {
-  booking.package = pkg;
+  if (pkg.pricingMode === 'fixed') {
+    booking.package = {
+      ...pkg,
+      selectedOption: null
+    };
+    booking.guests = 1; // Reset guest count
+    nextStep();
+  } else if (pkg.pricingMode === 'options') {
+    selectedPackage.value = pkg;
+    selectedPricingColumn.value = null;
+    showPackageModal.value = true;
+  }
+};
+
+const closePackageModal = () => {
+  showPackageModal.value = false;
+  selectedPricingColumn.value = null;
+};
+
+const canConfirmPackage = computed(() => {
+  if (!selectedPackage.value) return false;
+  if (selectedPackage.value.pricingMode === 'fixed') return true;
+  return selectedPricingColumn.value !== null;
+});
+
+const confirmPackageSelection = () => {
+  if (canConfirmPackage.value) {
+    booking.package = {
+      ...selectedPackage.value,
+      selectedOption: selectedPackage.value.options[selectedPricingColumn.value]
+    };
+    booking.guests = 1; // Reset guest count
+    closePackageModal();
+    nextStep();
+  }
 };
 
 const selectRoom = (hotel, room) => {
@@ -354,10 +483,61 @@ const closeSummaryModal = () => {
 };
 
 const calculateTotalPrice = () => {
-  if (!booking.package || !booking.hotelAndRoom) {
-    return 0;
+  let total = 0;
+  if (booking.package) {
+    if (booking.package.pricingMode === 'fixed') {
+      total += parseFloat(booking.package.fixedPrice);
+    } else if (booking.package.pricingMode === 'options' && booking.package.selectedOption) {
+      const matchingPricing = booking.package.selectedOption.pricing.find(
+        price => {
+          const [min, max] = price.paxRange.split('-').map(Number);
+          return booking.guests >= min && booking.guests <= max;
+        }
+      );
+      if (matchingPricing) {
+        total += parseFloat(matchingPricing.pricePerHead) * booking.guests;
+      }
+    }
   }
-  return booking.package.price + booking.hotelAndRoom.room.price;
+  if (booking.hotelAndRoom && booking.hotelAndRoom.room) {
+    const roomPrice = booking.hotelAndRoom.room.price;
+    if (typeof roomPrice === 'string') {
+      total += parseFloat(roomPrice.replace('₱', '').replace(',', ''));
+    } else if (typeof roomPrice === 'number') {
+      total += roomPrice;
+    }
+  }
+  return total.toFixed(2);
+};
+
+const calculatePackagePrice = () => {
+  if (booking.package?.pricingMode === 'options' && booking.package?.selectedOption) {
+    const matchingPricing = booking.package.selectedOption.pricing.find(
+      price => {
+        const [min, max] = price.paxRange.split('-').map(Number);
+        return booking.guests >= min && booking.guests <= max;
+      }
+    );
+    if (matchingPricing) {
+      return (parseFloat(matchingPricing.pricePerHead) * booking.guests).toFixed(2);
+    }
+  }
+  return '0.00';
+};
+
+const getPerHeadPrice = () => {
+  if (booking.package?.pricingMode === 'options' && booking.package?.selectedOption) {
+    const matchingPricing = booking.package.selectedOption.pricing.find(
+      price => {
+        const [min, max] = price.paxRange.split('-').map(Number);
+        return booking.guests >= min && booking.guests <= max;
+      }
+    );
+    if (matchingPricing) {
+      return parseFloat(matchingPricing.pricePerHead).toFixed(2);
+    }
+  }
+  return '0.00';
 };
 
 const confirmBooking = async () => {
@@ -431,6 +611,24 @@ const isGuestInfoValid = () => {
   return booking.guestName && booking.email && booking.phone && booking.guests > 0;
 };
 
+const validateGuestCount = () => {
+  if (booking.package && booking.package.pricingMode === 'options') {
+    const guestCount = booking.guests;
+    const matchingPricing = booking.package.selectedOption.pricing.find(
+      price => {
+        const [min, max] = price.paxRange.split('-').map(Number);
+        return guestCount >= min && guestCount <= max;
+      }
+    );
+    if (!matchingPricing) {
+      alert("The number of guests doesn't match any available options for this package. Please choose a different package or adjust the number of guests.");
+      currentStep.value = 0; // Redirect to package selection
+      return false;
+    }
+  }
+  return true;
+};
+
 const handleRecurring = (event) => {
   // Handle recurring bookings if needed
   console.log('Recurring booking:', event);
@@ -448,34 +646,44 @@ const handleRecurring = (event) => {
   background-color: white;
   padding: 2rem;
   font-family: 'Poppins', sans-serif;
+  max-width: 1800px;
 }
 
 .booking-form {
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
   background: white;
   border-radius: 1rem;
   padding: 2rem;
   position: relative;
-  padding-bottom: 100px; /* Add space for the form navigation */
+  padding-bottom: 100px;
+}
+
+.booking-header {
+  background-color: #006167;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-top: -1rem;
+  color: white;
 }
 
 .booking-title {
   text-align: center;
   font-size: 2.5rem;
   font-weight: 700;
-  color: #111827;
-  margin-bottom: 3rem;
+  color: white;
+  margin-bottom: 2rem;
+  margin-top: -1rem;
 }
 
 .progress-steps {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   position: relative;
   padding: 0 2rem;
-  margin-top: -1rem;
-  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .progress-step {
@@ -487,36 +695,43 @@ const handleRecurring = (event) => {
 }
 
 .step-circle {
-  width: 2rem;
-  height: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50%;
-  background: white;
-  border: 4px solid #6b7280;
+  background: transparent;
+  border: 2px solid white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  color: #6b7280;
+  color: white;
+  background-color: #006167;
   position: relative;
   z-index: 10;
   transition: all 0.3s ease;
 }
 
 .step-circle.active {
-  background: #10b981;
-  border-color: #10b981;
+  background: #00b7af;
+  border-color: #00b7af;
   color: white;
 }
 
 .step-circle.completed {
-  background: #10b981;
-  border-color: #10b981;
+  background: white;
+  border-color: white;
+}
+
+.check-icon {
+  color: green;
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
 .step-name {
   margin-top: 0.75rem;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: white;
   font-weight: 500;
 }
 
@@ -526,12 +741,12 @@ const handleRecurring = (event) => {
   left: 50%;
   right: -50%;
   height: 2px;
-  background: #e5e7eb;
+  background: rgba(255, 255, 255, 0.4);
   z-index: 0;
 }
 
 .step-line.active {
-  background: #10b981;
+  background: white;
 }
 
 .progress-step:last-child .step-line {
@@ -544,20 +759,19 @@ const handleRecurring = (event) => {
   padding: 2rem;
   display: flex;
   transition: all 0.3s ease;
-  height: 500px; /* Set a fixed height for the content */
-  overflow-y: auto; /* Add vertical scrolling if content exceeds the height */
+  height: 450px;
 }
 
 .booking-steps {
   flex: 1;
   transition: all 0.3s ease;
+  margin-top: -2rem;
 }
 
 .step-title {
   font-size: 1.5rem;
   font-weight: 600;
   color: #111827;
-  margin-bottom: 2rem;
 }
 
 .package-list {
@@ -570,7 +784,7 @@ const handleRecurring = (event) => {
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
-  border: 1px solid #e5e7eb;
+  border: 2px solid #e5e7eb;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -578,13 +792,13 @@ const handleRecurring = (event) => {
 }
 
 .package-card:hover {
-  border-color: #10b981;
+  border-color: #00b7af;
   transform: translateY(-2px);
 }
 
 .package-card.selected {
   background: #ecfdf5;
-  border-color: #10b981;
+  border-color: #00b7af;
 }
 
 .package-radio {
@@ -604,7 +818,7 @@ const handleRecurring = (event) => {
 }
 
 .package-card.selected .radio-outer {
-  border-color: #10b981;
+  border-color: #00b7af;
 }
 
 .radio-inner {
@@ -616,7 +830,7 @@ const handleRecurring = (event) => {
 }
 
 .radio-inner.checked {
-  background-color: #10b981;
+  background-color: #00b7af;
   transform: scale(1);
 }
 
@@ -657,7 +871,7 @@ const handleRecurring = (event) => {
 }
 
 .hotel-card {
-  background-color: white;
+  background-color: #d7eeda;
   border-radius: 1rem;
   padding: 2rem;
   display: flex;
@@ -665,7 +879,7 @@ const handleRecurring = (event) => {
   align-items: center;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 450px;
+  width: 500px;
   max-width: 100%;
 }
 
@@ -686,19 +900,19 @@ const handleRecurring = (event) => {
 .hotel-name {
   font-size: 1.5rem;
   font-weight: 600;
-  color:#10b981;
-  margin-bottom: 0.75rem;
+  color: #00b7af;
 }
 
 .hotel-description {
   font-size: 0.875rem;
   color: #6b7280;
-  margin-bottom: 1.5rem;
-  max-width: 400px;
+  max-width: 500px;
+  margin-top: -1.5rem;
 }
 
 .view-details-btn {
-  background-color: #10b981;
+  font-family: 'Poppins', sans-serif;
+  background-color: #00b7af;
   color: white;
   border: none;
   padding: 0.75rem 2rem;
@@ -709,7 +923,7 @@ const handleRecurring = (event) => {
 }
 
 .view-details-btn:hover {
-  background-color: #10b981;
+  background-color: #00b7af;
   transform: translateY(-2px);
 }
 
@@ -773,17 +987,16 @@ const handleRecurring = (event) => {
 .form-navigation {
   display: flex;
   justify-content: space-between;
-  padding-top: 1.5rem;
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   background: white;
-  padding: 1rem 2rem;
-  
+  padding: 1rem 1.5rem;
 }
 
 .nav-button {
+  font-family: 'Poppins', sans-serif;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -806,13 +1019,13 @@ const handleRecurring = (event) => {
 
 .next-button,
 .confirm-button {
-  background: #10b981;
+  background: #006167;
   color: white;
 }
 
 .next-button:hover,
 .confirm-button:hover {
-  background: #059669;
+  background: #006167;
 }
 
 .modal {
@@ -851,18 +1064,19 @@ const handleRecurring = (event) => {
   right: 1rem;
   background: none;
   border: none;
-  color: #4b5563;
+  color: white;
   cursor: pointer;
   z-index: 10;
   padding: 0.5rem;
 }
 
 .hotel-header {
-  background-color: #10b981;
+  background-color: #00b7af;
   padding: 2rem;
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  color: white;
 }
 
 .hotel-header-image {
@@ -909,12 +1123,12 @@ const handleRecurring = (event) => {
 }
 
 .room-option:hover {
-  border-color: #10b981;
+  border-color: #00b7af;
   transform: translateY(-2px);
 }
 
 .room-option.selected {
-  border-color: #10b981;
+  border-color: #00b7af;
   background-color: #E0F7FA;
 }
 
@@ -930,8 +1144,8 @@ const handleRecurring = (event) => {
 }
 
 .room-radio:checked {
-  border-color: #10b981;
-  background-color: #10b981;
+  border-color: #00b7af;
+  background-color: #00b7af;
 }
 
 .room-radio:checked::after {
@@ -967,7 +1181,7 @@ const handleRecurring = (event) => {
 }
 
 .room-price {
-  color: #10b981;
+  color: #00b7af;
   font-weight: 500;
 }
 
@@ -1009,12 +1223,12 @@ const handleRecurring = (event) => {
 }
 
 .price {
-  color: #10b981;
+  color: #00b7af;
 }
 
 .confirm-btn {
   font-family: 'Poppins', sans-serif;
-  background-color: #10b981;
+  background-color: #00b7af;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -1027,7 +1241,192 @@ const handleRecurring = (event) => {
 }
 
 .confirm-btn:hover {
-  background-color: #059669;
+  background-color: #00b7af;
+}
+
+.package-modal {
+  max-width: 1200px;
+  padding: 0;
+  background: white;
+}
+
+.package-modal-header {
+  background: #006167;
+  color: white;
+  padding: 1.5rem 2rem;
+  position: relative;
+}
+
+.package-modal-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.package-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  background: #f8fafc;
+}
+
+.pricing-column {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.pricing-column:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pricing-column.selected {
+  background-color: #E0F7FA;
+}
+
+.pricing-radio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.pricing-radio:checked + .accommodation-type {
+  color: #00b7af;
+}
+
+.accommodation-type {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #00b7af;
+  margin-bottom: 1rem;
+  text-align: center;
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.price-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.price-list li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+  color: #4a5568;
+}
+
+.price-list li:last-child {
+  border-bottom: none;
+}
+
+.package-modal-footer {
+  padding: 1.5rem;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: center;
+}
+
+.confirm-package-btn {
+  background: #00b7af;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.confirm-package-btn:hover {
+  background: #00897B;
+  transform: translateY(-1px);
+}
+
+.confirm-package-btn:disabled {
+  background: #A0AEC0;
+  cursor: not-allowed;
+}
+
+.confirm-package-btn:disabled:hover {
+  background: #A0AEC0;
+  transform: none;
+}
+
+.hotel-selection-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.selected-room-card {
+  background-color: #e5f6ff;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  width: 300px;
+  margin: 1rem auto 0;
+  margin-top: -.75rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.selected-room-header {
+  background-color: #00b7af;
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.selected-room-content {
+  padding: 1rem;
+  text-align: center;
+}
+
+.room-price {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #00b7af;
+  margin-bottom: 0.5rem;
+}
+
+.room-capacity {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.package-fixed-price {
+  padding: 2rem;
+  text-align: center;
+  background: #f8fafc;
+}
+
+.package-fixed-price h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #00b7af;
+  margin-bottom: 1rem;
+}
+
+.fixed-price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
 }
 
 @media (max-width: 768px) {
@@ -1054,6 +1453,23 @@ const handleRecurring = (event) => {
   .hotel-header-image {
     width: 100px;
     height: 100px;
+  }
+
+  .package-pricing-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .package-modal-title {
+    font-size: 1.5rem;
+  }
+
+  .accommodation-type {
+    font-size: 0.875rem;
+  }
+
+  .price-list li {
+    font-size: 0.8rem;
   }
 }
 
@@ -1101,6 +1517,7 @@ const handleRecurring = (event) => {
   }
 
   .form-navigation {
+    font-family: 'Poppins', sans-serif;
     flex-direction: column;
     gap: 1rem;
   }

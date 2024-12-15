@@ -11,50 +11,82 @@
     </div>
 
     <!-- User Profile Section -->
-    <div v-if="activeTab === 'profile'">
-      <div class="profile-container">
-        <div class="profile-left">
-          <div class="profile-image">
-            <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile Image" />
-            <div v-else class="image-placeholder">
-              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="50" fill="#B7E4F0"/>
-                <path d="M0 70 Q50 40 100 70 L100 100 L0 100 Z" fill="#90EE90"/>
-              </svg>
+    <div v-if="activeTab === 'profile'" class="profile-section">
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="profile-image-container" @click="triggerFileInput">
+            <div class="profile-image">
+              <img v-if="profileImageUrl" :src="profileImageUrl" alt="Profile Image" />
+              <div v-else class="image-placeholder">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
             </div>
+            <input
+              type="file"
+              ref="fileInput"
+              @change="handleFileChange"
+              accept="image/*"
+              class="hidden"
+            />
           </div>
-          <h2 class="user-name">{{ firstName }} {{ lastName }}</h2>
-          <p class="user-bio">{{ bio || 'Add your bio here' }}</p>
+          <h2 class="profile-name">{{ firstName }} {{ lastName }}</h2>
+          <p class="profile-subtitle">hello bini ellie ememme</p>
         </div>
-        
-        <div class="profile-right">
-          <div class="form-container">
-            <div class="user-info">
-              <div class="name-row">
-                <div class="form-group">
-                  <label for="first-name">First Name</label>
-                  <input v-model="firstName" type="text" id="first-name" placeholder="Add the first name here" readonly class="first-name-input">
-                </div>
-                <div class="form-group">
-                  <label for="last-name">Last Name</label>
-                  <input v-model="lastName" type="text" id="last-name" placeholder="Add the last name here" readonly class="last-name-input">
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="email">Email</label>
-                <input v-model="email" type="email" id="email" placeholder="Add the email here" readonly>
-              </div>
-              <div class="form-group">
-                <label for="address">Address</label>
-                <input v-model="address" type="text" id="address" placeholder="Add the address here" readonly>
-              </div>
-              <div class="form-group">
-                <label for="phone-number">Phone Number</label>
-                <input v-model="phoneNumber" type="tel" id="phone-number" placeholder="Add the phone number here" readonly>
-              </div>
+
+        <div class="profile-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <input 
+                type="text" 
+                v-model="firstName" 
+                placeholder="First Name"
+                :readonly="!isModalOpen"
+              >
             </div>
-            <button @click="openModal" class="edit-profile-btn">Edit Profile</button>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input 
+                type="text" 
+                v-model="lastName" 
+                placeholder="Last Name"
+                :readonly="!isModalOpen"
+              >
+            </div>
           </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email</label>
+              <input 
+                type="email" 
+                v-model="email" 
+                placeholder="Email"
+                :readonly="!isModalOpen"
+              >
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input 
+                type="tel" 
+                v-model="phoneNumber" 
+                placeholder="Phone Number"
+                :readonly="!isModalOpen"
+              >
+            </div>
+          </div>
+          <div class="form-group address-field">
+              <label>Address</label>
+              <input 
+                type="text" 
+                v-model="address" 
+                placeholder="Address"
+                :readonly="!isModalOpen"
+              >
+            </div>
+          <button @click="openModal" class="edit-profile-btn">Edit Profile</button>
         </div>
       </div>
     </div>
@@ -75,7 +107,6 @@
             entries
           </div>
           <div class="search-control">
-            <label>Search: </label>
             <input type="text" v-model="searchQuery" placeholder="Search bookings...">
           </div>
         </div>
@@ -400,133 +431,224 @@
       </div>
     </div>
 
-    <!-- Edit Booking Modal -->
-    <div v-if="editingBooking" class="modal">
-      <div class="modal-content">
-        <span class="close" @click="closeEditBookingModal">&times;</span>
-        <h2>Edit Booking</h2>
-        <form @submit.prevent="saveEditedBooking" class="edit-form">
-          <div class="form-group">
-            <label for="edit-check-in-date">Check-in Date</label>
-            <input 
-              v-model="editingBooking.checkInDate"
-              type="date"
-              id="edit-check-in-date"
-              required
-            />
+    <div v-if="editingBooking" class="edit-booking-modal">
+      <div class="edit-booking-content">
+        <div class="edit-booking-header">
+          <h2>Edit Booking</h2>
+          <button class="close-button" @click="closeEditBookingModal">&times;</button>
+        </div>
+        
+        <form @submit.prevent="saveEditedBooking" class="edit-booking-form">
+          <div class="form-field">
+            <label>Check-in Date</label>
+            <div class="input-wrapper">
+              <input 
+                v-model="editingBooking.checkInDate"
+                type="date"
+                required
+                placeholder="mm/dd/yyyy"
+              />
+              <span class="calendar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </span>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="edit-check-in-time">Check-in Time</label>
-            <input 
-              v-model="editingBooking.checkInTime"
-              type="time"
-              id="edit-check-in-time"
-              required
-            />
+
+          <div class="form-field">
+            <label>Check-in Time</label>
+            <div class="input-wrapper">
+              <input 
+                v-model="editingBooking.checkInTime"
+                type="time"
+                required
+              />
+              <span class="time-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </span>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="edit-guests">Number of Guests</label>
-            <input 
-              v-model.number="editingBooking.guests"
-              type="number"
-              id="edit-guests"
-              required
-              min="1"
-            />
+
+          <div class="form-field">
+            <label>Number of Guests</label>
+            <div class="input-wrapper">
+              <select 
+                v-model.number="editingBooking.guests"
+                required
+              >
+                <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
+              </select>
+              <span class="guests-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </span>
+            </div>
           </div>
-          <button type="submit" class="save-button">Save Changes</button>
+
+          <button type="submit" class="save-changes-btn">
+            Save Changes
+          </button>
         </form>
       </div>
     </div>
 
     <!-- Restore Booking Modal -->
-    <div v-if="restoringBooking" class="modal">
-      <div class="modal-content">
-        <span class="close" @click="closeRestoreBookingModal">&times;</span>
-        <h2>Restore Booking</h2>
-        <form @submit.prevent="restoreBooking" class="edit-form">
-          <div class="form-group">
-            <label for="restore-check-in-date">New Check-in Date</label>
-            <input 
-              v-model="restoringBooking.newCheckInDate"
-              type="date"
-              id="restore-check-in-date"
-              required
-            />
+    <div v-if="restoringBooking" class="restore-booking-modal">
+      <div class="restore-booking-content">
+        <div class="restore-booking-header">
+          <h2>Restore Booking</h2>
+          <button class="close-button" @click="closeRestoreBookingModal">&times;</button>
+        </div>
+        
+        <form @submit.prevent="restoreBooking" class="restore-booking-form">
+          <div class="form-field">
+            <label>New Check-in Date</label>
+            <div class="input-wrapper">
+              <input 
+                v-model="restoringBooking.newCheckInDate"
+                type="date"
+                required
+                placeholder="dd/mm/yyyy"
+              />
+              <span class="calendar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </span>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="restore-check-in-time">New Check-in Time</label>
-            <input 
-              v-model="restoringBooking.newCheckInTime"
-              type="time"
-              id="restore-check-in-time"
-              required
-            />
+
+          <div class="form-field">
+            <label>New Check-in Time</label>
+            <div class="input-wrapper">
+              <input 
+                v-model="restoringBooking.newCheckInTime"
+                type="time"
+                required
+              />
+              <span class="time-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </span>
+            </div>
           </div>
-          <button type="submit" class="save-button">Restore Booking</button>
+
+          <button type="submit" class="save-changes-btn">
+            Save Changes
+          </button>
         </form>
       </div>
     </div>
 
     <!-- Receipt Modal -->
     <div v-if="selectedReceipt" class="modal">
-      <div class="modal-content receipt-details">
-        <span class="close" @click="selectedReceipt = null">&times;</span>
-        <h2>Booking Receipt</h2>
-        <div class="receipt-content">
-          <div class="detail-row">
-            <span class="detail-label">Receipt ID:</span>
-            <span class="detail-value">{{ selectedReceipt.id }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Booking ID:</span>
-            <span class="detail-value">{{ selectedReceipt.bookingId }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Guest Name:</span>
-            <span class="detail-value">{{ selectedReceipt.guestName }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Check-in Date:</span>
-            <span class="detail-value">{{ formatDate(selectedReceipt.checkInDate) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Check-in Time:</span>
-            <span class="detail-value">{{ selectedReceipt.checkInTime }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Hotel:</span>
-            <span class="detail-value">{{ selectedReceipt.hotelName }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Room Type:</span>
-            <span class="detail-value">{{ selectedReceipt.roomType }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Package:</span>
-            <span class="detail-value">{{ selectedReceipt.packageName }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Tour Guide:</span>
-            <span class="detail-value">{{ selectedReceipt.tourGuideName }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Total Amount:</span>
-            <span class="detail-value">{{ formatCurrency(selectedReceipt.totalAmount) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Remit Amount:</span>
-            <span class="detail-value">{{ formatCurrency(selectedReceipt.remitAmount) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Generated At:</span>
-            <span class="detail-value">{{ formatDate(selectedReceipt.generatedAt) }}</span>
-          </div>
+      <div class="modal-content receipt-modal">
+        <!-- Diagonal Header -->
+        <div class="receipt-header">
+          <div class="header-teal"></div>
+          <div class="header-yellow"></div>
         </div>
-        <div class="receipt-actions">
-          <button @click="generatePDF(selectedReceipt)" class="download-receipt-btn">
-            Download PDF
-          </button>
+
+        <!-- Receipt Content -->
+        <div class="receipt-content">
+          <!-- Company Logo -->
+          <img src="/src/img/logoforRMs.png" alt="RM's Travel and Tour" class="company-logo">
+          
+          <!-- Receipt Title -->
+          <h1 class="receipt-title">RECEIPT</h1>
+          
+          <div class="receipt-divider"></div>
+
+          <!-- Personalized Greeting -->
+          <h2 class="greeting">Thank you, {{ selectedReceipt.guestName?.split(' ')[0] }}!</h2>
+
+          <!-- Receipt Details -->
+          <div class="receipt-ids">
+            <p>Receipt ID: {{ selectedReceipt.id }}</p>
+            <p>Booking ID: {{ selectedReceipt.bookingId }}</p>
+          </div>
+
+          <div class="booking-details">
+            <div class="detail-row">
+              <span class="label">Guest Name:</span>
+              <span class="value">{{ selectedReceipt.guestName }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Check-in Date:</span>
+              <span class="value">{{ formatDate(selectedReceipt.checkInDate) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Check-in Time:</span>
+              <span class="value">{{ selectedReceipt.checkInTime }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Hotel:</span>
+              <span class="value">{{ selectedReceipt.hotelName }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Room Type:</span>
+              <span class="value">{{ selectedReceipt.roomType }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Package:</span>
+              <span class="value">{{ selectedReceipt.packageName }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Tour Guide:</span>
+              <span class="value">{{ selectedReceipt.tourGuideName }}</span>
+            </div>
+          </div>
+
+          <!-- Remit Calculation -->
+          <div class="remit-calculation">
+            <h3>Remit Calculation</h3>
+            <div class="detail-row">
+              <span class="label">Booking Price:</span>
+              <span class="value">₱{{ selectedReceipt.bookingPrice.toFixed(2) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Remit Amount:</span>
+              <span class="value">₱{{ selectedReceipt.remitAmount.toFixed(2) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Change:</span>
+              <span class="value">₱{{ calculateChange(selectedReceipt).toFixed(2) }}</span>
+            </div>
+          </div>
+
+          <!-- Total Amount -->
+          <div class="total-amount">
+            <span class="label">Total Amount Paid:</span>
+            <span class="value">₱{{ selectedReceipt.remitAmount.toFixed(2) }}</span>
+          </div>
+
+          <!-- Generated Date -->
+          <div class="generated-date">
+            Generated at: {{ formatDate(selectedReceipt.generatedAt) }}
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="modal-actions">
+            <button @click="printReceipt" class="action-button print">Print</button>
+            <button @click="downloadReceipt" class="action-button download">Download PDF</button>
+            <button @click="closeReceiptModal" class="action-button close">Close</button>
+          </div>
         </div>
       </div>
     </div>
@@ -537,8 +659,9 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { auth, db } from '../firebaseConfig';
+import { auth, db, storage } from '../firebaseConfig';
 import { doc, getDoc, updateDoc, collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { jsPDF } from 'jspdf';
 import HeaderComponent from './Header.vue';
 import FooterComponent from './Footer.vue';
@@ -562,6 +685,7 @@ const selectedBooking = ref(null);
 const editingBooking = ref(null);
 const restoringBooking = ref(null);
 const selectedReceipt = ref(null);
+const fileInput = ref(null);
 
 const filteredBookings = computed(() => {
   if (!searchQuery.value) return bookings.value;
@@ -651,6 +775,34 @@ const openModal = () => {
 
 const closeModal = () => {
   isModalOpen.value = false;
+};
+
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+const handleFileChange = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error('No authenticated user');
+
+    const imageRef = storageRef(storage, `profileImages/${user.uid}/profile.jpg`);
+    await uploadBytes(imageRef, file);
+    const downloadURL = await getDownloadURL(imageRef);
+    
+    await updateDoc(doc(db, 'users', user.uid), {
+      profileImageUrl: downloadURL
+    });
+    
+    profileImageUrl.value = downloadURL;
+    alert('Profile image updated successfully!');
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    alert('Failed to upload image. Please try again.');
+  }
 };
 
 const saveProfile = async () => {
@@ -751,20 +903,6 @@ const cancelBooking = async (booking) => {
   }
 };
 
-const unassignGuide = async (bookingId) => {
-  try {
-    const bookingRef = doc(db, 'bookings', bookingId);
-    await updateDoc(bookingRef, {
-      assignedGuide: null,
-      updatedAt: Timestamp.now()
-    });
-    console.log("Guide unassigned successfully.");
-  } catch (error) {
-    console.error("Error unassigning guide:", error);
-    throw error;
-  }
-};
-
 const openRestoreBookingModal = (booking) => {
   restoringBooking.value = { 
     ...booking, 
@@ -825,38 +963,106 @@ const showReceipt = async (receiptId) => {
   }
 };
 
-const generatePDF = (receiptData) => {
-  const doc = new jsPDF();
-  
-  doc.setFontSize(20);
-  doc.text('Booking Receipt', 105, 20, { align: 'center' });
-  
-  doc.setFontSize(12);
-  let yPos = 40;
-  const lineHeight = 10;
+const calculateChange = (receipt) => {
+  if (!receipt) return 0;
+  return receipt.remitAmount - receipt.bookingPrice;
+};
 
-  const addLine = (label, value) => {
-    doc.text(`${label}: ${value}`, 20, yPos);
+const printReceipt = () => {
+  window.print();
+};
+
+const downloadReceipt = () => {
+  if (!selectedReceipt.value) return;
+
+  const doc = new jsPDF({
+    format: 'a4',
+    unit: 'mm'
+  });
+  
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 20;
+  
+  // Header with diagonal colors
+  doc.setFillColor(0, 150, 136); // Teal
+  doc.rect(0, 0, pageWidth/2 + 20, 40, 'F');
+  doc.setFillColor(255, 193, 7); // Yellow
+  doc.rect(pageWidth/2 - 20, 0, pageWidth/2 + 20, 40, 'F');
+
+  // Logo placeholder (you'll need to replace this with actual logo)
+  doc.addImage('/src/img/logoforRMs.png', 'PNG', pageWidth/2 - 15, 20, 30, 30);
+
+  // Title
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(24);
+  doc.setTextColor(51, 51, 51);
+  doc.text('RECEIPT', pageWidth/2, 70, { align: 'center' });
+
+  // Thank you message
+  doc.setFontSize(16);
+  doc.text(`Thank you, ${selectedReceipt.value.guestName.split(' ')[0]}!`, margin, 90);
+
+  // Receipt IDs
+  doc.setFontSize(10);
+  doc.setTextColor(102, 102, 102);
+  doc.text(`Receipt ID: ${selectedReceipt.value.id}`, margin, 105);
+  doc.text(`Booking ID: ${selectedReceipt.value.bookingId}`, margin, 112);
+
+  // Booking Details
+  let yPos = 130;
+  const lineHeight = 8;
+  const labelX = margin;
+  const valueX = pageWidth - margin;
+  
+  doc.setFont('helvetica', 'normal');
+  
+  const addDetailRow = (label, value) => {
+    doc.text(label, labelX, yPos);
+    doc.text(value, valueX, yPos, { align: 'right' });
     yPos += lineHeight;
   };
 
-  addLine('Receipt ID', receiptData.id);
-  addLine('Booking ID', receiptData.bookingId);
-  addLine('Guest Name', receiptData.guestName);
-  addLine('Check-in Date', formatDate(receiptData.checkInDate));
-  addLine('Check-in Time', receiptData.checkInTime);
-  addLine('Hotel', receiptData.hotelName);
-  addLine('Room Type', receiptData.roomType);
-  addLine('Package', receiptData.packageName);
-  addLine('Tour Guide', receiptData.tourGuideName);
-  addLine('Total Amount', formatCurrency(receiptData.totalAmount));
-  addLine('Remit Amount', formatCurrency(receiptData.remitAmount));
-  addLine('Generated At', formatDate(receiptData.generatedAt));
+  addDetailRow('Guest Name:', selectedReceipt.value.guestName);
+  addDetailRow('Check-in Date:', formatDate(selectedReceipt.value.checkInDate));
+  addDetailRow('Check-in Time:', selectedReceipt.value.checkInTime);
+  addDetailRow('Hotel:', selectedReceipt.value.hotelName);
+  addDetailRow('Room Type:', selectedReceipt.value.roomType);
+  addDetailRow('Package:', selectedReceipt.value.packageName);
+  addDetailRow('Tour Guide:', selectedReceipt.value.tourGuideName);
+
+  // Remit Calculation
+  yPos += 10;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Remit Calculation', margin, yPos);
+  yPos += lineHeight;
+
+  doc.setFont('helvetica', 'normal');
+  addDetailRow('Booking Price:', `₱${selectedReceipt.value.bookingPrice.toFixed(2)}`);
+  addDetailRow('Remit Amount:', `₱${selectedReceipt.value.remitAmount.toFixed(2)}`);
+  addDetailRow('Change:', `₱${calculateChange(selectedReceipt.value).toFixed(2)}`);
+
+  // Total Amount
+  yPos += 10;
+  doc.text('Total Amount Paid:', margin, yPos);
   
+  // Format total amount in green
+  doc.setTextColor(0, 150, 136);
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`₱${selectedReceipt.value.remitAmount.toFixed(2)}`, valueX, yPos, { align: 'right' });
+
+  // Generated Date
+  yPos += 20;
   doc.setFontSize(10);
-  doc.text('Thank you for choosing our service!', 105, yPos + 20, { align: 'center' });
-  
-  doc.save(`receipt-${receiptData.id}.pdf`);
+  doc.setTextColor(102, 102, 102);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Generated at: ${formatDate(selectedReceipt.value.generatedAt)}`, margin, yPos);
+
+  doc.save(`receipt_${selectedReceipt.value.id}.pdf`);
+};
+
+const closeReceiptModal = () => {
+  selectedReceipt.value = null;
 };
 
 onMounted(async () => {
@@ -928,182 +1134,134 @@ watch(activeTab, async (newTab) => {
   margin-bottom: 2rem;
 }
 
-.profile-container {
-  display: flex;
-  align-items: flex-start;
-  min-height: 70vh;
+.profile-section {
+  max-width: 1000px;
+  margin: 2rem auto;
+  margin-top: -2rem;
+  padding: 0 1rem;
 }
 
-.profile-left {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-left: 10rem;
+.profile-card {
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header {
+  background: #00BFA5;
+  padding: 2rem;
+  text-align: center;
+  color: white;
+}
+
+.profile-image-container {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid white;
+  cursor: pointer;
+  background: #f0f0f0;
 }
 
 .profile-image {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  overflow: hidden;
-  background-color: #f0f0f0;
-  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .profile-image img {
-  position: absolute;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: cover;
-}
-
-.image-placeholder {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.user-name {
+.profile-name {
   font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+  margin-bottom: -1rem;
 }
 
-.user-bio {
-  text-align: center;
-  color: #666;
-  font-size: 1rem;
-  margin-top: -1.8rem;
+.profile-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: -1rem;
   font-style: italic;
 }
 
-.profile-right {
-  flex: 2;
-  max-width: 90vh;
-  margin-right: 10rem;
-  margin-left: -4rem;
-}
-
-.form-container {
-  background-color: #fff;
+.profile-form {
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 5rem;
-  margin-top: -2rem;
 }
 
-.user-info {
-  margin-bottom: 1rem;
-}
-
-.name-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.name-row .form-group {
-  flex: 1;
-}
-
-.info-item {
-  margin-bottom: 1rem;
-}
-
-.info-item strong {
-  font-weight: 600;
-  margin-right: 0.5rem;
-}
-
-.edit-profile-btn {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
-  transition: background-color 0.2s;
-  margin-top: 1rem;
-}
-
-.edit-profile-btn:hover {
-  background-color: #45a049;
-}
-
-.profile-right .form-container {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  padding: 2.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.profile-right .user-info {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.profile-right label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 0.5rem;
-}
-
-.profile-right input[type="text"],
-.profile-right input[type="email"],
-.profile-right input[type="tel"] {
-  font-family: 'Poppins', sans-serif;
-  width: 95%;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  background-color: #fff;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.profile-right input[type="text"]:focus,
-.profile-right input[type="email"]:focus,
-.profile-right input[type="tel"]:focus {
-  font-family: 'Poppins', sans-serif;
-  border-color: #80bdff;
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.profile-right .name-row {
+.form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
+  margin-bottom: 1rem;
 }
 
-.profile-right .name-row .first-name-input,
-.profile-right .name-row .last-name-input {
-  width: 140%;
-  max-width: 288px;
+.form-group {
+  display: flex;
+  flex-direction: column;
 }
 
-.profile-right .edit-profile-btn {
-  margin-top: 2rem;
-  background-color: #007bff;
-  border-color: #007bff;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input {
+  font-family: 'Poppins', sans-serif;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
   font-size: 1rem;
-  border-radius: 6px;
-  transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+  width: 95%;
 }
 
-.profile-right .edit-profile-btn:hover {
-  background-color: #0056b3;
-  border-color: #004085;
+.address-field {
+  grid-column: 1 / -1;
+  margin-bottom: 1rem;
 }
 
-.profile-right .edit-profile-btn:active {
-  transform: translateY(1px);
+.address-field input {
+  width: 97%;
+}
+
+.form-group input:read-only {
+  background-color: #f8f8f8;
+}
+
+.edit-profile-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #ffbd3e;
+  border: none;
+  border-radius: 0.5rem;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.2s;
+}
+
+.edit-profile-btn:hover {
+  background: #ffcd6e;
+}
+
+.hidden {
+  display: none;
 }
 
 .modal {
@@ -1127,6 +1285,7 @@ watch(activeTab, async (newTab) => {
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
+  position: relative;
 }
 
 .modal-header {
@@ -1143,114 +1302,22 @@ watch(activeTab, async (newTab) => {
 }
 
 .close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  color: #666;
   background: none;
   border: none;
-  font-size: 1.5rem;
   cursor: pointer;
-  color: #666;
-  padding: 0;
-}
-
-.profile-image-container {
-  display: flex;
-  justify-content: center;
-  margin-top: -2rem;
-}
-
-.profile-image-wrapper {
-  position: relative;
-  width: 200px;
-  height: 200px;
-}
-
-.camera-icon {
-  position: absolute;
-  right: 5px;
-  bottom: 10px;
-  width: 40px;
-  height: 40px;
-  background-color: #ddd;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: 2px solid white;
-  color: white;
-  z-index: 10;
-}
-
-.hidden {
-  display: none;
-}
-
-.form-fields {
-  display: flex;
-  flex-direction: column;
-}
-
-.personal-info .form-row {
-  display: flex;
-  gap: 2rem;
-}
-
-.personal-info .form-row .form-group {
-  flex: 1;
-}
-
-.personal-info {
-  padding: 2rem;
-  border-radius: 8px;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-label {
-  display: block;
-  color: #666;
-  font-size: .85rem;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-textarea {
-  font-family: 'Poppins', sans-serif;
-  width: 97%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.first-name-input,
-.last-name-input {
-  width: 100%;
-  max-width: 230px;
-}
-
-.save-button {
-  font-family: 'Poppins', sans-serif;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
-  transition: background-color 0.2s;
-}
-
-.save-button:hover {
-  background-color: #45a049;
+  padding: 5px;
+  line-height: 1;
 }
 
 .history-content,
 .archive-content {
+  margin-top: -3rem;
+  margin-bottom: 3rem;
   padding: 20px;
   background: white;
   border-radius: 8px;
@@ -1287,7 +1354,9 @@ textarea {
 }
 
 .booking-table-container {
-  overflow-x: auto;
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-bottom: 20px;
 }
 
 .booking-table {
@@ -1300,7 +1369,7 @@ textarea {
 .booking-table td {
   padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid #ddd;
 }
 
 .booking-table th {
@@ -1344,53 +1413,56 @@ textarea {
 .cancel-booking-btn,
 .restore-booking-btn,
 .show-receipt-btn {
+  font-family: 'Poppins', sans-serif;
   padding: 6px 12px;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9em;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
   margin-right: 5px;
 }
 
 .view-details-btn {
-  background-color: #007bff;
+  background-color: #3b82f6;
 }
 
 .view-details-btn:hover {
-  background-color: #0056b3;
+  background-color: #2563eb;
 }
 
 .edit-booking-btn {
-  background-color: #ffc107;
+  background-color: #00A5B8;
 }
 
 .edit-booking-btn:hover {
-  background-color: #e0a800;
+  background-color: #008A99;
 }
 
 .cancel-booking-btn {
-  background-color: #dc3545;
+  background-color: #ef4444;
 }
 
 .cancel-booking-btn:hover {
-  background-color: #c82333;
+  background-color: #dc2626;
 }
 
 .restore-booking-btn {
-  background-color: #28a745;
+  background-color: #00A5B8;
 }
 
 .restore-booking-btn:hover {
-  background-color: #218838;
+  background-color: #008A99;
 }
 
 .show-receipt-btn {
-  background-color: #17a2b8;
+  background-color: #10b981;
 }
 
 .show-receipt-btn:hover {
-  background-color: #138496;
+  background-color: #059669;
 }
 
 .pagination {
@@ -1398,6 +1470,9 @@ textarea {
   justify-content: space-between;
   align-items: center;
   padding: 20px 0;
+  background-color: white;
+  border-top: 1px solid #ddd;
+  margin-top: auto;
 }
 
 .pagination-controls {
@@ -1408,6 +1483,7 @@ textarea {
 
 .pagination-btn,
 .page-btn {
+  font-family: 'Poppins', sans-serif;
   padding: 6px 12px;
   border: 1px solid #ddd;
   background: white;
@@ -1472,57 +1548,356 @@ textarea {
   background-color: #218838;
 }
 
-@media (max-width: 768px) {
-  .history-header,
-  .archive-header {
-    flex-direction: column;
-    gap: 15px;
+.edit-booking-modal,
+.restore-booking-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.edit-booking-content,
+.restore-booking-content {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.edit-booking-header,
+.restore-booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.edit-booking-header h2,
+.restore-booking-header h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+  color: #000;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  line-height: 1;
+}
+
+.edit-booking-form,
+.restore-booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper input,
+.input-wrapper select {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  background: white;
+}
+
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+  outline: none;
+  border-color: #00A5B8;
+  box-shadow: 0 0 0 1px #00A5B8;
+}
+
+.calendar-icon,
+.time-icon,
+.guests-icon {
+  position: absolute;
+  right: 12px;
+  color: #6B7280;
+  pointer-events: none;
+}
+
+.save-changes-btn {
+  background-color: #00A5B8;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 8px;
+}
+
+.save-changes-btn:hover {
+  background-color: #008A99;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+select {
+  cursor: pointer;
+}
+
+.receipt-modal {
+  background: white;
+  width: 100%;
+  max-width: 400px;
+  min-height: 500px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.receipt-header {
+  position: relative;
+  height: 50px;
+  overflow: hidden;
+  background: white;
+  margin: 0;
+  padding: 0;
+}
+
+.header-teal {
+  position: absolute;
+  top: 0;
+  left: -10%;
+  width: 60%;
+  height: 100%;
+  background-color: #009688;
+  transform: skewX(-20deg);
+}
+
+.header-yellow {
+  position: absolute;
+  top: 0;
+  right: -10%;
+  width: 60%;
+  height: 100%;
+  background-color: #FFC107;
+  transform: skewX(-20deg);
+}
+
+.receipt-content {
+  padding: 0 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  flex: 1;
+}
+
+.company-logo {
+  width: 80px;
+  height: 80px;
+  margin: -40px auto 1rem;
+  position: relative;
+  z-index: 10;
+  background: white;
+  border-radius: 50%;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.receipt-title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0.5rem 0 1rem;
+}
+
+.receipt-divider {
+  height: 1px;
+  background-color: #E0E0E0;
+  width: 100%;
+}
+
+.greeting {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.75rem;
+}
+
+.receipt-ids {
+  color: #666;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.receipt-ids p {
+  margin: 0.25rem 0;
+  color: #666;
+}
+
+.booking-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.detail-row .label {
+  color: #666;
+  font-weight: 500;
+  flex: 1;
+}
+
+.detail-row .value {
+  color: #333;
+  font-weight: 400;
+  text-align: right;
+  flex: 2;
+}
+
+.remit-calculation {
+  margin-top: 1rem;
+  border-top: 1px solid #E0E0E0;
+  padding-top: 0.25rem;
+}
+
+.remit-calculation h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.total-amount {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2rem;
+  margin-top: auto;
+  padding: 0.75rem 0;
+  border-top: 2px solid #E0E0E0;
+}
+
+.total-amount .label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.total-amount .value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #009688;
+}
+
+.generated-date {
+  text-align: left;
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: 0.75rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 0.5rem 1.5rem;
+  background: #f9fafb;
+  border-top: 1px solid #E0E0E0;
+}
+
+.action-button {
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.action-button.print {
+  background-color: #009688;
+  color: white;
+}
+
+.action-button.download {
+  background-color: #FFC107;
+  color: #333;
+}
+
+.action-button.close {
+  background-color: #E0E0E0;
+  color: #333;
+}
+
+.action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media print {
+  .modal-actions {
+    display: none;
   }
 
-  .history-controls,
-  .archive-controls {
-    flex-direction: column;
-    width: 100%;
+  .receipt-modal {
+    box-shadow: none;
+    min-height: auto;
   }
 
-  .search-control {
-    width: 100%;
+  .receipt-content {
+    padding: 2rem;
   }
 
-  .search-control input {
-    width: 100%;
-  }
-
-  .pagination {
-    flex-direction: column;
-    gap: 15px;
-    text-align: center;
-  }
-
-  .profile-container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .profile-left,
-  .profile-right {
-    margin: 0;
-    width: 100%;
-    max-width: none;
-  }
-
-  .form-container {
-    padding: 1rem;
-  }
-
-  .name-row {
-    flex-direction: column;
-  }
-
-  .first-name-input,
-  .last-name-input {
-    width: 100%;
-    max-width: none;
+  .booking-details {
+    page-break-inside: avoid;
   }
 }
 </style>
