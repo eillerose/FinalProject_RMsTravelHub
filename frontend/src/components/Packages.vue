@@ -48,14 +48,14 @@
                   </li>
                 </ul>
               </div>
-              <div v-if="selectedPackage.includePackageOptions" class="package-options">
+              <div v-if="selectedPackage.pricingMode === 'options'" class="package-options">
                 <h3>Package Options</h3>
                 <div class="options-grid">
                   <button 
-                    v-for="option in selectedPackage.selectedOptions" 
+                    v-for="option in selectedPackage.options" 
                     :key="option.id"
                     class="option-btn"
-                    @click="openOptionsModal(option)"
+                    @click="showOptionDetails(option)"
                   >
                     {{ option.name }}
                   </button>
@@ -67,19 +67,19 @@
       </div>
     </div>
 
-    <!-- Package Options Modal -->
-    <div v-if="showOptionsModal" class="modal-overlay" @click.self="closeOptionsModal">
+    <!-- Package Option Details Modal -->
+    <div v-if="showOptionDetailsModal" class="modal-overlay" @click.self="closeOptionDetailsModal">
       <div class="modal-content options-modal">
-        <button class="close-btn" @click="closeOptionsModal">×</button>
+        <button class="close-btn" @click="closeOptionDetailsModal">×</button>
         <div class="modal-details">
           <h2 class="options-title">{{ selectedOption.name }}</h2>
           <div class="pricing-grid">
             <div v-for="(price, index) in selectedOption.pricing" :key="index" class="pricing-card">
               <div class="pax-info">
-                <h3>{{ price.pax }} PAX</h3>
+                <h3>{{ price.paxRange }} PAX</h3>
               </div>
               <div class="price-info">
-                <p class="price">₱{{ price.price.toLocaleString() }}</p>
+                <p class="price">₱{{ price.pricePerHead.toLocaleString() }}</p>
                 <p class="per-person">per person</p>
               </div>
             </div>
@@ -103,7 +103,7 @@ const packages = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const showModal = ref(false);
-const showOptionsModal = ref(false);
+const showOptionDetailsModal = ref(false);
 const selectedPackage = ref(null);
 const selectedOption = ref(null);
 
@@ -126,7 +126,7 @@ const fetchPackages = async () => {
         id: doc.id,
         ...data,
         components: data.components || [],
-        selectedOptions: data.selectedOptions || []
+        options: data.options || []
       };
     });
     loading.value = false;
@@ -149,13 +149,13 @@ const closeModal = () => {
   document.body.style.overflow = 'auto';
 };
 
-const openOptionsModal = (option) => {
+const showOptionDetails = (option) => {
   selectedOption.value = option;
-  showOptionsModal.value = true;
+  showOptionDetailsModal.value = true;
 };
 
-const closeOptionsModal = () => {
-  showOptionsModal.value = false;
+const closeOptionDetailsModal = () => {
+  showOptionDetailsModal.value = false;
   selectedOption.value = null;
 };
 

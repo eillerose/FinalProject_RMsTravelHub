@@ -74,8 +74,6 @@ import {
   Calendar
 } from 'lucide-vue-next'
 
-import AdminCalendar from '@/views/AdminCalendar.vue'
-
 const route = useRoute()
 const currentPageTitle = computed(() => route.meta.title || '')
 
@@ -96,7 +94,14 @@ const menuSections = [
     title: 'MANAGEMENT',
     items: [
       { name: 'Logbook', path: '/admin/logbook', icon: BookOpenCheck },
-      { name: 'Packages', path: '/admin/packages', icon: Package },
+      {
+        name: 'Packages',
+        icon: Package,
+        subItems: [
+          { name: 'All Packages', path: '/admin/packages', icon: Package },
+          { name: 'Package Options', path: '/admin/options', icon: Package }
+        ]
+      },
       { name: 'Activities', path: '/admin/activities', icon: Activity },
       { name: 'Staffs', path: '/admin/staffs', icon: Users },
       { name: 'Hotels', path: '/admin/hotels', icon: Building2 },
@@ -282,4 +287,3 @@ const menuSections = [
   overflow: hidden;
 }
 </style>
-

@@ -1,6 +1,7 @@
 <template>
   <div class="booking-container">
     <HeaderComponent />
+    
     <div class="booking-form">
       <!-- Header Section with Title and Progress Steps -->
       <div class="booking-header">
@@ -49,7 +50,12 @@
                 <div class="package-details">
                   <h3 class="package-name">{{ pkg.name }}</h3>
                   <p class="package-description">{{ pkg.description }}</p>
-                  <div class="package-price">₱{{ pkg.price }}</div>
+                  <div v-if="pkg.pricingMode === 'fixed'" class="package-price">
+                    ₱{{ pkg.fixedPrice }}
+                  </div>
+                  <div v-else-if="pkg.pricingMode === 'options'" class="package-price">
+                    Options available
+                  </div>
                 </div>
               </div>
             </div>
@@ -79,7 +85,7 @@
                 </div>
               </div>
               
-              <!-- New: Selected Room Display -->
+              <!-- Selected Room Display -->
               <div v-if="booking.hotelAndRoom" class="selected-room-card">
                 <div class="selected-room-header">
                   {{ booking.hotelAndRoom.hotel.name }}
@@ -127,6 +133,7 @@
                       id="guests" 
                       v-model="booking.guests" 
                       min="1" 
+                      @change="validateGuestCount"
                       required
                     >
                   </div>
@@ -169,7 +176,7 @@
     </div>
 
     <!-- Package Details Modal -->
-    <div v-if="showPackageModal" class="modal">
+    <div v-if="showPackageModal && selectedPackage?.pricingMode === 'options'" class="modal">
       <div class="modal-content package-modal">
         <button class="close-modal-btn" @click="closePackageModal">
           <XIcon />
@@ -181,7 +188,7 @@
 
         <div class="package-pricing-grid">
           <label 
-            v-for="(column, index) in pricingColumns" 
+            v-for="(option, index) in selectedPackage.options" 
             :key="index" 
             class="pricing-column"
             :class="{ 'selected': selectedPricingColumn === index }"
@@ -193,17 +200,17 @@
               v-model="selectedPricingColumn"
               class="pricing-radio"
             >
-            <h3 class="accommodation-type">{{ column.title }}</h3>
+            <h3 class="accommodation-type">{{ option.name }}</h3>
             <ul class="price-list">
-              <li v-for="(price, priceIndex) in column.prices" :key="priceIndex">
-                {{ price.pax }} – PHP {{ price.amount }}
+              <li v-for="(price, priceIndex) in option.pricing" :key="priceIndex">
+                {{ price.paxRange }} – PHP {{ price.pricePerHead }}
               </li>
             </ul>
           </label>
         </div>
 
         <div class="package-modal-footer">
-          <button @click="confirmPackageSelection" class="confirm-package-btn" :disabled="selectedPricingColumn === null">
+          <button @click="confirmPackageSelection" class="confirm-package-btn" :disabled="!canConfirmPackage">
             Select Package
           </button>
         </div>
@@ -274,12 +281,25 @@
           <div class="summary-section">
             <h3>Package Details</h3>
             <p><strong>Package:</strong> {{ booking.package?.name }}</p>
-            <p><strong>Pricing Option:</strong> {{ booking.package?.pricingColumn?.title }}</p>
+            <p v-if="booking.package?.pricingMode === 'options'">
+              <strong>Pricing Option:</strong> {{ booking.package?.selectedOption?.name }}
+            </p>
             <p><strong>Check-in Date & Time:</strong> {{ formatDateTime(booking.checkInDate, booking.checkInTime) }}</p>
             <p><strong>Hotel:</strong> {{ booking.hotelAndRoom?.hotel.name }}</p>
-            <p><strong>Room Type:</strong> {{ booking.hotelAndRoom?.room.name }}</p>
+            <p><strong>Room Type:</strong> {{ booking.hotelAndRoom?.room.type }}</p>
             <p><strong>Room Price:</strong> ₱{{ booking.hotelAndRoom?.room.price }} per night</p>
             <p><strong>Room Capacity:</strong> {{ booking.hotelAndRoom?.room.capacity }} pax</p>
+          </div>
+
+          <div class="summary-section">
+            <h3>Bill Breakdown</h3>
+            <p v-if="booking.package?.pricingMode === 'fixed'">
+              <strong>Package Price:</strong> ₱{{ booking.package?.fixedPrice }}
+            </p>
+            <p v-else-if="booking.package?.pricingMode === 'options'">
+              <strong>Package Price:</strong> ₱{{ calculatePackagePrice() }} (₱{{ getPerHeadPrice() }} per person x {{ booking.guests }} guests)
+            </p>
+            <p><strong>Room Price:</strong> ₱{{ booking.hotelAndRoom?.room.price }}</p>
           </div>
 
           <div class="summary-total">
@@ -329,45 +349,6 @@ const showPackageModal = ref(false);
 const selectedPackage = ref(null);
 const selectedPricingColumn = ref(null);
 
-const pricingColumns = [
-  {
-    title: '2D1N PACKAGE (beach front accommodation)',
-    prices: [
-      { pax: '1-2 pax', amount: '2150.00' },
-      { pax: '3-4 pax', amount: '1800.00' },
-      { pax: '5-6 pax', amount: '1500.00' },
-      { pax: '10 pax or GROUPS', amount: '1400.00' },
-    ]
-  },
-  {
-    title: '3D2N PACKAGE (beach front accommodation)',
-    prices: [
-      { pax: '1-2 pax', amount: '3150.00' },
-      { pax: '3-4 pax', amount: '2599.00' },
-      { pax: '5-6 pax', amount: '2050.00' },
-      { pax: '10 pax or GROUPS', amount: '1900.00' },
-    ]
-  },
-  {
-    title: '2D1N Package (1-2 mins walk accommodation)',
-    prices: [
-      { pax: '1-2 pax', amount: '1900.00' },
-      { pax: '3-4 pax', amount: '1500.00' },
-      { pax: '5-6 pax', amount: '1450.00' },
-      { pax: '10 pax or GROUPS', amount: '1300.00' },
-    ]
-  },
-  {
-    title: '3D2N Package (1-2 mins walk accommodation)',
-    prices: [
-      { pax: '1-2 pax', amount: '2650.00' },
-      { pax: '3-4 pax', amount: '1900.00' },
-      { pax: '5-6 pax', amount: '1800.00' },
-      { pax: '10 pax or GROUPS', amount: '1700.00' },
-    ]
-  }
-];
-
 onMounted(async () => {
   await fetchPackages();
   await fetchHotels();
@@ -389,7 +370,9 @@ const fetchPackages = async () => {
     const packagesSnapshot = await getDocs(packagesCollection);
     packages.value = packagesSnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
+      options: doc.data().options || [],
+      fixedPrice: doc.data().fixedPrice || 0,
     }));
   } catch (error) {
     console.error("Error fetching packages:", error);
@@ -410,9 +393,18 @@ const fetchHotels = async () => {
 };
 
 const selectPackage = (pkg) => {
-  selectedPackage.value = pkg;
-  selectedPricingColumn.value = null;
-  showPackageModal.value = true;
+  if (pkg.pricingMode === 'fixed') {
+    booking.package = {
+      ...pkg,
+      selectedOption: null
+    };
+    booking.guests = 1; // Reset guest count
+    nextStep();
+  } else if (pkg.pricingMode === 'options') {
+    selectedPackage.value = pkg;
+    selectedPricingColumn.value = null;
+    showPackageModal.value = true;
+  }
 };
 
 const closePackageModal = () => {
@@ -420,13 +412,21 @@ const closePackageModal = () => {
   selectedPricingColumn.value = null;
 };
 
+const canConfirmPackage = computed(() => {
+  if (!selectedPackage.value) return false;
+  if (selectedPackage.value.pricingMode === 'fixed') return true;
+  return selectedPricingColumn.value !== null;
+});
+
 const confirmPackageSelection = () => {
-  if (selectedPricingColumn.value !== null) {
+  if (canConfirmPackage.value) {
     booking.package = {
       ...selectedPackage.value,
-      pricingColumn: pricingColumns[selectedPricingColumn.value]
+      selectedOption: selectedPackage.value.options[selectedPricingColumn.value]
     };
+    booking.guests = 1; // Reset guest count
     closePackageModal();
+    nextStep();
   }
 };
 
@@ -484,9 +484,20 @@ const closeSummaryModal = () => {
 
 const calculateTotalPrice = () => {
   let total = 0;
-  if (booking.package && booking.package.pricingColumn) {
-    const price = booking.package.pricingColumn.prices[0].amount; // Assuming first price is default
-    total += parseFloat(price);
+  if (booking.package) {
+    if (booking.package.pricingMode === 'fixed') {
+      total += parseFloat(booking.package.fixedPrice);
+    } else if (booking.package.pricingMode === 'options' && booking.package.selectedOption) {
+      const matchingPricing = booking.package.selectedOption.pricing.find(
+        price => {
+          const [min, max] = price.paxRange.split('-').map(Number);
+          return booking.guests >= min && booking.guests <= max;
+        }
+      );
+      if (matchingPricing) {
+        total += parseFloat(matchingPricing.pricePerHead) * booking.guests;
+      }
+    }
   }
   if (booking.hotelAndRoom && booking.hotelAndRoom.room) {
     const roomPrice = booking.hotelAndRoom.room.price;
@@ -497,6 +508,36 @@ const calculateTotalPrice = () => {
     }
   }
   return total.toFixed(2);
+};
+
+const calculatePackagePrice = () => {
+  if (booking.package?.pricingMode === 'options' && booking.package?.selectedOption) {
+    const matchingPricing = booking.package.selectedOption.pricing.find(
+      price => {
+        const [min, max] = price.paxRange.split('-').map(Number);
+        return booking.guests >= min && booking.guests <= max;
+      }
+    );
+    if (matchingPricing) {
+      return (parseFloat(matchingPricing.pricePerHead) * booking.guests).toFixed(2);
+    }
+  }
+  return '0.00';
+};
+
+const getPerHeadPrice = () => {
+  if (booking.package?.pricingMode === 'options' && booking.package?.selectedOption) {
+    const matchingPricing = booking.package.selectedOption.pricing.find(
+      price => {
+        const [min, max] = price.paxRange.split('-').map(Number);
+        return booking.guests >= min && booking.guests <= max;
+      }
+    );
+    if (matchingPricing) {
+      return parseFloat(matchingPricing.pricePerHead).toFixed(2);
+    }
+  }
+  return '0.00';
 };
 
 const confirmBooking = async () => {
@@ -568,6 +609,24 @@ const isDateTimeValid = () => {
 
 const isGuestInfoValid = () => {
   return booking.guestName && booking.email && booking.phone && booking.guests > 0;
+};
+
+const validateGuestCount = () => {
+  if (booking.package && booking.package.pricingMode === 'options') {
+    const guestCount = booking.guests;
+    const matchingPricing = booking.package.selectedOption.pricing.find(
+      price => {
+        const [min, max] = price.paxRange.split('-').map(Number);
+        return guestCount >= min && guestCount <= max;
+      }
+    );
+    if (!matchingPricing) {
+      alert("The number of guests doesn't match any available options for this package. Please choose a different package or adjust the number of guests.");
+      currentStep.value = 0; // Redirect to package selection
+      return false;
+    }
+  }
+  return true;
 };
 
 const handleRecurring = (event) => {
@@ -701,7 +760,6 @@ const handleRecurring = (event) => {
   display: flex;
   transition: all 0.3s ease;
   height: 450px;
-
 }
 
 .booking-steps {
@@ -802,7 +860,6 @@ const handleRecurring = (event) => {
   color: #111827;
   margin-top: 1rem;
 }
-
 
 .hotel-cards {
   display: flex;
@@ -956,7 +1013,8 @@ const handleRecurring = (event) => {
   color: #4b5563;
 }
 
-.back-button:hover {background: #e5e7eb;
+.back-button:hover {
+  background: #e5e7eb;
 }
 
 .next-button,
@@ -965,7 +1023,8 @@ const handleRecurring = (event) => {
   color: white;
 }
 
-.next-button:hover,.confirm-button:hover {
+.next-button:hover,
+.confirm-button:hover {
   background: #006167;
 }
 
@@ -1185,7 +1244,6 @@ const handleRecurring = (event) => {
   background-color: #00b7af;
 }
 
-/* Package Modal Styles */
 .package-modal {
   max-width: 1200px;
   padding: 0;
@@ -1336,7 +1394,7 @@ const handleRecurring = (event) => {
 }
 
 .selected-room-content {
-
+  padding: 1rem;
   text-align: center;
 }
 
@@ -1352,6 +1410,24 @@ const handleRecurring = (event) => {
   font-size: 0.875rem;
 }
 
+.package-fixed-price {
+  padding: 2rem;
+  text-align: center;
+  background: #f8fafc;
+}
+
+.package-fixed-price h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #00b7af;
+  margin-bottom: 1rem;
+}
+
+.fixed-price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+}
 
 @media (max-width: 768px) {
   .booking-content {
@@ -1465,4 +1541,3 @@ const handleRecurring = (event) => {
   }
 }
 </style>
-

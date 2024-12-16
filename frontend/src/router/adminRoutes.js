@@ -9,6 +9,7 @@ import AdminCalendar from '../views/AdminCalendar.vue';
 import Hotel from '../views/Hotel_admin.vue';
 import Guest from '../views/Guest_admin.vue';
 import Feedback from '../views/Feedback_admin.vue';
+import PackageOptions from '../views/PackageOptions.vue';
 
 const adminRoutes = [
   {
@@ -27,6 +28,7 @@ const adminRoutes = [
       { path: 'booking/calendar', component: AdminCalendar },
       { path: 'guest', component: Guest },
       { path: 'feedback', component: Feedback },
+      { path: 'options', component: PackageOptions },
     ],
   },
 ];

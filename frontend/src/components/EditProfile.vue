@@ -33,7 +33,7 @@
             />
           </div>
           <h2 class="profile-name">{{ firstName }} {{ lastName }}</h2>
-          <p class="profile-subtitle">hello bini ellie ememme</p>
+          <p class="user-bio">{{ bio || 'Add your bio here' }}</p>
         </div>
 
         <div class="profile-form">
@@ -68,7 +68,7 @@
               >
             </div>
             <div class="form-group">
-              <label>Phone Number</label>
+              <label>Phone Number</label> 
               <input 
                 type="tel" 
                 v-model="phoneNumber" 
@@ -90,6 +90,7 @@
         </div>
       </div>
     </div>
+
     <!-- History Tab Content -->
     <div v-if="activeTab === 'history'" class="history-content">
       <div class="history-header">
@@ -431,192 +432,219 @@
     </div>
 
     <div v-if="editingBooking" class="edit-booking-modal">
-  <div class="edit-booking-content">
-    <div class="edit-booking-header">
-      <h2>Edit Booking</h2>
-      <button class="close-button" @click="closeEditBookingModal">&times;</button>
+      <div class="edit-booking-content">
+        <div class="edit-booking-header">
+          <h2>Edit Booking</h2>
+          <button class="close-button" @click="closeEditBookingModal">&times;</button>
+        </div>
+        
+        <form @submit.prevent="saveEditedBooking" class="edit-booking-form">
+          <div class="form-field">
+            <label>Check-in Date</label>
+            <div class="input-wrapper">
+              <input 
+                v-model="editingBooking.checkInDate"
+                type="date"
+                required
+                placeholder="mm/dd/yyyy"
+              />
+              <span class="calendar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Check-in Time</label>
+            <div class="input-wrapper">
+              <input 
+                v-model="editingBooking.checkInTime"
+                type="time"
+                required
+              />
+              <span class="time-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Number of Guests</label>
+            <div class="input-wrapper">
+              <select 
+                v-model.number="editingBooking.guests"
+                required
+              >
+                <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
+              </select>
+              <span class="guests-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          <button type="submit" class="save-changes-btn">
+            Save Changes
+          </button>
+        </form>
+      </div>
     </div>
-    
-    <form @submit.prevent="saveEditedBooking" class="edit-booking-form">
-      <div class="form-field">
-        <label>Check-in Date</label>
-        <div class="input-wrapper">
-          <input 
-            v-model="editingBooking.checkInDate"
-            type="date"
-            required
-            placeholder="mm/dd/yyyy"
-          />
-          <span class="calendar-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-          </span>
-        </div>
-      </div>
-
-      <div class="form-field">
-        <label>Check-in Time</label>
-        <div class="input-wrapper">
-          <input 
-            v-model="editingBooking.checkInTime"
-            type="time"
-            required
-          />
-          <span class="time-icon">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-          </span>
-        </div>
-      </div>
-
-      <div class="form-field">
-        <label>Number of Guests</label>
-        <div class="input-wrapper">
-          <select 
-            v-model.number="editingBooking.guests"
-            required
-          >
-            <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
-          </select>
-          <span class="guests-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-          </span>
-        </div>
-      </div>
-
-      <button type="submit" class="save-changes-btn">
-        Save Changes
-      </button>
-    </form>
-  </div>
-</div>
 
     <!-- Restore Booking Modal -->
-  <div v-if="restoringBooking" class="restore-booking-modal">
-    <div class="restore-booking-content">
-      <div class="restore-booking-header">
-        <h2>Restore Booking</h2>
-        <button class="close-button" @click="closeRestoreBookingModal">&times;</button>
-      </div>
-      
-      <form @submit.prevent="restoreBooking" class="restore-booking-form">
-        <div class="form-field">
-          <label>New Check-in Date</label>
-          <div class="input-wrapper">
-            <input 
-              v-model="restoringBooking.newCheckInDate"
-              type="date"
-              required
-              placeholder="dd/mm/yyyy"
-            />
-            <span class="calendar-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-            </span>
-          </div>
+    <div v-if="restoringBooking" class="restore-booking-modal">
+      <div class="restore-booking-content">
+        <div class="restore-booking-header">
+          <h2>Restore Booking</h2>
+          <button class="close-button" @click="closeRestoreBookingModal">&times;</button>
         </div>
+        
+        <form @submit.prevent="restoreBooking" class="restore-booking-form">
+          <div class="form-field">
+            <label>New Check-in Date</label>
+            <div class="input-wrapper">
+              <input 
+                v-model="restoringBooking.newCheckInDate"
+                type="date"
+                required
+                placeholder="dd/mm/yyyy"
+              />
+              <span class="calendar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </span>
+            </div>
+          </div>
 
-        <div class="form-field">
-          <label>New Check-in Time</label>
-          <div class="input-wrapper">
-            <input 
-              v-model="restoringBooking.newCheckInTime"
-              type="time"
-              required
-            />
-            <span class="time-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-            </span>
+          <div class="form-field">
+            <label>New Check-in Time</label>
+            <div class="input-wrapper">
+              <input 
+                v-model="restoringBooking.newCheckInTime"
+                type="time"
+                required
+              />
+              <span class="time-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </span>
+            </div>
           </div>
-        </div>
 
-        <button type="submit" class="save-changes-btn">
-          Save Changes
-        </button>
-      </form>
-    </div>
-  </div>
-
-
-    <!-- Receipt Modal -->
-    <div v-if="selectedReceipt" class="modal">
-      <div class="modal-content receipt-details">
-        <span class="close" @click="selectedReceipt = null">&times;</span>
-        <h2>Booking Receipt</h2>
-        <div class="receipt-content">
-          <div class="detail-row">
-            <span class="detail-label">Receipt ID:</span>
-            <span class="detail-value">{{ selectedReceipt.id }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Booking ID:</span>
-            <span class="detail-value">{{ selectedReceipt.bookingId }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Guest Name:</span>
-            <span class="detail-value">{{ selectedReceipt.guestName }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Check-in Date:</span>
-            <span class="detail-value">{{ formatDate(selectedReceipt.checkInDate) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Check-in Time:</span>
-            <span class="detail-value">{{ selectedReceipt.checkInTime }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Hotel:</span>
-            <span class="detail-value">{{ selectedReceipt.hotelName }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Room Type:</span>
-            <span class="detail-value">{{ selectedReceipt.roomType }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Package:</span>
-            <span class="detail-value">{{ selectedReceipt.packageName }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Tour Guide:</span>
-            <span class="detail-value">{{ selectedReceipt.tourGuideName }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Total Amount:</span>
-            <span class="detail-value">{{ formatCurrency(selectedReceipt.totalAmount) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Remit Amount:</span>
-            <span class="detail-value">{{ formatCurrency(selectedReceipt.remitAmount) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Generated At:</span>
-            <span class="detail-value">{{ formatDate(selectedReceipt.generatedAt) }}</span>
-          </div>
-        </div>
-        <div class="receipt-actions">
-          <button @click="generatePDF(selectedReceipt)" class="download-receipt-btn">
-            Download PDF
+          <button type="submit" class="save-changes-btn">
+            Save Changes
           </button>
-        </div>
+        </form>
       </div>
     </div>
 
+        <div v-if="selectedReceipt" class="modal">
+      <div class="modal-content receipt-modal">
+        <!-- Header -->
+        <div class="receipt-header">
+          <div class="header-teal"></div>
+          <div class="header-yellow"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="receipt-content">
+          <h1 class="receipt-title">Receipt</h1>
+
+          <h2 class="greeting">Thank you, {{ selectedReceipt.guestName?.split(' ')[0] }}!</h2>
+
+          <div class="receipt-ids">
+            <p>Receipt ID: {{ selectedReceipt.id }}</p>
+            <p>Booking ID: {{ selectedReceipt.bookingId }}</p>
+          </div>
+
+          <div class="receipt-main-content">
+            <!-- Left side: Booking Details -->
+            <div class="booking-details">
+              <div class="detail-row">
+                <span class="label">Guest Name</span>
+                <span class="value">{{ selectedReceipt.guestName }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Check-in Date</span>
+                <span class="value">{{ formatDate(selectedReceipt.checkInDate) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Check-in Time</span>
+                <span class="value">{{ selectedReceipt.checkInTime }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Hotel</span>
+                <span class="value">{{ selectedReceipt.hotelName }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Room Type</span>
+                <span class="value">{{ selectedReceipt.roomType }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Package</span>
+                <span class="value">{{ selectedReceipt.packageName }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Tour Guide</span>
+                <span class="value">{{ selectedReceipt.tourGuideName }}</span>
+              </div>
+            </div>
+
+            <!-- Right side: Remit Calculation -->
+            <div class="remit-calculation">
+              <h3>Remit Calculation</h3>
+              <div class="calculation-details">
+                <div class="calc-row">
+                  <span class="label">Booking Price</span>
+                  <span class="value">₱ {{ selectedReceipt.bookingPrice.toFixed(2) }}</span>
+                </div>
+                <div class="calc-row">
+                  <span class="label">Remit Amount</span>
+                  <span class="value">₱ {{ selectedReceipt.remitAmount.toFixed(2) }}</span>
+                </div>
+                <div class="calc-row">
+                  <span class="label">Change</span>
+                  <span class="value">₱ {{ calculateChange(selectedReceipt).toFixed(2) }}</span>
+                </div>
+                <div class="total-amount">
+                  <span class="label">Total Amount Paid:</span>
+                  <span class="value">₱{{ selectedReceipt.remitAmount.toFixed(2) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="receipt-footer">
+            <span class="generated-date">Generated at: {{ formatDate(selectedReceipt.generatedAt) }}</span>
+            <div class="action-buttons">
+              <button @click="printReceipt" class="action-button print">Print</button>
+              <button @click="downloadReceipt" class="action-button confirm">Download PDF</button>
+              <button @click="closeReceiptModal" class="action-button close">
+                <X size="20" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <FooterComponent />
   </div>
 </template>
@@ -927,38 +955,106 @@ const showReceipt = async (receiptId) => {
   }
 };
 
-const generatePDF = (receiptData) => {
-  const doc = new jsPDF();
-  
-  doc.setFontSize(20);
-  doc.text('Booking Receipt', 105, 20, { align: 'center' });
-  
-  doc.setFontSize(12);
-  let yPos = 40;
-  const lineHeight = 10;
+const calculateChange = (receipt) => {
+  if (!receipt) return 0;
+  return receipt.remitAmount - receipt.bookingPrice;
+};
 
-  const addLine = (label, value) => {
-    doc.text(`${label}: ${value}`, 20, yPos);
+const printReceipt = () => {
+  window.print();
+};
+
+const downloadReceipt = () => {
+  if (!selectedReceipt.value) return;
+
+  const doc = new jsPDF({
+    format: 'a4',
+    unit: 'mm'
+  });
+  
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 20;
+  
+  // Header with diagonal colors
+  doc.setFillColor(0, 150, 136); // Teal
+  doc.rect(0, 0, pageWidth/2 + 20, 40, 'F');
+  doc.setFillColor(255, 193, 7); // Yellow
+  doc.rect(pageWidth/2 - 20, 0, pageWidth/2 + 20, 40, 'F');
+
+  // Logo placeholder (you'll need to replace this with actual logo)
+  doc.addImage('/src/img/logoforRMs.png', 'PNG', pageWidth/2 - 15, 20, 30, 30);
+
+  // Title
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(24);
+  doc.setTextColor(51, 51, 51);
+  doc.text('RECEIPT', pageWidth/2, 70, { align: 'center' });
+
+  // Thank you message
+  doc.setFontSize(16);
+  doc.text(`Thank you, ${selectedReceipt.value.guestName.split(' ')[0]}!`, margin, 90);
+
+  // Receipt IDs
+  doc.setFontSize(10);
+  doc.setTextColor(102, 102, 102);
+  doc.text(`Receipt ID: ${selectedReceipt.value.id}`, margin, 105);
+  doc.text(`Booking ID: ${selectedReceipt.value.bookingId}`, margin, 112);
+
+  // Booking Details
+  let yPos = 130;
+  const lineHeight = 8;
+  const labelX = margin;
+  const valueX = pageWidth - margin;
+  
+  doc.setFont('helvetica', 'normal');
+  
+  const addDetailRow = (label, value) => {
+    doc.text(label, labelX, yPos);
+    doc.text(value, valueX, yPos, { align: 'right' });
     yPos += lineHeight;
   };
 
-  addLine('Receipt ID', receiptData.id);
-  addLine('Booking ID', receiptData.bookingId);
-  addLine('Guest Name', receiptData.guestName);
-  addLine('Check-in Date', formatDate(receiptData.checkInDate));
-  addLine('Check-in Time', receiptData.checkInTime);
-  addLine('Hotel', receiptData.hotelName);
-  addLine('Room Type', receiptData.roomType);
-  addLine('Package', receiptData.packageName);
-  addLine('Tour Guide', receiptData.tourGuideName);
-  addLine('Total Amount', formatCurrency(receiptData.totalAmount));
-  addLine('Remit Amount', formatCurrency(receiptData.remitAmount));
-  addLine('Generated At', formatDate(receiptData.generatedAt));
+  addDetailRow('Guest Name:', selectedReceipt.value.guestName);
+  addDetailRow('Check-in Date:', formatDate(selectedReceipt.value.checkInDate));
+  addDetailRow('Check-in Time:', selectedReceipt.value.checkInTime);
+  addDetailRow('Hotel:', selectedReceipt.value.hotelName);
+  addDetailRow('Room Type:', selectedReceipt.value.roomType);
+  addDetailRow('Package:', selectedReceipt.value.packageName);
+  addDetailRow('Tour Guide:', selectedReceipt.value.tourGuideName);
+
+  // Remit Calculation
+  yPos += 10;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Remit Calculation', margin, yPos);
+  yPos += lineHeight;
+
+  doc.setFont('helvetica', 'normal');
+  addDetailRow('Booking Price:', `₱${selectedReceipt.value.bookingPrice.toFixed(2)}`);
+  addDetailRow('Remit Amount:', `₱${selectedReceipt.value.remitAmount.toFixed(2)}`);
+  addDetailRow('Change:', `₱${calculateChange(selectedReceipt.value).toFixed(2)}`);
+
+  // Total Amount
+  yPos += 10;
+  doc.text('Total Amount Paid:', margin, yPos);
   
+  // Format total amount in green
+  doc.setTextColor(0, 150, 136);
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`₱${selectedReceipt.value.remitAmount.toFixed(2)}`, valueX, yPos, { align: 'right' });
+
+  // Generated Date
+  yPos += 20;
   doc.setFontSize(10);
-  doc.text('Thank you for choosing our service!', 105, yPos + 20, { align: 'center' });
-  
-  doc.save(`receipt-${receiptData.id}.pdf`);
+  doc.setTextColor(102, 102, 102);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Generated at: ${formatDate(selectedReceipt.value.generatedAt)}`, margin, yPos);
+
+  doc.save(`receipt_${selectedReceipt.value.id}.pdf`);
+};
+
+const closeReceiptModal = () => {
+  selectedReceipt.value = null;
 };
 
 onMounted(async () => {
@@ -1577,135 +1673,207 @@ select {
   cursor: pointer;
 }
 
-@media (max-width: 768px) {
-  .history-header,
-  .archive-header {
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .edit-booking-content,
-  .restore-booking-content {
-    margin: 16px;
-    padding: 20px;
-  }
-
-  .history-controls,
-  .archive-controls {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .search-control {
-    width: 100%;
-  }
-
-  .search-control input {
-    width: 100%;
-  }
-
-  .pagination {
-    flex-direction: column;
-    gap: 15px;
-    text-align: center;
-  }
-
-  .profile-section {
-    padding: 0;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .profile-card {
-    border-radius: 0;
-  }
-}
-
-.image-placeholder {
+.receipt-modal {
+  background: white;
   width: 100%;
-  height: 100%;
+  max-width: 800px;
+  min-height: 600px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #e0e0e0;
+  flex-direction: column;
+  padding: 0;
 }
 
-.image-placeholder svg {
-  width: 50%;
-  height: 50%;
-  color: #9e9e9e;
+.receipt-header {
+  position: relative;
+  height: 30px;
+  overflow: hidden;
+  background: white;
 }
 
-.nav-tabs {
-  overflow-x: auto;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
+.header-teal {
+  position: absolute;
+  top: 0;
+  left: -10%;
+  width: 60%;
+  height: 100%;
+  background-color: #009688;
+  transform: skewX(-20deg);
 }
 
-.tab {
-  display: inline-block;
-  padding: 0.5rem 1rem;
+.header-yellow {
+  position: absolute;
+  top: 0;
+  right: -10%;
+  width: 60%;
+  height: 100%;
+  background-color: #FFC107;
+  transform: skewX(-20deg);
+}
+
+
+
+.receipt-content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.receipt-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem;
+}
+
+.greeting {
+  font-size: 1.8rem;
+  font-weight: 600;
+
+}
+
+.receipt-ids {
   color: #666;
-  text-decoration: none;
-  margin-right: 1rem;
-  transition: color 0.3s, border-color 0.3s;
+  margin-bottom: 2rem;
 }
 
-.tab:hover {
+.receipt-ids p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.receipt-main-content {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.booking-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  align-items: center;
+}
+
+.detail-row .label {
+  color: #333;
+  font-weight: 500;
+}
+
+.detail-row .value {
   color: #000;
 }
 
-.tab.active {
-  color: #00BFA5;
-  border-bottom: 2px solid #00BFA5;
+.remit-calculation {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
 }
 
-@media (max-width: 480px) {
-  .page-title {
-    font-size: 2rem;
-    margin-left: 1rem;
+.remit-calculation h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.calculation-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.calc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.total-amount {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.total-amount .value {
+  color: #009688;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.receipt-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.generated-date {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-button.print {
+  background-color: #009688;
+  color: white;
+}
+
+.action-button.confirm {
+  background-color: #FFC107;
+  color: #000;
+}
+
+.action-button.close {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.action-button:hover {
+  opacity: 0.9;
+}
+
+
+@media print {
+  .modal-actions {
+    display: none;
   }
 
-  .nav-tabs {
-    margin-left: 1rem;
-    margin-right: 1rem;
+  .receipt-modal {
+    box-shadow: none;
+    min-height: auto;
   }
 
-  .profile-header {
-    padding: 1rem;
+  .receipt-content {
+    padding: 2rem;
   }
 
-  .profile-image-container {
-    width: 100px;
-    height: 100px;
-  }
-
-  .profile-name {
-    font-size: 1.2rem;
-  }
-
-  .profile-subtitle {
-    font-size: 0.8rem;
-  }
-
-  .profile-form {
-    padding: 1rem;
-  }
-
-  .form-group label {
-    font-size: 0.8rem;
-  }
-
-  .form-group input {
-    padding: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  .edit-profile-btn {
-    padding: 0.75rem;
-    font-size: 0.9rem;
+  .booking-details {
+    page-break-inside: avoid;
   }
 }
 </style>
